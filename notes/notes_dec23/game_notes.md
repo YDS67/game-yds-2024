@@ -56,3 +56,46 @@ Use **SFML**, Raylib?
 - If collision, draw wall quad
 - Quads are drawn by projecting their corners to the camera
 
+---
+
+&nbsp;&nbsp;&nbsp;![width:850](images/first.png)&nbsp;&nbsp;&nbsp;![width:850](images/second.png)
+
+---
+
+<!-- 
+_class: columns
+-->
+
+![width:950](images/third.png)
+
+$$R = \frac{W}{\Phi}, \quad W - \text{screen width}$$
+
+$$u=R \phi = W \frac{\phi}{\Phi}  \in [0,W]$$
+
+$$d_{xy} = \sqrt{(x_t-x_p)^2+(y_t-y_p)^2}$$
+
+$$\alpha_t = \operatorname{sign} (y_t-y_p) \operatorname{acos} \frac{x_t-x_p}{d_{xy}}$$
+
+$$\phi = \frac{\Phi}{2} + \alpha_p - \alpha_t$$
+
+$$u = \frac{W}{\Phi} \left(\frac{\Phi}{2} + \alpha_p - \alpha_t \right)$$
+
+---
+
+<!-- 
+_class: columns
+-->
+
+![width:950](images/fourth.png)
+
+$$\Theta = \frac{H}{W} \Phi$$
+
+$$v=R \theta = H \frac{\theta}{\Theta}  \in [0,H]$$
+
+$$d = \sqrt{(x_t-x_p)^2+(y_t-y_p)^2+(z_t-z_p)^2}$$
+
+$$\beta_t = \frac{\pi}{2} - \operatorname{acos} \frac{z_t-z_p}{d}$$
+
+$$\theta = \frac{\Theta}{2} + \beta_p - \beta_t$$
+
+$$v = \frac{H}{\Theta} \left(\frac{\Theta}{2} + \beta_p - \beta_t \right)$$
