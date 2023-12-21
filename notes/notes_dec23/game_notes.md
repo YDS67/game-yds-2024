@@ -99,3 +99,19 @@ $$\beta_t = \frac{\pi}{2} - \operatorname{acos} \frac{z_t-z_p}{d}$$
 $$\theta = \frac{\Theta}{2} + \beta_p - \beta_t$$
 
 $$v = \frac{H}{\Theta} \left(\frac{\Theta}{2} + \beta_p - \beta_t \right)$$
+
+---
+
+<!-- 
+_class: columns
+-->
+
+# Approximation
+
+There's a good approximation for **acos**, which looks like this:
+
+$$\operatorname{acos} x \approx \begin{cases} \frac{\pi}{2} \sqrt{1-x},& x\geq 0 \\ \pi - \frac{\pi}{2} \sqrt{1+x}, & x < 0 \end{cases}$$
+
+So we can avoid trigonometric operations and use only square roots.
+
+![width:900](images/plot1.png)
