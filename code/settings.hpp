@@ -7,7 +7,7 @@ const int WINDOW_HEIGHT = 720;
 const int HALF_WIDTH = WINDOW_WIDTH / 2;
 const int HALF_HEIGHT = WINDOW_HEIGHT / 2;
 const int TARGET_FPS = 60;
-const char *WINDOW_TITLE = "Double pendulum";
+const char *WINDOW_TITLE = "Awesome game";
 const int FONT_SIZE = 20;
 
 #endif /* SETTINGS_HPP */
