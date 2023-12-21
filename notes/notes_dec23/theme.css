@@ -1,0 +1,57 @@
+/* @theme custom-theme */
+
+@import "gaia";
+
+h1 {
+    color: #cf973a;
+    font-size: 1.4em;
+    column-span: all;
+}
+
+h2 {
+    color: #cf973a;
+    font-size: 1.6em;
+}
+
+footer {
+  color:#78d9e2;
+}
+
+section {
+    width: 1920px;
+    height: 1080px;
+    color: #ffffff;
+    font-size: 45px;
+    text-align: justify;
+}
+
+section::after {
+  color:#78d9e2;
+  content: attr(data-marpit-pagination) ' / ' attr(data-marpit-pagination-total);
+}
+
+section.columns {
+    display: block;
+    column-count: 2;
+    column-fill: auto;
+}
+
+section.lead {
+    color: #ffffff;
+    text-align: center;
+    column-count: 1;
+    display: flex;
+    flex-flow: column nowrap;
+}
+
+section.lead::after {
+  display: none;
+}
+
+section.closing {
+  color: #ffffff;
+  text-align: center;
+  column-count: 1;
+  display: flex;
+  flex-flow: column nowrap;
+}
