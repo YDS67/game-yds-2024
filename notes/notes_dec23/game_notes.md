@@ -55,6 +55,7 @@ Use **SFML**, Raylib?
 - If no collisions, draw wall/ceiling quads
 - If collision, draw wall quad
 - Quads are drawn by projecting their corners to the camera
+- Important! Wall and ceiling quads' corners have known coordinates, so their projections should be calculated no more than once per frame
 
 ---
 
@@ -88,7 +89,7 @@ _class: columns
 
 ![width:950](images/fourth.png)
 
-$$\Theta = \frac{H}{W} \Phi$$
+$$\Theta = \frac{H}{W} \Phi, \quad H - \text{screen height}$$
 
 $$v=R \theta = H \frac{\theta}{\Theta}  \in [0,H]$$
 
