@@ -11,4 +11,4 @@ pub const FOVXY: f32 = 1.5;
 pub const FOVZ: f32 = HEIGHT as f32 / WIDTH as f32 * FOVXY;
 pub const DELTATIME: f32 = 1.0/60.0;
 pub const PLAYERSPEED: f32 = 0.2;
-pub const PLAYERSIZE: f32 = 2.0;
+pub const PLAYERSIZE: f32 = 0.2;

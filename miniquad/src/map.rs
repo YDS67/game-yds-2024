@@ -13,7 +13,7 @@ impl GameMap {
         for i in 0..settings::MAPSIZE {
             for j in 0..settings::MAPSIZE {
                 let pixel = image::ImageBuffer::get_pixel(&map_image, i as u32, j as u32).to_rgba();
-                map_array[i][j] = pixel[0];
+                map_array[i][settings::MAPSIZE-j-1] = pixel[0];
             }
         }
 

@@ -22,7 +22,7 @@ async fn main() {
     let ass = assets::Ass::load().await;
     let mut player = player::Player::new();
 
-    let _game_map = map::GameMap::new(&ass.map_image);
+    let game_map = map::GameMap::new(&ass.map_image);
     let img = Image {
         bytes: ass.map_image.as_raw().to_owned(),
         width: settings::MAPSIZE as u16,
@@ -48,7 +48,7 @@ async fn main() {
     };
 
     loop {
-        clear_background(WHITE);
+        clear_background(Color::from_rgba(135, 206, 235, 255));
 
         // Render some primitives in camera space
 
@@ -79,14 +79,14 @@ async fn main() {
         player.draw();
         draw_words(&t_par);
 
-        player.walk();
+        player.walk(&game_map);
 
         next_frame().await
     }
 }
 
 fn draw_words(t_par: &TextParams) {
-    draw_rectangle(10.0, 10.0, 220.0, 80.0, LIGHTGRAY);
+    draw_rectangle(10.0, 10.0, 220.0, 80.0, WHITE);
     draw_rectangle_lines(10.0, 10.0, 220.0, 80.0, 4.0, BLACK);
     draw_text_ex("Awesome game", 20.0, 40.0, t_par.clone());
     draw_text_ex(
