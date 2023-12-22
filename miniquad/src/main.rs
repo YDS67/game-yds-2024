@@ -1,6 +1,8 @@
 use macroquad::prelude::*;
 
 mod assets;
+mod map;
+mod player;
 mod settings;
 mod shaders;
 mod stage;
@@ -17,18 +19,30 @@ fn window_conf() -> Conf {
 
 #[macroquad::main(window_conf)]
 async fn main() {
+    let ass = assets::Ass::load().await;
+    let mut player = player::Player::new();
+
+    let _game_map = map::GameMap::new(&ass.map_image);
+    let img = Image {
+        bytes: ass.map_image.as_raw().to_owned(),
+        width: settings::MAPSIZE as u16,
+        height: settings::MAPSIZE as u16,
+    };
+    let map_texture = Texture2D::from_image(&img);
+    map_texture.set_filter(FilterMode::Nearest);
+
     let stage = {
         let InternalGlContext {
             quad_context: ctx, ..
         } = unsafe { get_internal_gl() };
 
-        stage::Stage::new(ctx)
+        stage::Stage::new(ctx, &ass)
     }
     .await;
 
     let t_par = TextParams {
         font_size: 30,
-        font: Some(&stage.font),
+        font: Some(&ass.font_main),
         color: BLACK,
         ..Default::default()
     };
@@ -61,16 +75,37 @@ async fn main() {
             gl.quad_context.end_render_pass();
         }
 
+        draw_map(&map_texture);
+        player.draw();
         draw_words(&t_par);
+
+        player.walk();
 
         next_frame().await
     }
 }
 
-fn draw_words (t_par: &TextParams) {
-    
-    draw_rectangle(0.0, 0.0, 220.0, 80.0, LIGHTGRAY);
-    draw_rectangle_lines(0.0, 0.0, 220.0, 80.0, 2.0, BLACK);
-    draw_text_ex("Awesome game", 10.0, 30.0, t_par.clone());
-    draw_text_ex(&format!("FPS is {}0", (get_fps()+2) / 10), 10.0, 60.0, t_par.to_owned());
+fn draw_words(t_par: &TextParams) {
+    draw_rectangle(10.0, 10.0, 220.0, 80.0, LIGHTGRAY);
+    draw_rectangle_lines(10.0, 10.0, 220.0, 80.0, 4.0, BLACK);
+    draw_text_ex("Awesome game", 20.0, 40.0, t_par.clone());
+    draw_text_ex(
+        &format!("FPS is {}", get_fps()),
+        20.0,
+        70.0,
+        t_par.to_owned(),
+    );
+}
+
+fn draw_map(map_texture: &Texture2D) {
+    draw_texture_ex(
+        &map_texture,
+        10.0,
+        screen_height() - 10.0 - 256.0,
+        WHITE,
+        DrawTextureParams {
+            dest_size: Some(vec2(256.0, 256.0)),
+            ..Default::default()
+        },
+    );
 }

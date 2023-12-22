@@ -1,9 +1,9 @@
 use image::{self, EncodableLayout, ImageBuffer, Rgba};
-use miniquad::*;
 use macroquad::prelude::*;
+use miniquad::*;
 
-use crate::shaders;
 use crate::assets;
+use crate::shaders;
 
 #[repr(C)]
 struct Vec2 {
@@ -19,13 +19,10 @@ struct Vertex {
 pub struct Stage {
     pub pipeline: Pipeline,
     pub bindings: Bindings,
-    pub font: Font,
 }
 
 impl Stage {
-    pub async fn new(ctx: &mut dyn RenderingBackend) -> Stage {
-        let ass = assets::Ass::load().await;
-
+    pub async fn new(ctx: &mut dyn RenderingBackend, ass: &assets::Ass) -> Stage {
         #[rustfmt::skip]
             let quad: [Vertex; 4] = [
                 Vertex { pos : Vec2 { x: -0.5, y: -0.7 }, uv: Vec2 { x: 0., y: 3./5. } },
@@ -46,7 +43,7 @@ impl Stage {
             BufferSource::slice(&indices[..]),
         );
 
-        let pixels: ImageBuffer<Rgba<u8>, Vec<u8>> = ass.wall_atlas;
+        let pixels: ImageBuffer<Rgba<u8>, Vec<u8>> = ass.wall_atlas.clone();
         let dims = pixels.dimensions();
         let texture = ctx.new_texture_from_rgba8(dims.0 as u16, dims.1 as u16, pixels.as_bytes());
 
@@ -75,10 +72,6 @@ impl Stage {
             shader,
         );
 
-        Stage {
-            pipeline, 
-            bindings,
-            font: ass.font_main,
-        }
+        Stage { pipeline, bindings }
     }
 }
