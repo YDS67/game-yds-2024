@@ -1,27 +1,42 @@
 use macroquad::prelude::*;
 
-mod raw_miniquad;
+mod assets;
+mod settings;
 mod shaders;
+mod stage;
 
-#[macroquad::main("Rendering a quad in macroquad")]
+fn window_conf() -> Conf {
+    Conf {
+        window_title: "Awesome game".to_owned(),
+        high_dpi: true,
+        window_width: settings::WIDTH,
+        window_height: settings::HEIGHT,
+        ..Default::default()
+    }
+}
+
+#[macroquad::main(window_conf)]
 async fn main() {
     let stage = {
         let InternalGlContext {
             quad_context: ctx, ..
         } = unsafe { get_internal_gl() };
 
-        raw_miniquad::Stage::new(ctx)
+        stage::Stage::new(ctx)
+    }
+    .await;
+
+    let t_par = TextParams {
+        font_size: 30,
+        font: Some(&stage.font),
+        color: BLACK,
+        ..Default::default()
     };
 
     loop {
-        clear_background(LIGHTGRAY);
+        clear_background(WHITE);
 
         // Render some primitives in camera space
-
-        set_camera(&Camera2D {
-            zoom: vec2(1., screen_width() / screen_height()),
-            ..Default::default()
-        });
 
         set_default_camera();
 
@@ -38,21 +53,24 @@ async fn main() {
             gl.quad_context.apply_bindings(&stage.bindings);
 
             gl.quad_context
-                    .apply_uniforms(miniquad::UniformsSource::table(
-                        &shaders::Uniforms {
-                            offset: (0.0, 0.0),
-                        },
-                    ));
-                gl.quad_context.draw(0, 6, 1);
+                .apply_uniforms(miniquad::UniformsSource::table(&shaders::Uniforms {
+                    offset: (0.0, 0.0),
+                }));
+            gl.quad_context.draw(0, 6, 1);
 
             gl.quad_context.end_render_pass();
         }
 
-        // Back to screen space, render some text
+        draw_words(&t_par);
 
-        set_default_camera();
-        draw_text("Hello, happy tree from WGPU tutorial", 200.0, 50.0, 30.0, BLACK);
-        draw_text(&format!("FPS is {}", get_fps()), 200.0, 80.0, 30.0, BLACK);
         next_frame().await
     }
+}
+
+fn draw_words (t_par: &TextParams) {
+    
+    draw_rectangle(0.0, 0.0, 220.0, 80.0, LIGHTGRAY);
+    draw_rectangle_lines(0.0, 0.0, 220.0, 80.0, 2.0, BLACK);
+    draw_text_ex("Awesome game", 10.0, 30.0, t_par.clone());
+    draw_text_ex(&format!("FPS is {}0", (get_fps()+2) / 10), 10.0, 60.0, t_par.to_owned());
 }
