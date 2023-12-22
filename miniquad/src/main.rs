@@ -6,6 +6,7 @@ mod player;
 mod settings;
 mod shaders;
 mod stage;
+mod camera;
 
 fn window_conf() -> Conf {
     Conf {
@@ -52,8 +53,6 @@ async fn main() {
 
         // Render some primitives in camera space
 
-        set_default_camera();
-
         {
             let mut gl = unsafe { get_internal_gl() };
 
@@ -77,7 +76,7 @@ async fn main() {
 
         draw_map(&map_texture);
         player.draw();
-        draw_words(&t_par);
+        draw_words(&t_par, &player);
 
         player.walk(&game_map);
 
@@ -85,14 +84,31 @@ async fn main() {
     }
 }
 
-fn draw_words(t_par: &TextParams) {
-    draw_rectangle(10.0, 10.0, 220.0, 80.0, WHITE);
-    draw_rectangle_lines(10.0, 10.0, 220.0, 80.0, 4.0, BLACK);
+fn draw_words(t_par: &TextParams, player: &player::Player) {
+    draw_rectangle(10.0, 10.0, 256.0, 140.0, WHITE);
+    draw_rectangle_lines(10.0, 10.0, 256.0, 140.0, 4.0, BLACK);
     draw_text_ex("Awesome game", 20.0, 40.0, t_par.clone());
+    let fps = get_fps();
+    let mut fps_display = fps;
+    if fps > 50 && fps < 70 {
+        fps_display = 60
+    }
     draw_text_ex(
-        &format!("FPS is {}", get_fps()),
+        &format!("FPS is {}", fps_display),
         20.0,
         70.0,
+        t_par.to_owned(),
+    );
+    draw_text_ex(
+        "Player position:",
+        20.0,
+        100.0,
+        t_par.to_owned(),
+    );
+    draw_text_ex(
+        &format!("({:.1},{:.1})", player.position.x, player.position.y),
+        20.0,
+        130.0,
         t_par.to_owned(),
     );
 }
