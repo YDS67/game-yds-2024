@@ -1,4 +1,4 @@
-use image::{self, Pixel, ImageBuffer, Rgba};
+use image::{self, Pixel};
 use crate::settings;
 use crate::assets;
 
@@ -7,6 +7,8 @@ pub struct GameMap {
     pub floor_array: [[u8; settings::MAPSIZE]; settings::MAPSIZE],
     pub wall_visible: [[bool; settings::MAPSIZE]; settings::MAPSIZE],
     pub floor_visible: [[bool; settings::MAPSIZE]; settings::MAPSIZE],
+    pub wall_dist: [[usize; settings::MAPSIZE]; settings::MAPSIZE],
+    pub floor_dist: [[usize; settings::MAPSIZE]; settings::MAPSIZE],
 }
 
 impl GameMap {
@@ -26,11 +28,16 @@ impl GameMap {
         let wall_visible = [[false; settings::MAPSIZE]; settings::MAPSIZE];
         let floor_visible = [[false; settings::MAPSIZE]; settings::MAPSIZE];
 
+        let wall_dist = [[settings::MAXDRAWDIST; settings::MAPSIZE]; settings::MAPSIZE];
+        let floor_dist = [[settings::MAXDRAWDIST; settings::MAPSIZE]; settings::MAPSIZE];
+
         GameMap { 
             wall_array,
             floor_array,
             wall_visible,
             floor_visible,
+            wall_dist,
+            floor_dist,
         }
     }
 }

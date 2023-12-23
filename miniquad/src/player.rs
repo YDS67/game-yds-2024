@@ -10,6 +10,8 @@ pub struct PlayerPos {
     pub b: f32,
     pub ax: f32,
     pub ay: f32,
+    pub bx: f32,
+    pub by: f32,
     pub cxp: bool,
     pub cyp: bool,
     pub cxm: bool,
@@ -32,6 +34,8 @@ impl Player {
                 b: settings::PLAYERB0,
                 ax: settings::PLAYERA0.cos(),
                 ay: settings::PLAYERA0.sin(),
+                bx: settings::PLAYERB0.cos(),
+                by: settings::PLAYERB0.sin(),
                 cxp: false,
                 cyp: false,
                 cxm: false,
@@ -56,6 +60,10 @@ impl Player {
         let jp = (self.position.y + self.size * self.position.ay).floor() as usize;
         let im = (self.position.x - self.size * self.position.ax).floor() as usize;
         let jm = (self.position.y - self.size * self.position.ay).floor() as usize;
+        // let il = (self.position.x - self.size * self.position.ay).floor() as usize;
+        // let jl = (self.position.y + self.size * self.position.ax).floor() as usize;
+        // let ir = (self.position.x + self.size * self.position.ay).floor() as usize;
+        // let jr = (self.position.y - self.size * self.position.ax).floor() as usize;
         if game_map.wall_array[ip][j] < 255
         {
             self.position.cxp = true;
@@ -117,10 +125,14 @@ impl Player {
 
         if is_key_down(KeyCode::Down) && self.position.b < settings::PI/2.0 {
             self.position.b = self.position.b + 0.1 * settings::PLAYERSPEED;
+            self.position.bx = self.position.b.cos();
+            self.position.by = self.position.b.sin();
         }
 
         if is_key_down(KeyCode::Up) && self.position.b > -settings::PI/2.0 {
             self.position.b = self.position.b - 0.1 * settings::PLAYERSPEED;
+            self.position.bx = self.position.b.cos();
+            self.position.by = self.position.b.sin();
         }
 
     }

@@ -1,4 +1,5 @@
 use macroquad::prelude::*;
+use std::cmp::Ordering;
 
 mod assets;
 mod camera;
@@ -42,6 +43,8 @@ async fn main() {
     walls_texture.set_filter(FilterMode::Nearest);
 
     camera::find_visible_tiles(&mut game_map, &player);
+    let mut depth_buffer = camera::DepthBuffer::generate(&game_map);
+
     img = Image {
         bytes: ass.floor_image.as_raw().to_owned(),
         width: settings::MAPSIZE as u16,
@@ -78,65 +81,13 @@ async fn main() {
     loop {
         clear_background(Color::from_rgba(135, 206, 235, 255));
 
-        for i in 0..settings::MAPSIZE {
-            for j in 0..settings::MAPSIZE {
-                if game_map.wall_array[i][j] < 255 {
-                    let wall_x = i as f32 + 0.5;
-                    let wall_y = j as f32 + 0.5;
-                    let wall_z = 0.5;
-                    let proj = project_point(&player, wall_x, wall_y, wall_z);
-                    let d = proj.d;
-                    if game_map.wall_visible[i][j] {
-                        let proj1 =
-                            project_point(&player, wall_x + 0.5, wall_y + 0.5, wall_z + 0.5);
-                        let proj2 =
-                            project_point(&player, wall_x - 0.5, wall_y + 0.5, wall_z + 0.5);
-                        let proj3 =
-                            project_point(&player, wall_x + 0.5, wall_y - 0.5, wall_z + 0.5);
-                        let proj4 =
-                            project_point(&player, wall_x + 0.5, wall_y + 0.5, wall_z - 0.5);
-                        let proj5 =
-                            project_point(&player, wall_x - 0.5, wall_y - 0.5, wall_z + 0.5);
-                        let proj6 =
-                            project_point(&player, wall_x - 0.5, wall_y + 0.5, wall_z - 0.5);
-                        let proj7 =
-                            project_point(&player, wall_x + 0.5, wall_y - 0.5, wall_z - 0.5);
-                        let proj8 =
-                            project_point(&player, wall_x - 0.5, wall_y - 0.5, wall_z - 0.5);
-                        let col = BLACK;
-                        draw_line(proj1.u, proj1.v, proj2.u, proj2.v, thickness / d, col);
-                        draw_line(proj1.u, proj1.v, proj3.u, proj3.v, thickness / d, col);
-                        draw_line(proj1.u, proj1.v, proj4.u, proj4.v, thickness / d, col);
-                        draw_line(proj8.u, proj8.v, proj7.u, proj7.v, thickness / d, col);
-                        draw_line(proj8.u, proj8.v, proj6.u, proj6.v, thickness / d, col);
-                        draw_line(proj8.u, proj8.v, proj5.u, proj5.v, thickness / d, col);
-                        draw_line(proj2.u, proj2.v, proj5.u, proj5.v, thickness / d, col);
-                        draw_line(proj2.u, proj2.v, proj6.u, proj6.v, thickness / d, col);
-                        draw_line(proj3.u, proj3.v, proj5.u, proj5.v, thickness / d, col);
-                        draw_line(proj3.u, proj3.v, proj7.u, proj7.v, thickness / d, col);
-                        draw_line(proj4.u, proj4.v, proj6.u, proj6.v, thickness / d, col);
-                        draw_line(proj4.u, proj4.v, proj7.u, proj7.v, thickness / d, col);
-                    }
-                } else if game_map.floor_visible[i][j] {
-                    let wall_x = i as f32 + 0.5;
-                    let wall_y = j as f32 + 0.5;
-                    let wall_z = 0.0;
-                    let proj = project_point(&player, wall_x, wall_y, wall_z);
-                    let visible = proj.visible;
-                    let d = proj.d;
-                    if visible {
-                        let proj4 = project_point(&player, wall_x + 0.5, wall_y + 0.5, wall_z);
-                        let proj6 = project_point(&player, wall_x - 0.5, wall_y + 0.5, wall_z);
-                        let proj7 = project_point(&player, wall_x + 0.5, wall_y - 0.5, wall_z);
-                        let proj8 = project_point(&player, wall_x - 0.5, wall_y - 0.5, wall_z);
-                        let col = GRAY;
-                        draw_line(proj8.u, proj8.v, proj7.u, proj7.v, 0.5 * thickness / d, col);
-                        draw_line(proj8.u, proj8.v, proj6.u, proj6.v, 0.5 * thickness / d, col);
-                        draw_line(proj4.u, proj4.v, proj6.u, proj6.v, 0.5 * thickness / d, col);
-                        draw_line(proj4.u, proj4.v, proj7.u, proj7.v, 0.5 * thickness / d, col);
-                    }
-                }
+        for tile in depth_buffer.visible_tiles {
+            if tile[3] == 1 {
+                floor_face_draw(&player, &game_map, tile[1], tile[2])
+            } else if tile[3] == 2 {
+                wall_face_draw(&player, &game_map, tile[1], tile[2])
             }
+            
         }
 
         // Render some primitives in camera space
@@ -161,8 +112,11 @@ async fn main() {
 
         //     gl.quad_context.end_render_pass();
         // }
-
+        
         camera::find_visible_tiles(&mut game_map, &player);
+        depth_buffer = camera::DepthBuffer::generate(&game_map);
+
+
         img = Image {
             bytes: ass.floor_image.as_raw().to_owned(),
             width: settings::MAPSIZE as u16,
@@ -171,7 +125,10 @@ async fn main() {
         for i in 0..settings::MAPSIZE {
             for j in 0..settings::MAPSIZE {
                 if game_map.floor_visible[i][settings::MAPSIZE - j - 1] {
-                    img.set_pixel(i as u32, j as u32, BLUE);
+                    let d = game_map.floor_dist[i][settings::MAPSIZE - j - 1];
+                    let b = 255 - d as u8;
+                    let col = Color::from_rgba(255-b, 255-b, b, 255);
+                    img.set_pixel(i as u32, j as u32, col);
                 }
             }
         }
@@ -240,26 +197,83 @@ struct ProjResult {
     u: f32,
     v: f32,
     d: f32,
-    visible: bool,
 }
 
-fn project_point(player: &player::Player, wall_x: f32, wall_y: f32, wall_z: f32) -> ProjResult {
-    let dxy = ((player.position.x - wall_x).powi(2) + (player.position.y - wall_y).powi(2)).sqrt();
-    let at = -(player.position.y - wall_y).signum() * (-(player.position.x - wall_x) / dxy).acos();
+fn project_point(player: &player::Player, tile_x: f32, tile_y: f32, tile_z: f32) -> ProjResult {
+    let dxy = ((player.position.x - tile_x).powi(2) + (player.position.y - tile_y).powi(2)).sqrt();
+    let at = -(player.position.y - tile_y).signum() * (-(player.position.x - tile_x) / dxy).acos();
     let phi = player::angle_round(settings::FOVXY / 2.0 + player.position.a - at);
     let u = settings::WIDTHF / settings::FOVXY * phi;
 
-    let d = ((player.position.x - wall_x).powi(2)
-        + (player.position.y - wall_y).powi(2)
-        + (player.position.z - wall_z).powi(2))
+    let d = ((player.position.x - tile_x).powi(2)
+        + (player.position.y - tile_y).powi(2)
+        + (player.position.z - tile_z).powi(2))
     .sqrt();
-    let bt = settings::PI / 2.0 - (-(player.position.z - wall_z) / d).acos();
-    let theta =
-        player::angle_round(settings::ASPECT * settings::FOVXY / 2.0 + player.position.b - bt);
+    let bt = settings::PI / 2.0 - (-(player.position.z - tile_z) / d).acos();
+    let theta = player::angle_round(settings::FOVZ / 2.0 + player.position.b - bt);
     let v = settings::WIDTHF / settings::FOVXY * theta;
-    let visible = phi > 0.0
-        && phi < settings::FOVXY
-        && theta > 0.0
-        && theta < settings::ASPECT * settings::FOVXY;
-    ProjResult { u, v, d, visible }
+    ProjResult { u, v, d }
+}
+
+fn wall_face_draw(player: &player::Player, game_map: &map::GameMap, i: usize, j: usize) {
+    let tile_x = i as f32 + 0.5;
+    let tile_y = j as f32 + 0.5;
+    let tile_z = 0.5;
+
+    let proj000 = project_point(player, tile_x - 0.5, tile_y - 0.5, tile_z - 0.5);
+    let proj001 = project_point(player, tile_x - 0.5, tile_y - 0.5, tile_z + 0.5);
+    let proj010 = project_point(player, tile_x - 0.5, tile_y + 0.5, tile_z - 0.5);
+    let proj100 = project_point(player, tile_x + 0.5, tile_y - 0.5, tile_z - 0.5);
+    let proj011 = project_point(player, tile_x - 0.5, tile_y + 0.5, tile_z + 0.5);
+    let proj110 = project_point(player, tile_x + 0.5, tile_y + 0.5, tile_z - 0.5);
+    let proj101 = project_point(player, tile_x + 0.5, tile_y - 0.5, tile_z + 0.5);
+    let proj111 = project_point(player, tile_x + 0.5, tile_y + 0.5, tile_z + 0.5);
+    
+    let val = game_map.wall_array[i][j];
+    let col = Color::from_rgba(100-val, val, 155-val, 255);
+
+    let d1 = proj000.d + proj001.d + proj101.d + proj100.d;
+    let d2 = proj000.d + proj001.d + proj011.d + proj010.d;
+    let d3 = proj010.d + proj011.d + proj111.d + proj110.d;
+    let d4 = proj110.d + proj111.d + proj101.d + proj100.d;
+
+    let face1 = [&proj000, &proj001, &proj100, &proj101];
+    let face2 = [&proj000, &proj001, &proj010, &proj011];
+    let face3 = [&proj010, &proj011, &proj110, &proj111];
+    let face4 = [&proj111, &proj110, &proj101, &proj100];
+
+    let mut faces = vec![(d1, face1), (d2, face2), (d3, face3), (d4, face4)];
+    faces.sort_by(cmp_depth);
+
+    for face in faces {
+        face_draw(face.1[0], face.1[1], face.1[2], face.1[3], col)
+    }
+    
+}
+
+fn floor_face_draw(player: &player::Player, game_map: &map::GameMap, i: usize, j: usize) {
+    let tile_x = i as f32 + 0.5;
+    let tile_y = j as f32 + 0.5;
+    let tile_z = 0.0;
+    let proj000 = project_point(player, tile_x - 0.5, tile_y - 0.5, tile_z );
+    let proj010 = project_point(player, tile_x - 0.5, tile_y + 0.5, tile_z );
+    let proj100 = project_point(player, tile_x + 0.5, tile_y - 0.5, tile_z );
+    let proj110 = project_point(player, tile_x + 0.5, tile_y + 0.5, tile_z );
+    let val = game_map.floor_array[i][j];
+    let col = Color::from_rgba(val, val, val, 255);
+    face_draw(&proj000, &proj010, &proj100, &proj110, col)
+}
+
+fn face_draw(proj1: &ProjResult, proj2: &ProjResult, proj3: &ProjResult, proj4: &ProjResult, col: Color) {
+    draw_triangle(Vec2{x: proj2.u, y: proj2.v}, Vec2{x: proj3.u, y: proj3.v}, Vec2{x: proj1.u, y: proj1.v}, col);
+    draw_triangle(Vec2{x: proj3.u, y: proj3.v}, Vec2{x: proj2.u, y: proj2.v}, Vec2{x: proj4.u, y: proj4.v}, col);
+}
+
+fn cmp_depth(a: &(f32, [&ProjResult; 4]), b: &(f32, [&ProjResult; 4])) -> Ordering {
+    if a.0 < b.0 {
+        return Ordering::Greater;
+    } else if a.0 > b.0 {
+        return Ordering::Less;
+    }
+    return Ordering::Equal;
 }
