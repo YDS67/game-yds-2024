@@ -42,13 +42,10 @@ impl Player {
     }
 
     pub fn draw(&self) {
-        let x = 10.0 + self.position.x * settings::TILESCREENSIZE;
-        let y = screen_height() - 10.0 - self.position.y * settings::TILESCREENSIZE;
-        let s = self.size * settings::TILESCREENSIZE * 5.0;
-        let x1 = x + self.position.ax * settings::TILESCREENSIZE * 10.0;
-        let y1 = y - self.position.ay * settings::TILESCREENSIZE * 10.0;
+        let x = settings::MAPOFFSETX + self.position.x * settings::TILESCREENSIZE;
+        let y = settings::HEIGHTF - 10.0 - self.position.y * settings::TILESCREENSIZE;
+        let s = self.size * settings::TILESCREENSIZE * 3.0;
 
-        draw_line(x, y, x1, y1, 6.0, BLUE);
         draw_circle(x, y, s, RED);
     }
 
@@ -98,7 +95,7 @@ impl Player {
         }
 
         if is_key_down(KeyCode::A) || is_key_down(KeyCode::Left) {
-            self.position.a = angle_round(self.position.a + 0.1 * settings::PLAYERSPEED);
+            self.position.a = angle_round(self.position.a + 0.2 * settings::PLAYERSPEED);
             self.position.ax = self.position.a.cos();
             self.position.ay = self.position.a.sin();
         }
