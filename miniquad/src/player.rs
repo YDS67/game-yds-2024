@@ -44,7 +44,7 @@ impl Player {
     pub fn draw(&self) {
         let x = 10.0 + self.position.x * settings::TILESCREENSIZE;
         let y = screen_height() - 10.0 - self.position.y * settings::TILESCREENSIZE;
-        let s = self.size * settings::TILESCREENSIZE * 10.0;
+        let s = self.size * settings::TILESCREENSIZE * 5.0;
         let x1 = x + self.position.ax * settings::TILESCREENSIZE * 10.0;
         let y1 = y - self.position.ay * settings::TILESCREENSIZE * 10.0;
 
@@ -97,14 +97,14 @@ impl Player {
             }
         }
 
-        if is_key_down(KeyCode::A) {
-            self.position.a = self.position.a + 0.1 * settings::PLAYERSPEED;
+        if is_key_down(KeyCode::A) || is_key_down(KeyCode::Left) {
+            self.position.a = angle_round(self.position.a + 0.1 * settings::PLAYERSPEED);
             self.position.ax = self.position.a.cos();
             self.position.ay = self.position.a.sin();
         }
 
-        if is_key_down(KeyCode::D) {
-            self.position.a = self.position.a - 0.2 * settings::PLAYERSPEED;
+        if is_key_down(KeyCode::D) || is_key_down(KeyCode::Right) {
+            self.position.a = angle_round(self.position.a - 0.2 * settings::PLAYERSPEED);
             self.position.ax = self.position.a.cos();
             self.position.ay = self.position.a.sin();
         }
@@ -117,5 +117,25 @@ impl Player {
                 self.position.y = self.position.y - settings::PLAYERSPEED * self.position.ay;
             }
         }
+
+        if is_key_down(KeyCode::Up) && self.position.b < settings::PI/2.0 {
+            self.position.b = self.position.b + 0.1 * settings::PLAYERSPEED;
+        }
+
+        if is_key_down(KeyCode::Down) && self.position.b > -settings::PI/2.0 {
+            self.position.b = self.position.b - 0.1 * settings::PLAYERSPEED;
+        }
+
     }
+}
+
+pub fn angle_round(angle: f32) -> f32 {
+    let mut in_degrees = angle * 180.0 / settings::PI;
+    while in_degrees < -180.0 {
+        in_degrees = 360.0 + in_degrees
+    } 
+    while in_degrees > 179.9 {
+        in_degrees = -360.0 + in_degrees
+    }
+    in_degrees * settings::PI / 180.0
 }

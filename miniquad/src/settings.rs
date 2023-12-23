@@ -1,5 +1,8 @@
 pub const WIDTH: i32 = 1280;
 pub const HEIGHT: i32 = 800;
+pub const WIDTHF: f32 = 1280.0;
+pub const HEIGHTF: f32 = 800.0;
+pub const ASPECT: f32 = HEIGHTF/WIDTHF;
 pub const MAPSIZE: usize = 64;
 pub const PLAYERHEIGHT: f32 = 0.5;
 pub const TILESCREENSIZE: f32 = 4.0;
@@ -11,4 +14,5 @@ pub const FOVXY: f32 = 1.5;
 pub const FOVZ: f32 = HEIGHT as f32 / WIDTH as f32 * FOVXY;
 pub const DELTATIME: f32 = 1.0/60.0;
 pub const PLAYERSPEED: f32 = 0.2;
-pub const PLAYERSIZE: f32 = 0.2;
+pub const PLAYERSIZE: f32 = 0.4;
+pub const PI: f32 = 3.14159;
