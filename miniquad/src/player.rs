@@ -59,25 +59,25 @@ impl Player {
         let jp = (self.position.y + self.size * self.position.ay).floor() as usize;
         let im = (self.position.x - self.size * self.position.ax).floor() as usize;
         let jm = (self.position.y - self.size * self.position.ay).floor() as usize;
-        if game_map.map_array[ip][j] < 255
+        if game_map.wall_array[ip][j] < 255
         {
             self.position.cxp = true;
         } else {
             self.position.cxp = false;
         }
-        if game_map.map_array[i][jp] < 255
+        if game_map.wall_array[i][jp] < 255
         {
             self.position.cyp = true;
         } else {
             self.position.cyp = false;
         }
-        if game_map.map_array[im][j] < 255
+        if game_map.wall_array[im][j] < 255
         {
             self.position.cxm = true;
         } else {
             self.position.cxm = false;
         }
-        if game_map.map_array[i][jm] < 255
+        if game_map.wall_array[i][jm] < 255
         {
             self.position.cym = true;
         } else {

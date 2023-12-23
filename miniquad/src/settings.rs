@@ -16,3 +16,4 @@ pub const DELTATIME: f32 = 1.0/60.0;
 pub const PLAYERSPEED: f32 = 0.2;
 pub const PLAYERSIZE: f32 = 0.4;
 pub const PI: f32 = 3.14159;
+pub const MAXDRAWDIST: usize = MAPSIZE;

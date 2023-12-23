@@ -23,14 +23,30 @@ async fn main() {
     let ass = assets::Ass::load().await;
     let mut player = player::Player::new();
 
-    let game_map = map::GameMap::new(&ass.map_image);
-    let img = Image {
-        bytes: ass.map_image.as_raw().to_owned(),
+    let game_map = map::GameMap::new(&ass);
+    let mut img = Image {
+        bytes: ass.wall_image.as_raw().to_owned(),
         width: settings::MAPSIZE as u16,
         height: settings::MAPSIZE as u16,
     };
-    let map_texture = Texture2D::from_image(&img);
-    map_texture.set_filter(FilterMode::Nearest);
+    for i in 0..settings::MAPSIZE {
+        for j in 0..settings::MAPSIZE {
+            let col = game_map.wall_array[i][settings::MAPSIZE-j-1];
+            if col == 255 {
+                img.set_pixel(i as u32, j as u32, BLANK);
+            }
+        }
+    }
+    let walls_texture = Texture2D::from_image(&img);
+    walls_texture.set_filter(FilterMode::Nearest);
+
+    img = Image {
+        bytes: ass.floor_image.as_raw().to_owned(),
+        width: settings::MAPSIZE as u16,
+        height: settings::MAPSIZE as u16,
+    };
+    let floor_texture = Texture2D::from_image(&img);
+    floor_texture.set_filter(FilterMode::Nearest);
 
     let thickness: f32 = 50.0;
 
@@ -55,7 +71,7 @@ async fn main() {
 
         for i in 0..settings::MAPSIZE {
             for j in 0..settings::MAPSIZE {
-                if game_map.map_array[i][j] < 255 {
+                if game_map.wall_array[i][j] < 255 {
                     let wall_x = i as f32 + 0.5;
                     let wall_y = j as f32 + 0.5;
                     let wall_z = 0.5;
@@ -132,7 +148,7 @@ async fn main() {
         //     gl.quad_context.end_render_pass();
         // }
 
-        draw_map(&map_texture);
+        draw_map(&walls_texture, &floor_texture);
         player.draw();
         draw_words(&t_par, &player);
 
@@ -166,9 +182,19 @@ fn draw_words(t_par: &TextParams, player: &player::Player) {
     );
 }
 
-fn draw_map(map_texture: &Texture2D) {
+fn draw_map(walls_texture: &Texture2D, floor_texture: &Texture2D) {
     draw_texture_ex(
-        &map_texture,
+        &floor_texture,
+        10.0,
+        screen_height() - 10.0 - 256.0,
+        WHITE,
+        DrawTextureParams {
+            dest_size: Some(vec2(256.0, 256.0)),
+            ..Default::default()
+        },
+    );
+    draw_texture_ex(
+        &walls_texture,
         10.0,
         screen_height() - 10.0 - 256.0,
         WHITE,
@@ -203,8 +229,4 @@ fn project_point(player: &player::Player, wall_x: f32, wall_y: f32, wall_z: f32)
     ProjResult {
         u, v, d, visible,
     }
-}
-
-fn project_face(player: &player::Player, i: usize, j: usize) {
-
 }
