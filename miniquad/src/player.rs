@@ -118,11 +118,11 @@ impl Player {
             }
         }
 
-        if is_key_down(KeyCode::Up) && self.position.b < settings::PI/2.0 {
+        if is_key_down(KeyCode::Down) && self.position.b < settings::PI/2.0 {
             self.position.b = self.position.b + 0.1 * settings::PLAYERSPEED;
         }
 
-        if is_key_down(KeyCode::Down) && self.position.b > -settings::PI/2.0 {
+        if is_key_down(KeyCode::Up) && self.position.b > -settings::PI/2.0 {
             self.position.b = self.position.b - 0.1 * settings::PLAYERSPEED;
         }
 

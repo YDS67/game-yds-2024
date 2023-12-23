@@ -34,6 +34,8 @@ draw((0,0) -- (0,1.1), arrow = Arrow);
 label("$x$", (1.1,0), align=E);
 label("$z$", (0,1.1), align=N);
 
+//draw(player_left -- player_right, red);
+
 label("$\beta_p$", player_pos + 2wtiles*(cos(pa/2), sin(pa/2)), Fill(blackc));
 draw(arc(player_pos, wtiles, degrees(pa), 0));
 

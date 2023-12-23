@@ -72,18 +72,38 @@ async fn main() {
                         let proj6 = project_point(&player, wall_x - 0.5, wall_y + 0.5, wall_z - 0.5);
                         let proj7 = project_point(&player, wall_x + 0.5, wall_y - 0.5, wall_z - 0.5);
                         let proj8 = project_point(&player, wall_x - 0.5, wall_y - 0.5, wall_z - 0.5);
-                        draw_line(proj1.u, proj1.v, proj2.u, proj2.v, thickness/d, BLACK);
-                        draw_line(proj1.u, proj1.v, proj3.u, proj3.v, thickness/d, BLACK);
-                        draw_line(proj1.u, proj1.v, proj4.u, proj4.v, thickness/d, BLACK);
-                        draw_line(proj8.u, proj8.v, proj7.u, proj7.v, thickness/d, BLACK);
-                        draw_line(proj8.u, proj8.v, proj6.u, proj6.v, thickness/d, BLACK);
-                        draw_line(proj8.u, proj8.v, proj5.u, proj5.v, thickness/d, BLACK);
-                        draw_line(proj2.u, proj2.v, proj5.u, proj5.v, thickness/d, BLACK);
-                        draw_line(proj2.u, proj2.v, proj6.u, proj6.v, thickness/d, BLACK);
-                        draw_line(proj3.u, proj3.v, proj5.u, proj5.v, thickness/d, BLACK);
-                        draw_line(proj3.u, proj3.v, proj7.u, proj7.v, thickness/d, BLACK);
-                        draw_line(proj4.u, proj4.v, proj6.u, proj6.v, thickness/d, BLACK);
-                        draw_line(proj4.u, proj4.v, proj7.u, proj7.v, thickness/d, BLACK);
+                        let col = BLACK;
+                        draw_line(proj1.u, proj1.v, proj2.u, proj2.v, thickness/d, col);
+                        draw_line(proj1.u, proj1.v, proj3.u, proj3.v, thickness/d, col);
+                        draw_line(proj1.u, proj1.v, proj4.u, proj4.v, thickness/d, col);
+                        draw_line(proj8.u, proj8.v, proj7.u, proj7.v, thickness/d, col);
+                        draw_line(proj8.u, proj8.v, proj6.u, proj6.v, thickness/d, col);
+                        draw_line(proj8.u, proj8.v, proj5.u, proj5.v, thickness/d, col);
+                        draw_line(proj2.u, proj2.v, proj5.u, proj5.v, thickness/d, col);
+                        draw_line(proj2.u, proj2.v, proj6.u, proj6.v, thickness/d, col);
+                        draw_line(proj3.u, proj3.v, proj5.u, proj5.v, thickness/d, col);
+                        draw_line(proj3.u, proj3.v, proj7.u, proj7.v, thickness/d, col);
+                        draw_line(proj4.u, proj4.v, proj6.u, proj6.v, thickness/d, col);
+                        draw_line(proj4.u, proj4.v, proj7.u, proj7.v, thickness/d, col);
+                    }
+                } else {
+                    let wall_x = i as f32 + 0.5;
+                    let wall_y = j as f32 + 0.5;
+                    let wall_z = 0.0;
+                    let proj = project_point(&player, wall_x, wall_y, wall_z);
+                    let visible = proj.visible;
+                    let d = proj.d;
+                    if visible
+                    {
+                        let proj4 = project_point(&player, wall_x + 0.5, wall_y + 0.5, wall_z );
+                        let proj6 = project_point(&player, wall_x - 0.5, wall_y + 0.5, wall_z);
+                        let proj7 = project_point(&player, wall_x + 0.5, wall_y - 0.5, wall_z);
+                        let proj8 = project_point(&player, wall_x - 0.5, wall_y - 0.5, wall_z);
+                        let col = GRAY;
+                        draw_line(proj8.u, proj8.v, proj7.u, proj7.v, 0.5*thickness/d, col);
+                        draw_line(proj8.u, proj8.v, proj6.u, proj6.v, 0.5*thickness/d, col);
+                        draw_line(proj4.u, proj4.v, proj6.u, proj6.v, 0.5*thickness/d, col);
+                        draw_line(proj4.u, proj4.v, proj7.u, proj7.v, 0.5*thickness/d, col);
                     }
                 }
             }

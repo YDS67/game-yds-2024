@@ -107,6 +107,24 @@ $$v = \frac{H}{\Theta} \left(\frac{\Theta}{2} + \beta_p - \beta_t \right)$$
 _class: columns
 -->
 
+![width:950](images/third-a.png)
+
+$$d_{xy} = \sqrt{(x_t-x_p)^2+(y_t-y_p)^2}$$
+
+$$\alpha_t = \operatorname{sign} (y_t-y_p) \operatorname{acos} \frac{x_t-x_p}{d_{xy}}$$
+
+$$L = R \sin \frac{\Phi}{2}$$
+
+$$D = R \cos  \frac{\Phi}{2}$$
+
+$$u = L - D \tan \left(\alpha_t - \alpha_p \right)$$
+
+---
+
+<!-- 
+_class: columns
+-->
+
 # Approximation
 
 There's a good approximation for **acos**, which looks like this:
