@@ -125,8 +125,8 @@ async fn main() {
         for i in 0..settings::MAPSIZE {
             for j in 0..settings::MAPSIZE {
                 if game_map.floor_visible[i][settings::MAPSIZE - j - 1] {
-                    let d = game_map.floor_dist[i][settings::MAPSIZE - j - 1];
-                    let b = 255 - d as u8;
+                    let d = game_map.dist_field[i][settings::MAPSIZE - j - 1];
+                    let b = 255 - d as u8 * 17;
                     let col = Color::from_rgba(255-b, 255-b, b, 255);
                     img.set_pixel(i as u32, j as u32, col);
                 }
@@ -146,8 +146,8 @@ async fn main() {
 }
 
 fn draw_words(t_par: &TextParams, player: &player::Player) {
-    draw_rectangle(10.0, 10.0, 256.0, 140.0, WHITE);
-    draw_rectangle_lines(10.0, 10.0, 256.0, 140.0, 4.0, BLACK);
+    draw_rectangle(10.0, 10.0, 220.0, 140.0, WHITE);
+    draw_rectangle_lines(10.0, 10.0, 220.0, 140.0, 4.0, BLACK);
     draw_text_ex("Awesome game", 20.0, 40.0, t_par.clone());
     let fps = get_fps();
     let mut fps_display = fps;
@@ -197,22 +197,26 @@ struct ProjResult {
     u: f32,
     v: f32,
     d: f32,
+    visible: bool,
 }
 
-fn project_point(player: &player::Player, tile_x: f32, tile_y: f32, tile_z: f32) -> ProjResult {
-    let dxy = ((player.position.x - tile_x).powi(2) + (player.position.y - tile_y).powi(2)).sqrt();
-    let at = -(player.position.y - tile_y).signum() * (-(player.position.x - tile_x) / dxy).acos();
+fn project_point(player: &player::Player, wall_x: f32, wall_y: f32, wall_z: f32) -> ProjResult {
+    let dxy = ((player.position.x - wall_x).powi(2) + (player.position.y - wall_y).powi(2)).sqrt();
+    let at = -(player.position.y - wall_y).signum() * (-(player.position.x - wall_x) / dxy).acos();
     let phi = player::angle_round(settings::FOVXY / 2.0 + player.position.a - at);
     let u = settings::WIDTHF / settings::FOVXY * phi;
 
-    let d = ((player.position.x - tile_x).powi(2)
-        + (player.position.y - tile_y).powi(2)
-        + (player.position.z - tile_z).powi(2))
+    let d = ((player.position.x - wall_x).powi(2)
+        + (player.position.y - wall_y).powi(2)
+        + (player.position.z - wall_z).powi(2))
     .sqrt();
-    let bt = settings::PI / 2.0 - (-(player.position.z - tile_z) / d).acos();
-    let theta = player::angle_round(settings::FOVZ / 2.0 + player.position.b - bt);
+    let bt = settings::PI / 2.0 - (-(player.position.z - wall_z) / d).acos();
+    let theta = player::angle_round(settings::ASPECT * settings::FOVXY / 2.0 + player.position.b - bt);
     let v = settings::WIDTHF / settings::FOVXY * theta;
-    ProjResult { u, v, d }
+    let visible = phi > 0.0 && phi < settings::FOVXY && theta > 0.0 && theta < settings::ASPECT * settings::FOVXY;
+    ProjResult {
+        u, v, d, visible,
+    }
 }
 
 fn wall_face_draw(player: &player::Player, game_map: &map::GameMap, i: usize, j: usize) {
@@ -228,9 +232,13 @@ fn wall_face_draw(player: &player::Player, game_map: &map::GameMap, i: usize, j:
     let proj110 = project_point(player, tile_x + 0.5, tile_y + 0.5, tile_z - 0.5);
     let proj101 = project_point(player, tile_x + 0.5, tile_y - 0.5, tile_z + 0.5);
     let proj111 = project_point(player, tile_x + 0.5, tile_y + 0.5, tile_z + 0.5);
+
+    let vis1 = proj000.visible || proj001.visible || proj101.visible || proj100.visible;
+    let vis2 = proj000.visible || proj001.visible || proj011.visible || proj010.visible;
+    let vis3 = proj010.visible || proj011.visible || proj111.visible || proj110.visible;
+    let vis4 = proj110.visible || proj111.visible || proj101.visible || proj100.visible;
     
-    let val = game_map.wall_array[i][j];
-    let col = Color::from_rgba(100-val, val, 155-val, 255);
+    let val = 155 - (game_map.wall_dist[i][j]/2) as u8;
 
     let d1 = proj000.d + proj001.d + proj101.d + proj100.d;
     let d2 = proj000.d + proj001.d + proj011.d + proj010.d;
@@ -242,11 +250,14 @@ fn wall_face_draw(player: &player::Player, game_map: &map::GameMap, i: usize, j:
     let face3 = [&proj010, &proj011, &proj110, &proj111];
     let face4 = [&proj111, &proj110, &proj101, &proj100];
 
-    let mut faces = vec![(d1, face1), (d2, face2), (d3, face3), (d4, face4)];
+    let mut faces = vec![(d1, face1, vis1), (d2, face2, vis2), (d3, face3, vis3), (d4, face4, vis4)];
     faces.sort_by(cmp_depth);
 
     for face in faces {
-        face_draw(face.1[0], face.1[1], face.1[2], face.1[3], col)
+        if face.2 {
+            let col = Color::from_rgba(val, 0, val, 255);
+            face_draw(face.1[0], face.1[1], face.1[2], face.1[3], col)
+        }
     }
     
 }
@@ -269,7 +280,7 @@ fn face_draw(proj1: &ProjResult, proj2: &ProjResult, proj3: &ProjResult, proj4: 
     draw_triangle(Vec2{x: proj3.u, y: proj3.v}, Vec2{x: proj2.u, y: proj2.v}, Vec2{x: proj4.u, y: proj4.v}, col);
 }
 
-fn cmp_depth(a: &(f32, [&ProjResult; 4]), b: &(f32, [&ProjResult; 4])) -> Ordering {
+fn cmp_depth(a: &(f32, [&ProjResult; 4], bool), b: &(f32, [&ProjResult; 4], bool)) -> Ordering {
     if a.0 < b.0 {
         return Ordering::Greater;
     } else if a.0 > b.0 {

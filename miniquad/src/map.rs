@@ -1,10 +1,11 @@
-use image::{self, Pixel};
-use crate::settings;
 use crate::assets;
+use crate::settings;
+use image::{self, Pixel};
 
 pub struct GameMap {
     pub wall_array: [[u8; settings::MAPSIZE]; settings::MAPSIZE],
     pub floor_array: [[u8; settings::MAPSIZE]; settings::MAPSIZE],
+    pub dist_field: [[usize; settings::MAPSIZE]; settings::MAPSIZE],
     pub wall_visible: [[bool; settings::MAPSIZE]; settings::MAPSIZE],
     pub floor_visible: [[bool; settings::MAPSIZE]; settings::MAPSIZE],
     pub wall_dist: [[usize; settings::MAPSIZE]; settings::MAPSIZE],
@@ -18,10 +19,38 @@ impl GameMap {
 
         for i in 0..settings::MAPSIZE {
             for j in 0..settings::MAPSIZE {
-                let pixel1 = image::ImageBuffer::get_pixel(&ass.wall_image, i as u32, j as u32).to_rgba();
-                let pixel2 = image::ImageBuffer::get_pixel(&ass.floor_image, i as u32, j as u32).to_rgba();
-                wall_array[i][settings::MAPSIZE-j-1] = pixel1[0];
-                floor_array[i][settings::MAPSIZE-j-1] = pixel2[0];
+                let pixel1 =
+                    image::ImageBuffer::get_pixel(&ass.wall_image, i as u32, j as u32).to_rgba();
+                let pixel2 =
+                    image::ImageBuffer::get_pixel(&ass.floor_image, i as u32, j as u32).to_rgba();
+                wall_array[i][settings::MAPSIZE - j - 1] = pixel1[0];
+                floor_array[i][settings::MAPSIZE - j - 1] = pixel2[0];
+            }
+        }
+
+        let mut dist_field: [[usize; settings::MAPSIZE]; settings::MAPSIZE] =
+            [[0; settings::MAPSIZE]; settings::MAPSIZE];
+
+        for i in 0..settings::MAPSIZE {
+            for j in 0..settings::MAPSIZE {
+                for d in 1..(2*settings::MAPSIZE) {
+                    for k in 0..settings::MAPSIZE {
+                        for l in 0..settings::MAPSIZE {
+                            if (i - k) * (i - k) + (j - l) * (j - l) <= d * d
+                                && wall_array[k][l] < 255
+                            {
+                                dist_field[i][j] = d;
+                                break;
+                            }
+                        }
+                        if dist_field[i][j] == d {
+                            break;
+                        }
+                    }
+                    if dist_field[i][j] == d {
+                        break;
+                    }
+                }
             }
         }
 
@@ -31,9 +60,10 @@ impl GameMap {
         let wall_dist = [[settings::MAXDRAWDIST; settings::MAPSIZE]; settings::MAPSIZE];
         let floor_dist = [[settings::MAXDRAWDIST; settings::MAPSIZE]; settings::MAPSIZE];
 
-        GameMap { 
+        GameMap {
             wall_array,
             floor_array,
+            dist_field,
             wall_visible,
             floor_visible,
             wall_dist,

@@ -45,22 +45,26 @@ pub fn find_visible_tiles(game_map: &mut map::GameMap, player: &player::Player) 
         let phi = player.position.a + settings::FOVXY * (0.5 - (k as f32)/(settings::NUMRAYS as f32));
         let cphi = phi.cos();
         let sphi = phi.sin();
-        for l in 0..settings::MAXDRAWDIST {
-            let xr = 0.5 * (l as f32) * cphi;
-            let yr = 0.5 * (l as f32) * sphi;
+        let mut i = player.position.x.floor() as usize;
+        let mut j = player.position.y.floor() as usize;
+        let mut xr = 0.0;
+        let mut yr = 0.0;
+        for _l in 0..settings::MAXDRAWDIST {
+            xr += 0.1 * cphi;
+            yr += 0.1 * sphi;
             let x = player.position.x + xr;
             let y = player.position.y + yr;
             let d = (xr*xr + yr*yr).sqrt();
-            let i = x.floor() as i32;
-            let j = y.floor() as i32;
-            if i >= 0 && i < settings::MAPSIZE as i32 && j >= 0 && j < settings::MAPSIZE as i32 {
-                if game_map.wall_array[i as usize][j as usize] < 255 {
-                    game_map.wall_visible[i as usize][j as usize] = true;
-                    game_map.wall_dist[i as usize][j as usize] = (d*4.0).floor() as usize;
+            i = x.floor() as usize;
+            j = y.floor() as usize;
+            if i as i32 >= 0 && i < settings::MAPSIZE && j as i32 >= 0 && j < settings::MAPSIZE {
+                if game_map.wall_array[i][j] < 255 {
+                    game_map.wall_visible[i][j] = true;
+                    game_map.wall_dist[i][j] = (d*4.0).floor() as usize;
                     break
                 } else {
-                    game_map.floor_visible[i as usize][j as usize] = true;
-                    game_map.floor_dist[i as usize][j as usize] = (d*4.0).floor() as usize;
+                    game_map.floor_visible[i][j] = true;
+                    game_map.floor_dist[i][j] = (d*4.0).floor() as usize;
                 }
             }
         }

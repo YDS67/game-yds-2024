@@ -48,7 +48,7 @@ impl Player {
     pub fn draw(&self) {
         let x = settings::MAPOFFSETX + self.position.x * settings::TILESCREENSIZE;
         let y = settings::HEIGHTF - 10.0 - self.position.y * settings::TILESCREENSIZE;
-        let s = self.size * settings::TILESCREENSIZE * 3.0;
+        let s = self.size * settings::TILESCREENSIZE;
 
         draw_circle(x, y, s, RED);
     }
@@ -56,36 +56,53 @@ impl Player {
     fn coll_check(&mut self, game_map: &map::GameMap) {
         let i = (self.position.x).floor() as usize;
         let j = (self.position.y).floor() as usize;
+        let ip = (self.position.x + self.size).floor() as usize;
+        let jp = (self.position.y + self.size).floor() as usize;
+        let im = (self.position.x - self.size).floor() as usize;
+        let jm = (self.position.y - self.size).floor() as usize;
+
+        self.position.cxp = false;
+        self.position.cxm = false;
+        self.position.cyp = false;
+        self.position.cym = false;
+
+        if game_map.wall_array[ip][j] < 255
+            || game_map.wall_array[i][jp] < 255
+            || game_map.wall_array[im][j] < 255
+            || game_map.wall_array[i][jm] < 255
+            || game_map.wall_array[ip][jp] < 255
+            || game_map.wall_array[im][jm] < 255
+            || game_map.wall_array[im][jp] < 255
+            || game_map.wall_array[ip][jm] < 255
+        {
+            self.position.cxp = true;
+            self.position.cxm = true;
+            self.position.cyp = true;
+            self.position.cym = true;
+        } 
+
         let ip = (self.position.x + self.size * self.position.ax).floor() as usize;
         let jp = (self.position.y + self.size * self.position.ay).floor() as usize;
         let im = (self.position.x - self.size * self.position.ax).floor() as usize;
         let jm = (self.position.y - self.size * self.position.ay).floor() as usize;
-        // let il = (self.position.x - self.size * self.position.ay).floor() as usize;
-        // let jl = (self.position.y + self.size * self.position.ax).floor() as usize;
-        // let ir = (self.position.x + self.size * self.position.ay).floor() as usize;
-        // let jr = (self.position.y - self.size * self.position.ax).floor() as usize;
-        if game_map.wall_array[ip][j] < 255
+
+        if game_map.wall_array[ip][j] == 255
         {
-            self.position.cxp = true;
-        } else {
             self.position.cxp = false;
         }
-        if game_map.wall_array[i][jp] < 255
+
+        if game_map.wall_array[i][jp] == 255
         {
-            self.position.cyp = true;
-        } else {
             self.position.cyp = false;
-        }
-        if game_map.wall_array[im][j] < 255
+        } 
+
+        if game_map.wall_array[im][j] == 255
         {
-            self.position.cxm = true;
-        } else {
             self.position.cxm = false;
         }
-        if game_map.wall_array[i][jm] < 255
+
+        if game_map.wall_array[i][jm] == 255
         {
-            self.position.cym = true;
-        } else {
             self.position.cym = false;
         }
     }
