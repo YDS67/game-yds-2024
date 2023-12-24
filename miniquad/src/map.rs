@@ -7,7 +7,7 @@ pub struct GameMap {
     pub wall_array: [[u8; settings::MAPSIZE]; settings::MAPSIZE],
     pub floor_array: [[u8; settings::MAPSIZE]; settings::MAPSIZE],
     pub dist_field: [[u8; settings::MAPSIZE]; settings::MAPSIZE],
-    pub dmax: usize,
+    pub dmax: u8,
     pub wall_visible: [[bool; settings::MAPSIZE]; settings::MAPSIZE],
     pub floor_visible: [[bool; settings::MAPSIZE]; settings::MAPSIZE],
     pub wall_dist: [[usize; settings::MAPSIZE]; settings::MAPSIZE],
@@ -26,16 +26,16 @@ impl GameMap {
                     image::ImageBuffer::get_pixel(&ass.wall_image, i as u32, j as u32).to_rgba();
                 let pixel2 =
                     image::ImageBuffer::get_pixel(&ass.floor_image, i as u32, j as u32).to_rgba();
-                let pixel3 =
-                    image::ImageBuffer::get_pixel(&ass.dist_image, i as u32, j as u32).to_rgba();
+                 let pixel3 =
+                     image::ImageBuffer::get_pixel(&ass.dist_image, i as u32, j as u32).to_rgba();
                 wall_array[i][settings::MAPSIZE - j - 1] = pixel1[0];
                 floor_array[i][settings::MAPSIZE - j - 1] = pixel2[0];
                 dist_field[i][settings::MAPSIZE - j - 1] = pixel3[0];
             }
         }
 
-        
         let dmax = 255;
+        //let mut dmax: u8 = 0;
 
         // for i in 0..settings::MAPSIZE {
         //     for j in 0..settings::MAPSIZE {
@@ -45,18 +45,18 @@ impl GameMap {
         //                     if (i - k) * (i - k) + (j - l) * (j - l) <= ((d * d) as f32 * 0.25) as usize
         //                         && wall_array[k][l] < 255
         //                     {
-        //                         dist_field[i][j] = d;
-        //                         if d > dmax {
-        //                             dmax = d
+        //                         dist_field[i][j] = d as u8;
+        //                         if d as u8 > dmax {
+        //                             dmax = d as u8
         //                         }
         //                         break;
         //                     }
         //                 }
-        //                 if dist_field[i][j] == d {
+        //                 if dist_field[i][j] == d as u8 {
         //                     break;
         //                 }
         //             }
-        //             if dist_field[i][j] == d {
+        //             if dist_field[i][j] == d as u8 {
         //                 break;
         //             }
         //         }

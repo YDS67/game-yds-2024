@@ -89,11 +89,13 @@ async fn main() {
             }
         }
 
-        for tile in depth_buffer.visible_tiles.clone() {
+        for tile in depth_buffer.visible_tiles {
             if tile[3] == 1 {
                 floor_face_draw(&player, &game_map, tile[1], tile[2])
             } else if tile[3] == 2 {
-                wall_face_draw(&player, &game_map, &depth_buffer, tile[1], tile[2])
+                wall_face_draw(&player, &game_map, depth_buffer.dmax, tile[1], tile[2], 0);
+                wall_face_draw(&player, &game_map, depth_buffer.dmax, tile[1], tile[2], 1);
+                wall_face_draw(&player, &game_map, depth_buffer.dmax, tile[1], tile[2], 2);
             }
             
         }
@@ -231,10 +233,10 @@ fn project_point(player: &player::Player, wall_x: f32, wall_y: f32, wall_z: f32)
     }
 }
 
-fn wall_face_draw(player: &player::Player, game_map: &map::GameMap, depth_buffer: &camera::DepthBuffer, i: usize, j: usize) {
+fn wall_face_draw(player: &player::Player, game_map: &map::GameMap, dmax: usize, i: usize, j: usize, k: usize) {
     let tile_x = i as f32 + 0.5;
     let tile_y = j as f32 + 0.5;
-    let tile_z = 0.5;
+    let tile_z = k as f32 + 0.5;
 
     let proj000 = project_point(player, tile_x - 0.5, tile_y - 0.5, tile_z - 0.5);
     let proj001 = project_point(player, tile_x - 0.5, tile_y - 0.5, tile_z + 0.5);
@@ -250,7 +252,7 @@ fn wall_face_draw(player: &player::Player, game_map: &map::GameMap, depth_buffer
     let vis3 = proj010.visible || proj011.visible || proj111.visible || proj110.visible;
     let vis4 = proj110.visible || proj111.visible || proj101.visible || proj100.visible;
     
-    let val = 255 - (255.0 * (game_map.wall_dist[i][j] as f32) / (depth_buffer.dmax as f32)) as u8;
+    let val = 255 - (255.0 * (game_map.wall_dist[i][j] as f32) / (dmax as f32)) as u8;
 
     let d1 = proj000.d + proj001.d + proj101.d + proj100.d;
     let d2 = proj000.d + proj001.d + proj011.d + proj010.d;
