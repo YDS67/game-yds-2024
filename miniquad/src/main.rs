@@ -60,8 +60,6 @@ async fn main() {
     let mut floor_texture = Texture2D::from_image(&img);
     floor_texture.set_filter(FilterMode::Nearest);
 
-    let thickness: f32 = 50.0;
-
     // let stage = {
     //     let InternalGlContext {
     //         quad_context: ctx, ..
@@ -78,14 +76,24 @@ async fn main() {
         ..Default::default()
     };
 
+    let mut request_map = false;
+
     loop {
         clear_background(Color::from_rgba(135, 206, 235, 255));
 
-        for tile in depth_buffer.visible_tiles {
+        if is_key_pressed(KeyCode::M) {
+            if request_map {
+                request_map = false;
+            } else {
+                request_map = true
+            }
+        }
+
+        for tile in depth_buffer.visible_tiles.clone() {
             if tile[3] == 1 {
                 floor_face_draw(&player, &game_map, tile[1], tile[2])
             } else if tile[3] == 2 {
-                wall_face_draw(&player, &game_map, tile[1], tile[2])
+                wall_face_draw(&player, &game_map, &depth_buffer, tile[1], tile[2])
             }
             
         }
@@ -126,7 +134,7 @@ async fn main() {
             for j in 0..settings::MAPSIZE {
                 if game_map.floor_visible[i][settings::MAPSIZE - j - 1] {
                     let d = game_map.dist_field[i][settings::MAPSIZE - j - 1];
-                    let b = 255 - d as u8 * 17;
+                    let b = 255 - (d as f32 / game_map.dmax as f32 * 255.0) as u8;
                     let col = Color::from_rgba(255-b, 255-b, b, 255);
                     img.set_pixel(i as u32, j as u32, col);
                 }
@@ -135,8 +143,12 @@ async fn main() {
         floor_texture = Texture2D::from_image(&img);
         floor_texture.set_filter(FilterMode::Nearest);
 
-        draw_map(&walls_texture, &floor_texture);
-        player.draw();
+        if request_map {
+            draw_map(&walls_texture, &floor_texture);
+            player.draw();
+        }
+        
+        
         draw_words(&t_par, &player);
 
         player.walk(&game_map);
@@ -219,7 +231,7 @@ fn project_point(player: &player::Player, wall_x: f32, wall_y: f32, wall_z: f32)
     }
 }
 
-fn wall_face_draw(player: &player::Player, game_map: &map::GameMap, i: usize, j: usize) {
+fn wall_face_draw(player: &player::Player, game_map: &map::GameMap, depth_buffer: &camera::DepthBuffer, i: usize, j: usize) {
     let tile_x = i as f32 + 0.5;
     let tile_y = j as f32 + 0.5;
     let tile_z = 0.5;
@@ -238,7 +250,7 @@ fn wall_face_draw(player: &player::Player, game_map: &map::GameMap, i: usize, j:
     let vis3 = proj010.visible || proj011.visible || proj111.visible || proj110.visible;
     let vis4 = proj110.visible || proj111.visible || proj101.visible || proj100.visible;
     
-    let val = 155 - (game_map.wall_dist[i][j]/2) as u8;
+    let val = 255 - (255.0 * (game_map.wall_dist[i][j] as f32) / (depth_buffer.dmax as f32)) as u8;
 
     let d1 = proj000.d + proj001.d + proj101.d + proj100.d;
     let d2 = proj000.d + proj001.d + proj011.d + proj010.d;
@@ -255,7 +267,7 @@ fn wall_face_draw(player: &player::Player, game_map: &map::GameMap, i: usize, j:
 
     for face in faces {
         if face.2 {
-            let col = Color::from_rgba(val, 0, val, 255);
+            let col = Color::from_rgba(val, val, val, 255);
             face_draw(face.1[0], face.1[1], face.1[2], face.1[3], col)
         }
     }

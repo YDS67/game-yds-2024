@@ -48,7 +48,7 @@ impl Player {
     pub fn draw(&self) {
         let x = settings::MAPOFFSETX + self.position.x * settings::TILESCREENSIZE;
         let y = settings::HEIGHTF - 10.0 - self.position.y * settings::TILESCREENSIZE;
-        let s = self.size * settings::TILESCREENSIZE;
+        let s = self.size * settings::TILESCREENSIZE * 2.0;
 
         draw_circle(x, y, s, RED);
     }
