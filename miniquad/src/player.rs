@@ -119,18 +119,6 @@ impl Player {
             }
         }
 
-        if is_key_down(KeyCode::A) || is_key_down(KeyCode::Left) {
-            self.position.a = angle_round(self.position.a + 0.2 * settings::PLAYERSPEED);
-            self.position.ax = self.position.a.cos();
-            self.position.ay = self.position.a.sin();
-        }
-
-        if is_key_down(KeyCode::D) || is_key_down(KeyCode::Right) {
-            self.position.a = angle_round(self.position.a - 0.2 * settings::PLAYERSPEED);
-            self.position.ax = self.position.a.cos();
-            self.position.ay = self.position.a.sin();
-        }
-
         if is_key_down(KeyCode::S) {
             if !self.position.cxm {
                 self.position.x = self.position.x - settings::PLAYERSPEED * self.position.ax;
@@ -138,6 +126,36 @@ impl Player {
             if !self.position.cym {
                 self.position.y = self.position.y - settings::PLAYERSPEED * self.position.ay;
             }
+        }
+
+        if is_key_down(KeyCode::A) {
+            if !self.position.cxm {
+                self.position.x = self.position.x - settings::PLAYERSPEED * self.position.ay;
+            }
+            if !self.position.cym {
+                self.position.y = self.position.y + settings::PLAYERSPEED * self.position.ax;
+            }
+        }
+
+        if is_key_down(KeyCode::D) {
+            if !self.position.cxm {
+                self.position.x = self.position.x + settings::PLAYERSPEED * self.position.ay;
+            }
+            if !self.position.cym {
+                self.position.y = self.position.y - settings::PLAYERSPEED * self.position.ax;
+            }
+        }
+
+        if is_key_down(KeyCode::Left) {
+            self.position.a = angle_round(self.position.a + 0.2 * settings::PLAYERSPEED);
+            self.position.ax = self.position.a.cos();
+            self.position.ay = self.position.a.sin();
+        }
+
+        if is_key_down(KeyCode::Right) {
+            self.position.a = angle_round(self.position.a - 0.2 * settings::PLAYERSPEED);
+            self.position.ax = self.position.a.cos();
+            self.position.ay = self.position.a.sin();
         }
 
         if is_key_down(KeyCode::Down) && self.position.b < settings::PI/2.0 {

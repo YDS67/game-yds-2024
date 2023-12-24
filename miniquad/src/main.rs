@@ -218,7 +218,7 @@ fn project_point(player: &player::Player, wall_x: f32, wall_y: f32, wall_z: f32)
     let dxy = ((player.position.x - wall_x).powi(2) + (player.position.y - wall_y).powi(2)).sqrt();
     let at = -(player.position.y - wall_y).signum() * (-(player.position.x - wall_x) / dxy).acos();
     let phi = player::angle_round(settings::FOVXY / 2.0 + player.position.a - at);
-    let u = settings::WIDTHF / settings::FOVXY * phi;
+    let u = settings::WIDTHF * (0.5 + (player.position.a - at).sin());
 
     let d = ((player.position.x - wall_x).powi(2)
         + (player.position.y - wall_y).powi(2)
@@ -226,7 +226,7 @@ fn project_point(player: &player::Player, wall_x: f32, wall_y: f32, wall_z: f32)
     .sqrt();
     let bt = settings::PI / 2.0 - (-(player.position.z - wall_z) / d).acos();
     let theta = player::angle_round(settings::ASPECT * settings::FOVXY / 2.0 + player.position.b - bt);
-    let v = settings::WIDTHF / settings::FOVXY * theta;
+    let v = settings::HEIGHTF * (0.5 + (player.position.b - bt).sin());
     let visible = phi > 0.0 && phi < settings::FOVXY && theta > 0.0 && theta < settings::ASPECT * settings::FOVXY;
     ProjResult {
         u, v, d, visible,
