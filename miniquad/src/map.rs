@@ -1,6 +1,6 @@
 use crate::assets;
 use crate::settings;
-use image::{self, Pixel, DynamicImage, ImageBuffer, Rgba};
+use image::{self, DynamicImage, ImageBuffer, Pixel, Rgba};
 use std::path::Path;
 
 pub struct GameMap {
@@ -26,8 +26,8 @@ impl GameMap {
                     image::ImageBuffer::get_pixel(&ass.wall_image, i as u32, j as u32).to_rgba();
                 let pixel2 =
                     image::ImageBuffer::get_pixel(&ass.floor_image, i as u32, j as u32).to_rgba();
-                 let pixel3 =
-                     image::ImageBuffer::get_pixel(&ass.dist_image, i as u32, j as u32).to_rgba();
+                let pixel3 =
+                    image::ImageBuffer::get_pixel(&ass.dist_image, i as u32, j as u32).to_rgba();
                 wall_array[i][settings::MAPSIZE - j - 1] = pixel1[0];
                 floor_array[i][settings::MAPSIZE - j - 1] = pixel2[0];
                 dist_field[i][settings::MAPSIZE - j - 1] = pixel3[0];
