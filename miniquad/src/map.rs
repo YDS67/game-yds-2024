@@ -1,24 +1,23 @@
 use crate::assets;
 use crate::settings;
-use image::{self, DynamicImage, ImageBuffer, Pixel, Rgba};
-use std::path::Path;
+use image::{self, Pixel};
 
 pub struct GameMap {
     pub wall_array: [[u8; settings::MAPSIZE]; settings::MAPSIZE],
     pub floor_array: [[u8; settings::MAPSIZE]; settings::MAPSIZE],
-    pub dist_field: [[u8; settings::MAPSIZE]; settings::MAPSIZE],
-    pub dmax: u8,
+    //pub dist_field: [[u8; settings::MAPSIZE]; settings::MAPSIZE],
+    pub dmax: f32,
     pub wall_visible: [[bool; settings::MAPSIZE]; settings::MAPSIZE],
     pub floor_visible: [[bool; settings::MAPSIZE]; settings::MAPSIZE],
-    pub wall_dist: [[usize; settings::MAPSIZE]; settings::MAPSIZE],
-    pub floor_dist: [[usize; settings::MAPSIZE]; settings::MAPSIZE],
+    pub wall_dist: [[f32; settings::MAPSIZE]; settings::MAPSIZE],
+    pub floor_dist: [[f32; settings::MAPSIZE]; settings::MAPSIZE],
 }
 
 impl GameMap {
     pub fn new(ass: &assets::Ass) -> GameMap {
         let mut wall_array = [[0; settings::MAPSIZE]; settings::MAPSIZE];
         let mut floor_array = [[0; settings::MAPSIZE]; settings::MAPSIZE];
-        let mut dist_field = [[0; settings::MAPSIZE]; settings::MAPSIZE];
+        //let mut dist_field = [[0; settings::MAPSIZE]; settings::MAPSIZE];
 
         for i in 0..settings::MAPSIZE {
             for j in 0..settings::MAPSIZE {
@@ -26,15 +25,15 @@ impl GameMap {
                     image::ImageBuffer::get_pixel(&ass.wall_image, i as u32, j as u32).to_rgba();
                 let pixel2 =
                     image::ImageBuffer::get_pixel(&ass.floor_image, i as u32, j as u32).to_rgba();
-                let pixel3 =
-                    image::ImageBuffer::get_pixel(&ass.dist_image, i as u32, j as u32).to_rgba();
+                //let pixel3 =
+                //    image::ImageBuffer::get_pixel(&ass.dist_image, i as u32, j as u32).to_rgba();
                 wall_array[i][settings::MAPSIZE - j - 1] = pixel1[0];
                 floor_array[i][settings::MAPSIZE - j - 1] = pixel2[0];
-                dist_field[i][settings::MAPSIZE - j - 1] = pixel3[0];
+                //dist_field[i][settings::MAPSIZE - j - 1] = pixel3[0];
             }
         }
 
-        let dmax = 255;
+        let dmax = 1.0;
         //let mut dmax: u8 = 0;
 
         // for i in 0..settings::MAPSIZE {
@@ -78,13 +77,13 @@ impl GameMap {
         let wall_visible = [[false; settings::MAPSIZE]; settings::MAPSIZE];
         let floor_visible = [[false; settings::MAPSIZE]; settings::MAPSIZE];
 
-        let wall_dist = [[settings::MAXDRAWDIST; settings::MAPSIZE]; settings::MAPSIZE];
-        let floor_dist = [[settings::MAXDRAWDIST; settings::MAPSIZE]; settings::MAPSIZE];
+        let wall_dist = [[1.0; settings::MAPSIZE]; settings::MAPSIZE];
+        let floor_dist = [[1.0; settings::MAPSIZE]; settings::MAPSIZE];
 
         GameMap {
             wall_array,
             floor_array,
-            dist_field,
+            //dist_field,
             dmax,
             wall_visible,
             floor_visible,

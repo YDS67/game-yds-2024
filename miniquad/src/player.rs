@@ -16,6 +16,10 @@ pub struct PlayerPos {
     pub cyp: bool,
     pub cxm: bool,
     pub cym: bool,
+    pub cxl: bool,
+    pub cyl: bool,
+    pub cxr: bool,
+    pub cyr: bool,
 }
 
 pub struct Player {
@@ -40,6 +44,10 @@ impl Player {
                 cyp: false,
                 cxm: false,
                 cym: false,
+                cxl: false,
+                cyl: false,
+                cxr: false,
+                cyr: false,
             },
             size: settings::PLAYERSIZE,
         }
@@ -47,7 +55,7 @@ impl Player {
 
     pub fn draw(&self) {
         let x = settings::MAPOFFSETX + self.position.x * settings::TILESCREENSIZE;
-        let y = settings::HEIGHTF - 10.0 - self.position.y * settings::TILESCREENSIZE;
+        let y = 20.0 + settings::MAPSIZE as f32 - self.position.y * settings::TILESCREENSIZE;
         let s = self.size * settings::TILESCREENSIZE * 2.0;
 
         draw_circle(x, y, s, RED);
@@ -56,35 +64,38 @@ impl Player {
     fn coll_check(&mut self, game_map: &map::GameMap) {
         let i = (self.position.x).floor() as usize;
         let j = (self.position.y).floor() as usize;
-        let ip = (self.position.x + self.size).floor() as usize;
-        let jp = (self.position.y + self.size).floor() as usize;
-        let im = (self.position.x - self.size).floor() as usize;
-        let jm = (self.position.y - self.size).floor() as usize;
+        let ip = (self.position.x + self.size * self.position.ax).floor() as usize;
+        let jp = (self.position.y + self.size * self.position.ay).floor() as usize;
+        let im = (self.position.x - self.size * self.position.ax).floor() as usize;
+        let jm = (self.position.y - self.size * self.position.ay).floor() as usize;
+        let il = (self.position.x - self.size * self.position.ay).floor() as usize;
+        let jl = (self.position.y + self.size * self.position.ax).floor() as usize;
+        let ir = (self.position.x + self.size * self.position.ay).floor() as usize;
+        let jr = (self.position.y - self.size * self.position.ax).floor() as usize;
 
         self.position.cxp = false;
         self.position.cxm = false;
         self.position.cyp = false;
         self.position.cym = false;
+        self.position.cxl = false;
+        self.position.cxr = false;
+        self.position.cyl = false;
+        self.position.cyr = false;
 
-        if game_map.wall_array[ip][j] < 255
-            || game_map.wall_array[i][jp] < 255
-            || game_map.wall_array[im][j] < 255
-            || game_map.wall_array[i][jm] < 255
-            || game_map.wall_array[ip][jp] < 255
+        if game_map.wall_array[ip][jp] < 255
             || game_map.wall_array[im][jm] < 255
-            || game_map.wall_array[im][jp] < 255
-            || game_map.wall_array[ip][jm] < 255
+            || game_map.wall_array[il][jl] < 255
+            || game_map.wall_array[ir][jr] < 255
         {
             self.position.cxp = true;
             self.position.cxm = true;
             self.position.cyp = true;
             self.position.cym = true;
+            self.position.cxl = true;
+            self.position.cxr = true;
+            self.position.cyl = true;
+            self.position.cyr = true;
         }
-
-        let ip = (self.position.x + self.size * self.position.ax).floor() as usize;
-        let jp = (self.position.y + self.size * self.position.ay).floor() as usize;
-        let im = (self.position.x - self.size * self.position.ax).floor() as usize;
-        let jm = (self.position.y - self.size * self.position.ay).floor() as usize;
 
         if game_map.wall_array[ip][j] == 255 {
             self.position.cxp = false;
@@ -100,6 +111,22 @@ impl Player {
 
         if game_map.wall_array[i][jm] == 255 {
             self.position.cym = false;
+        }
+
+        if game_map.wall_array[il][j] == 255 {
+            self.position.cxl = false;
+        }
+
+        if game_map.wall_array[ir][j] == 255 {
+            self.position.cxr = false;
+        }
+
+        if game_map.wall_array[i][jl] == 255 {
+            self.position.cyl = false;
+        }
+
+        if game_map.wall_array[i][jr] == 255 {
+            self.position.cyr = false;
         }
     }
 
@@ -125,19 +152,19 @@ impl Player {
         }
 
         if is_key_down(KeyCode::A) {
-            if !self.position.cxm {
+            if !self.position.cxl {
                 self.position.x = self.position.x - settings::PLAYERSPEED * self.position.ay;
             }
-            if !self.position.cym {
+            if !self.position.cyl {
                 self.position.y = self.position.y + settings::PLAYERSPEED * self.position.ax;
             }
         }
 
         if is_key_down(KeyCode::D) {
-            if !self.position.cxm {
+            if !self.position.cxr {
                 self.position.x = self.position.x + settings::PLAYERSPEED * self.position.ay;
             }
-            if !self.position.cym {
+            if !self.position.cyr {
                 self.position.y = self.position.y - settings::PLAYERSPEED * self.position.ax;
             }
         }

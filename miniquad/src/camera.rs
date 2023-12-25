@@ -16,81 +16,121 @@ use crate::settings;
 // 3 = (i+1,j+1)
 // 4 = (i+1.j)
 
-fn find_corner(i: usize, j: usize, xp: f32, yp: f32) -> u8 {
-    let mut corner = 1;
-    if xp <= i as f32+0.5 && yp <= j as f32+0.5 {
-        corner = 1
-    }
-    if xp <= i as f32+0.5 && yp > j as f32+0.5 {
-        corner = 2
-    }
-    if xp > i as f32+0.5 && yp <= j as f32+0.5 {
-        corner = 4
-    }
-    if xp > i as f32+0.5 && yp > j as f32+0.5 {
-        corner = 3
-    }
-    corner
-}
-
 #[derive(Debug, Clone)]
-pub struct TileData {
-    pub i: usize,
-    pub j: usize,
-    pub dist: usize,
-    pub wall_corner: u8,
+pub struct FaceData {
+    pub top_right_x: usize,
+    pub top_right_y: usize,
+    pub bottom_right_x: usize,
+    pub bottom_right_y: usize,
+    pub top_left_x: usize,
+    pub top_left_y: usize,
+    pub bottom_left_x: usize,
+    pub bottom_left_y: usize,
+    pub is_wall: bool,
+    pub dist: f32,
 }
 
 pub struct DepthBuffer {
-    pub visible_tiles: Vec<TileData>,
-    pub dmax: usize,
+    pub faces: Vec<FaceData>,
     pub len: usize,
 }
 
 impl DepthBuffer {
     pub fn generate(game_map: &map::GameMap, player: &player::Player) -> DepthBuffer {
-        let mut visible_tiles: Vec<TileData> = Vec::new();
-        let mut dmax = 0;
+        let mut faces: Vec<FaceData> = Vec::new();
         let mut len = 0;
         let xp = player.position.x;
         let yp = player.position.y;
 
         for i in 0..settings::MAPSIZE {
             for j in 0..settings::MAPSIZE {
+                let xi = i as f32;
+                let yj = j as f32;
                 if game_map.wall_visible[i][j] {
-                    let d = game_map.wall_dist[i][j];
-                    if d > dmax {
-                        dmax = d
-                    }
-                    visible_tiles.push(TileData {
-                        i,
-                        j,
-                        dist: d,
-                        wall_corner: find_corner(i, j, xp, yp),
+                
+                    let dist = (xi-xp).powi(2)+(yj+2.0/4.0-yp).powi(2);
+                    faces.push(FaceData { // face 1
+                        top_right_x: i,
+                        top_right_y: j,
+                        bottom_right_x: i,
+                        bottom_right_y: j,
+                        bottom_left_x: i,
+                        bottom_left_y: j+1,
+                        top_left_x: i,
+                        top_left_y: j+1,
+                        is_wall: true,
+                        dist,
                     });
                     len += 1;
-                }
-                if game_map.floor_visible[i][j] {
-                    let d = game_map.floor_dist[i][j];
-                    if d > dmax {
-                        dmax = d
-                    }
-                    visible_tiles.push(TileData {
-                        i,
-                        j,
-                        dist: d,
-                        wall_corner: 0,
+
+                    let dist = (xi+2.0/4.0-xp).powi(2)+(yj+4.0/4.0-yp).powi(2);
+                    faces.push(FaceData { // face 2
+                        top_right_x: i,
+                        top_right_y: j+1,
+                        bottom_right_x: i,
+                        bottom_right_y: j+1,
+                        bottom_left_x: i+1,
+                        bottom_left_y: j+1,
+                        top_left_x: i+1,
+                        top_left_y: j+1,
+                        is_wall: true,
+                        dist,
+                    });
+                    len += 1;
+
+                    let dist = (xi+4.0/4.0-xp).powi(2)+(yj+2.0/4.0-yp).powi(2);
+                    faces.push(FaceData { // face 3
+                        top_right_x: i+1,
+                        top_right_y: j+1,
+                        bottom_right_x: i+1,
+                        bottom_right_y: j+1,
+                        bottom_left_x: i+1,
+                        bottom_left_y: j,
+                        top_left_x: i+1,
+                        top_left_y: j,
+                        is_wall: true,
+                        dist,
+                    });
+                    len += 1;
+
+                    let dist = (xi+2.0/4.0-xp).powi(2)+(yj-yp).powi(2);
+                    faces.push(FaceData { // face 4
+                        top_right_x: i+1,
+                        top_right_y: j,
+                        bottom_right_x: i+1,
+                        bottom_right_y: j,
+                        bottom_left_x: i,
+                        bottom_left_y: j,
+                        top_left_x: i,
+                        top_left_y: j,
+                        is_wall: true,
+                        dist,
+                    });
+                    len += 1;
+
+                } else if game_map.floor_visible[i][j] {
+                    let dist = (xi+2.0/4.0-xp).powi(2)+(yj+2.0/4.0-yp).powi(2);
+                    faces.push(FaceData {
+                        top_right_x: i+1,
+                        top_right_y: j+1,
+                        bottom_right_x: i+1,
+                        bottom_right_y: j,
+                        bottom_left_x: i,
+                        bottom_left_y: j,
+                        top_left_x: i,
+                        top_left_y: j+1,
+                        is_wall: false,
+                        dist,
                     });
                     len += 1;
                 }
             }
         }
 
-        visible_tiles.sort_by(cmp_depth);
+        faces.sort_by(cmp_depth);
 
         DepthBuffer {
-            visible_tiles,
-            dmax,
+            faces,
             len,
         }
     }
@@ -111,24 +151,25 @@ pub fn find_visible_tiles(game_map: &mut map::GameMap, player: &player::Player) 
             yr += 0.1 * sphi;
             let x = player.position.x + xr;
             let y = player.position.y + yr;
-            let d = (xr * xr + yr * yr).sqrt();
+            let d = xr * xr + yr * yr;
             let i = x.floor() as usize;
             let j = y.floor() as usize;
             if i as i32 >= 0 && i < settings::MAPSIZE && j as i32 >= 0 && j < settings::MAPSIZE {
                 if game_map.wall_array[i][j] < 255 {
                     game_map.wall_visible[i][j] = true;
-                    game_map.wall_dist[i][j] = (d * 4.0).floor() as usize;
+                    game_map.wall_dist[i][j] = d;
+                    if game_map.dmax < d {game_map.dmax = d}
                     break;
                 } else {
                     game_map.floor_visible[i][j] = true;
-                    game_map.floor_dist[i][j] = (d * 4.0).floor() as usize;
+                    game_map.floor_dist[i][j] = d;
                 }
             }
         }
     }
 }
 
-fn cmp_depth(a: &TileData, b: &TileData) -> Ordering {
+fn cmp_depth(a: &FaceData, b: &FaceData) -> Ordering {
     if a.dist < b.dist {
         return Ordering::Greater;
     } else if a.dist > b.dist {

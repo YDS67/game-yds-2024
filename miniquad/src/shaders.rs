@@ -15,7 +15,7 @@ const float pi = 3.1415926538;
 const float fov = pi/4.0;
 const float asp = 800.0/1280.0;
 
-float at, u, bt, v, d;
+float at, u, bt, v, d, l;
 
 vec3 dir1, dir2, cros, nor1, nor2;
 
@@ -35,8 +35,10 @@ void main() {
     u = 2.0*sin(at)/sin(fov);
     v = 2.0*sin(bt)/sin(fov*asp);
 
+    l = length(dir2);
+
     gl_Position = vec4(u, v, 0, 1);
-    texcoord = vec3(uv/length(dir2),1.0/length(dir2));
+    texcoord = vec3(uv/l,1.0/l);
 
     if (at < -1.4*fov || at > 1.4*fov || bt < -1.4*fov*asp || bt > 1.4*fov*asp) {
         cols = vec4(1.0,1.0,1.0,0.0);
