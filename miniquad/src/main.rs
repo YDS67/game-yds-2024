@@ -162,7 +162,7 @@ fn draw_words(t_par: &TextParams, depth_buffer: &camera::DepthBuffer) {
         40.0,
         t_par.to_owned(),
     );
-    draw_text_ex("Faces drawn:", 20.0, 75.0, t_par.to_owned());
+    draw_text_ex("Quads drawn:", 20.0, 75.0, t_par.to_owned());
     draw_text_ex(
         &format!("{}", depth_buffer.len),
         20.0,
