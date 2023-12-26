@@ -20,7 +20,8 @@ fn window_conf() -> Conf {
 
 #[macroquad::main(window_conf)]
 async fn main() {
-    let ass = assets::Ass::load().await;
+    let font_main = load_ttf_font("resources/times.ttf").await.unwrap();
+    let ass = assets::Ass::load();
     let mut player = player::Player::new();
 
     let mut game_map = map::GameMap::new(&ass);
@@ -61,7 +62,7 @@ async fn main() {
 
     let t_par = TextParams {
         font_size: 30,
-        font: Some(&ass.font_main),
+        font: Some(&font_main),
         color: BLACK,
         ..Default::default()
     };
