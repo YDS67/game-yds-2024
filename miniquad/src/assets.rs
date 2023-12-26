@@ -1,5 +1,4 @@
 use image::{self, ImageBuffer, Rgba};
-use macroquad::prelude::*;
 use std::path::Path;
 
 pub struct Ass {
