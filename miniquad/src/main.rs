@@ -69,6 +69,14 @@ async fn main() {
 
     let mut request_map = false;
 
+    let stage = {
+        let InternalGlContext {
+            quad_context: ctx, ..
+        } = unsafe { get_internal_gl() };
+
+        stage::Stage::new(ctx, &ass, &depth_buffer)
+    }.await;
+
     loop {
         clear_background(Color::from_rgba(135, 206, 235, 255));
 
@@ -81,20 +89,14 @@ async fn main() {
         }
 
         {
-            let stage = {
-                let InternalGlContext {
-                    quad_context: ctx, ..
-                } = unsafe { get_internal_gl() };
-        
-                stage::Stage::new(ctx, &ass, &depth_buffer)
-            }.await;
-
             let mut gl = unsafe { get_internal_gl() };
 
             // Ensure that macroquad's shapes are not going to be lost
             gl.flush();
 
             gl.quad_gl.clear_draw_calls();
+
+            gl.quad_context.delete_texture(stage.bindings.images[0]);
 
             gl.quad_context.apply_pipeline(&stage.pipeline);
 
