@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 pub const WIDTH: i32 = 1280;
 pub const HEIGHT: i32 = 800;
 pub const WIDTHF: f32 = 1280.0;
