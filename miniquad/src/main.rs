@@ -24,13 +24,9 @@ fn window_conf() -> Conf {
 async fn main() {
     let font_main = load_ttf_font("resources/times.ttf").await.unwrap();
     
-    let mut stage = {
-        let InternalGlContext {
-            quad_context: ctx, ..
-        } = unsafe { get_internal_gl() };
+    let gl = unsafe { get_internal_gl() };
 
-        stage::Stage::new(ctx)
-    };
+    let mut stage = stage::Stage::new(gl.quad_context);
 
     let mut img = Image {
         bytes: stage.ass.wall_image.as_raw().to_owned(),
@@ -73,7 +69,7 @@ async fn main() {
     let mut request_map = false;
 
     loop {
-        clear_background(Color::from_rgba(135, 206, 235, 255));
+        //clear_background(Color::from_rgba(135, 206, 235, 255));
 
         if is_key_pressed(KeyCode::M) {
             if request_map {
@@ -83,32 +79,15 @@ async fn main() {
             }
         }
 
-        {
-            let gl = unsafe { get_internal_gl() };
-
+        
             // Ensure that macroquad's shapes are not going to be lost
             //gl.flush();
 
+            gl.quad_context.begin_default_pass(miniquad::PassAction::clear_color(0.5294118,0.8078431,0.9215686,1.0000000));
+
             stage.update(gl.quad_context);
 
-            gl.quad_context.apply_pipeline(&stage.pipeline);
-
-            gl.quad_context.apply_bindings(&stage.bindings);
-
-            gl.quad_context
-                .apply_uniforms(miniquad::UniformsSource::table(&shaders::Uniforms {
-                    playerpos: (stage.player.position.x, stage.player.position.y, stage.player.position.z),
-                    playerdir: (
-                        stage.player.position.ax,
-                        stage.player.position.ay,
-                        stage.player.position.bz,
-                        stage.player.position.bxy,
-                    ),
-                }));
-            gl.quad_context.draw(0, &stage.num*6, 1);
-
-            gl.quad_context.end_render_pass();
-        }
+        
 
         img = Image {
             bytes: stage.ass.floor_image.as_raw().to_owned(),
