@@ -136,17 +136,17 @@ impl DepthBuffer {
     }
 }
 
-pub fn find_visible_tiles(game_map: &mut map::GameMap, player: &player::Player) {
+pub fn find_visible_tiles(game_map: &mut map::GameMap, player: &player::Player, settings: &settings::Settings) {
     game_map.wall_visible = [[false; settings::MAPSIZE]; settings::MAPSIZE];
     game_map.floor_visible = [[false; settings::MAPSIZE]; settings::MAPSIZE];
-    for k in 0..=settings::NUMRAYS {
+    for k in 0..=settings.draw_rays_num {
         let phi =
-            player.position.a + settings::FOVXY * (0.5 - (k as f32) / (settings::NUMRAYS as f32));
+            player.position.a + settings.fov_xy * (0.5 - (k as f32) / (settings.draw_rays_num as f32));
         let cphi = phi.cos();
         let sphi = phi.sin();
         let mut xr = 0.0;
         let mut yr = 0.0;
-        for _l in 0..settings::MAXDRAWDIST {
+        for _l in 0..settings.draw_max_dist {
             xr += 0.1 * cphi;
             yr += 0.1 * sphi;
             let x = player.position.x + xr;

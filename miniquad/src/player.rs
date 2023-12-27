@@ -24,22 +24,24 @@ pub struct PlayerPos {
 
 pub struct Player {
     pub position: PlayerPos,
-    pub size: f32,
+    pub radius: f32,
 }
 
 impl Player {
-    pub fn new() -> Player {
+    pub fn new(settings: &settings::Settings) -> Player {
+        let a = settings.player_a0;
+        let b = settings.player_b0;
         Player {
             position: PlayerPos {
-                x: settings::PLAYERX0,
-                y: settings::PLAYERY0,
-                z: settings::PLAYERHEIGHT,
-                a: settings::PLAYERA0,
-                b: settings::PLAYERB0,
-                ax: settings::PLAYERA0.cos(),
-                ay: settings::PLAYERA0.sin(),
-                bxy: settings::PLAYERB0.cos(),
-                bz: settings::PLAYERB0.sin(),
+                x: settings.player_x0,
+                y: settings.player_y0,
+                z: settings.player_height,
+                a,
+                b,
+                ax: a.cos(),
+                ay: a.sin(),
+                bxy: b.cos(),
+                bz: b.sin(),
                 cxp: false,
                 cyp: false,
                 cxm: false,
@@ -49,14 +51,14 @@ impl Player {
                 cxr: false,
                 cyr: false,
             },
-            size: settings::PLAYERSIZE,
+            radius: settings.player_radius,
         }
     }
 
-    pub fn draw(&self) {
-        let x = settings::MAPOFFSETX + self.position.x * settings::TILESCREENSIZE;
-        let y = 20.0 + settings::MAPSIZE as f32 - self.position.y * settings::TILESCREENSIZE;
-        let s = self.size * settings::TILESCREENSIZE * 2.0;
+    pub fn draw(&self, settings: &settings::Settings) {
+        let x = settings.map_offset_x + self.position.x * settings.tile_screen_size;
+        let y = 20.0 + (settings::MAPSIZE as f32 - self.position.y) * settings.tile_screen_size;
+        let s = self.radius * settings.tile_screen_size * 2.0;
 
         draw_circle(x, y, s, RED);
     }
@@ -64,14 +66,14 @@ impl Player {
     fn coll_check(&mut self, game_map: &map::GameMap) {
         let i = (self.position.x).floor() as usize;
         let j = (self.position.y).floor() as usize;
-        let ip = (self.position.x + self.size * self.position.ax).floor() as usize;
-        let jp = (self.position.y + self.size * self.position.ay).floor() as usize;
-        let im = (self.position.x - self.size * self.position.ax).floor() as usize;
-        let jm = (self.position.y - self.size * self.position.ay).floor() as usize;
-        let il = (self.position.x - self.size * self.position.ay).floor() as usize;
-        let jl = (self.position.y + self.size * self.position.ax).floor() as usize;
-        let ir = (self.position.x + self.size * self.position.ay).floor() as usize;
-        let jr = (self.position.y - self.size * self.position.ax).floor() as usize;
+        let ip = (self.position.x + self.radius * self.position.ax).floor() as usize;
+        let jp = (self.position.y + self.radius * self.position.ay).floor() as usize;
+        let im = (self.position.x - self.radius * self.position.ax).floor() as usize;
+        let jm = (self.position.y - self.radius * self.position.ay).floor() as usize;
+        let il = (self.position.x - self.radius * self.position.ay).floor() as usize;
+        let jl = (self.position.y + self.radius * self.position.ax).floor() as usize;
+        let ir = (self.position.x + self.radius * self.position.ay).floor() as usize;
+        let jr = (self.position.y - self.radius * self.position.ax).floor() as usize;
 
         self.position.cxp = false;
         self.position.cxm = false;
@@ -130,65 +132,65 @@ impl Player {
         }
     }
 
-    pub fn walk(&mut self, game_map: &map::GameMap) {
+    pub fn walk(&mut self, game_map: &map::GameMap, settings: &settings::Settings) {
         self.coll_check(game_map);
 
         if is_key_down(KeyCode::W) {
             if !self.position.cxp {
-                self.position.x = self.position.x + settings::PLAYERSPEED * self.position.ax;
+                self.position.x = self.position.x + settings.player_speed * self.position.ax;
             }
             if !self.position.cyp {
-                self.position.y = self.position.y + settings::PLAYERSPEED * self.position.ay;
+                self.position.y = self.position.y + settings.player_speed * self.position.ay;
             }
         }
 
         if is_key_down(KeyCode::S) {
             if !self.position.cxm {
-                self.position.x = self.position.x - settings::PLAYERSPEED * self.position.ax;
+                self.position.x = self.position.x - settings.player_speed * self.position.ax;
             }
             if !self.position.cym {
-                self.position.y = self.position.y - settings::PLAYERSPEED * self.position.ay;
+                self.position.y = self.position.y - settings.player_speed * self.position.ay;
             }
         }
 
         if is_key_down(KeyCode::A) {
             if !self.position.cxl {
-                self.position.x = self.position.x - settings::PLAYERSPEED * self.position.ay;
+                self.position.x = self.position.x - settings.player_speed * self.position.ay;
             }
             if !self.position.cyl {
-                self.position.y = self.position.y + settings::PLAYERSPEED * self.position.ax;
+                self.position.y = self.position.y + settings.player_speed * self.position.ax;
             }
         }
 
         if is_key_down(KeyCode::D) {
             if !self.position.cxr {
-                self.position.x = self.position.x + settings::PLAYERSPEED * self.position.ay;
+                self.position.x = self.position.x + settings.player_speed * self.position.ay;
             }
             if !self.position.cyr {
-                self.position.y = self.position.y - settings::PLAYERSPEED * self.position.ax;
+                self.position.y = self.position.y - settings.player_speed * self.position.ax;
             }
         }
 
         if is_key_down(KeyCode::Left) {
-            self.position.a = angle_round(self.position.a + 0.1 * settings::PLAYERSPEED);
+            self.position.a = angle_round(self.position.a + 0.1 * settings.player_speed);
             self.position.ax = self.position.a.cos();
             self.position.ay = self.position.a.sin();
         }
 
         if is_key_down(KeyCode::Right) {
-            self.position.a = angle_round(self.position.a - 0.1 * settings::PLAYERSPEED);
+            self.position.a = angle_round(self.position.a - 0.1 * settings.player_speed);
             self.position.ax = self.position.a.cos();
             self.position.ay = self.position.a.sin();
         }
 
         if is_key_down(KeyCode::Down) && self.position.b < settings::PI / 4.0 {
-            self.position.b = self.position.b + 0.1 * settings::PLAYERSPEED;
+            self.position.b = self.position.b + 0.1 * settings.player_speed;
             self.position.bxy = self.position.b.cos();
             self.position.bz = self.position.b.sin();
         }
 
         if is_key_down(KeyCode::Up) && self.position.b > -settings::PI / 4.0 {
-            self.position.b = self.position.b - 0.1 * settings::PLAYERSPEED;
+            self.position.b = self.position.b - 0.1 * settings.player_speed;
             self.position.bxy = self.position.b.cos();
             self.position.bz = self.position.b.sin();
         }

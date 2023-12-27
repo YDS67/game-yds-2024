@@ -7,6 +7,7 @@ use crate::map;
 use crate::mesh;
 use crate::player;
 use crate::shaders;
+use crate::settings;
 
 pub struct Stage {
     pub ass: assets::Ass,
@@ -20,13 +21,13 @@ pub struct Stage {
 }
 
 impl Stage {
-    pub fn new(ctx: &mut dyn RenderingBackend) -> Stage {
+    pub fn new(ctx: &mut dyn RenderingBackend, settings: &settings::Settings) -> Stage {
         let ass = assets::Ass::load();
-        let player = player::Player::new();
+        let player = player::Player::new(&settings);
 
         let mut game_map = map::GameMap::new(&ass);
 
-        camera::find_visible_tiles(&mut game_map, &player);
+        camera::find_visible_tiles(&mut game_map, &player, &settings);
         let depth_buffer = camera::DepthBuffer::generate(&game_map, &player);
 
         let mesh = mesh::Mesh::new(&depth_buffer);
@@ -88,9 +89,9 @@ impl Stage {
         }
     }
 
-    pub fn update(&mut self, ctx: &mut dyn RenderingBackend) {
-        self.player.walk(&self.game_map);
-        camera::find_visible_tiles(&mut self.game_map, &self.player);
+    pub fn update(&mut self, ctx: &mut dyn RenderingBackend, settings: &settings::Settings) {
+        self.player.walk(&self.game_map, &settings);
+        camera::find_visible_tiles(&mut self.game_map, &self.player, &settings);
         self.depth_buffer = camera::DepthBuffer::generate(&self.game_map, &self.player);
 
         self.mesh = mesh::Mesh::new(&self.depth_buffer);

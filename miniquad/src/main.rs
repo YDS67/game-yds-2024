@@ -14,8 +14,8 @@ fn window_conf() -> Conf {
     Conf {
         window_title: "Raycasting + GPU rendering".to_owned(),
         high_dpi: true,
-        window_width: settings::WIDTH,
-        window_height: settings::HEIGHT,
+        window_width: settings::WIDTH0,
+        window_height: settings::HEIGHT0,
         ..Default::default()
     }
 }
@@ -23,10 +23,12 @@ fn window_conf() -> Conf {
 #[macroquad::main(window_conf)]
 async fn main() {
     let font_main = load_ttf_font("resources/times.ttf").await.unwrap();
+
+    let settings = settings::Settings::init();
     
     let gl = unsafe { get_internal_gl() };
 
-    let mut stage = stage::Stage::new(gl.quad_context);
+    let mut stage = stage::Stage::new(gl.quad_context, &settings);
 
     let mut img = Image {
         bytes: stage.ass.wall_image.as_raw().to_owned(),
@@ -85,7 +87,7 @@ async fn main() {
 
             gl.quad_context.begin_default_pass(miniquad::PassAction::clear_color(0.5294118,0.8078431,0.9215686,1.0000000));
 
-            stage.update(gl.quad_context);
+            stage.update(gl.quad_context, &settings);
 
         
 
@@ -108,8 +110,8 @@ async fn main() {
         floor_texture.set_filter(FilterMode::Nearest);
 
         if request_map {
-            draw_map(&walls_texture, &floor_texture);
-            stage.player.draw();
+            draw_map(&walls_texture, &floor_texture, &settings);
+            stage.player.draw(&settings);
         }
 
         draw_words(&t_par, &stage.depth_buffer);
@@ -141,11 +143,11 @@ fn draw_words(t_par: &TextParams, depth_buffer: &camera::DepthBuffer) {
     );
 }
 
-fn draw_map(walls_texture: &Texture2D, floor_texture: &Texture2D) {
-    let size = settings::MAPSIZE as f32 * settings::TILESCREENSIZE;
+fn draw_map(walls_texture: &Texture2D, floor_texture: &Texture2D, settings: &settings::Settings) {
+    let size = settings::MAPSIZE as f32 * settings.tile_screen_size;
     draw_texture_ex(
         &floor_texture,
-        settings::MAPOFFSETX,
+        settings.map_offset_x,
         20.0,
         WHITE,
         DrawTextureParams {
@@ -155,7 +157,7 @@ fn draw_map(walls_texture: &Texture2D, floor_texture: &Texture2D) {
     );
     draw_texture_ex(
         &walls_texture,
-        settings::MAPOFFSETX,
+        settings.map_offset_x,
         20.0,
         WHITE,
         DrawTextureParams {
