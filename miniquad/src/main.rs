@@ -69,22 +69,22 @@ async fn main() {
         ..Default::default()
     };
 
-    let mut map_state;
+    //let mut map_state;
 
     loop {
         if mqp::is_key_pressed(mqp::KeyCode::M) {
-            if settings.draw_menu {
-                settings.draw_menu = false;
+            if settings.draw_map {
+                settings.draw_map = false;
             } else {
-                settings.draw_menu = true
+                settings.draw_map = true
             }
         }
 
-        if settings.draw_map {
-            map_state = "Hide map"
-        } else {
-            map_state = "Show map"
-        }
+        // if settings.draw_map {
+        //     map_state = "Hide map"
+        // } else {
+        //     map_state = "Show map"
+        // }
 
         // Ensure that macroquad's shapes are not going to be lost
         {
@@ -92,9 +92,11 @@ async fn main() {
 
             gl.flush();
 
+            gl.quad_context.clear(Some((0.5294118, 0.8078431, 0.9215686, 1.0000000)), None, None);
+
             gl.quad_context
                 .begin_default_pass(miniquad::PassAction::clear_color(
-                    0.5294118, 0.8078431, 0.9215686, 1.0000000,
+                    0.0, 0.0, 0.0, 1.0000000,
                 ));
 
             stage.update(gl.quad_context, &settings);

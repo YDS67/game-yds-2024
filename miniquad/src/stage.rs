@@ -17,7 +17,6 @@ pub struct Stage {
     pub mesh: mesh::Mesh,
     pub pipeline: Pipeline,
     pub bindings: Bindings,
-    pub num: i32,
 }
 
 impl Stage {
@@ -28,7 +27,7 @@ impl Stage {
         let mut game_map = map::GameMap::new(&ass);
 
         camera::find_visible_tiles(&mut game_map, &player, &settings);
-        let depth_buffer = camera::DepthBuffer::generate(&game_map, &player);
+        let depth_buffer = camera::DepthBuffer::generate(&game_map, &player, &settings);
 
         let mesh = mesh::Mesh::new(&depth_buffer);
 
@@ -84,7 +83,6 @@ impl Stage {
             depth_buffer,
             pipeline,
             bindings,
-            num: mesh.idx,
             mesh,
         }
     }
@@ -92,10 +90,9 @@ impl Stage {
     pub fn update(&mut self, ctx: &mut dyn RenderingBackend, settings: &settings::Settings) {
         self.player.walk(&self.game_map, &settings);
         camera::find_visible_tiles(&mut self.game_map, &self.player, &settings);
-        self.depth_buffer = camera::DepthBuffer::generate(&self.game_map, &self.player);
+        self.depth_buffer = camera::DepthBuffer::generate(&self.game_map, &self.player, &settings);
 
         self.mesh = mesh::Mesh::new(&self.depth_buffer);
-        self.num = self.mesh.idx;
 
         for b in 0..self.bindings.vertex_buffers.len() {
             ctx.delete_buffer(self.bindings.vertex_buffers[b]);
@@ -141,7 +138,7 @@ impl Stage {
                 self.player.position.bxy,
             ),
         }));
-        ctx.draw(0, &self.num * 6, 1);
+        ctx.draw(0, &self.mesh.num * 6, 1);
 
         ctx.end_render_pass();
     }

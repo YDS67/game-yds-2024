@@ -58,7 +58,7 @@ void main() {
     if (cols.w < 1.0) {
         discard;
     } else {
-        gl_FragColor = textureProj(tex, texcoord);
+        gl_FragColor = vec4(textureProj(tex, texcoord).xyz * cols.x, 1.0);
     }
 }"#;
 

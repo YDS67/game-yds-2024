@@ -25,6 +25,7 @@ pub struct Settings {
     pub player_speed: f32,
     pub player_radius: f32,
     pub draw_max_dist: usize,
+    pub light_dist: f32,
     pub draw_rays_num: usize,
     pub tolerance: f32,
 }
@@ -51,7 +52,8 @@ impl Settings {
         let delta_tile = 1.0/60.0;
         let player_speed = 0.2;
         let player_radius = 0.5;
-        let draw_max_dist = MAPSIZE;
+        let draw_max_dist = 2*MAPSIZE;
+        let light_dist = 100.0;
         let draw_rays_num = 250;
         let tolerance = 1e-16;
         Settings {
@@ -76,6 +78,7 @@ impl Settings {
             player_speed,
             player_radius,
             draw_max_dist,
+            light_dist,
             draw_rays_num,
             tolerance,
         }
