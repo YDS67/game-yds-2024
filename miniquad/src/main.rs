@@ -1,19 +1,20 @@
-use macroquad::prelude::*;
+#![windows_subsystem = "windows"]
+
+use macroquad::prelude as mqp;
 use miniquad;
 
 mod assets;
 mod camera;
 mod map;
+mod mesh;
 mod player;
 mod settings;
 mod shaders;
 mod stage;
-mod mesh;
 
-fn window_conf() -> Conf {
-    Conf {
+fn window_conf() -> mqp::Conf {
+    mqp::Conf {
         window_title: "Raycasting + GPU rendering".to_owned(),
-        high_dpi: true,
         window_width: settings::WIDTH0,
         window_height: settings::HEIGHT0,
         ..Default::default()
@@ -22,15 +23,15 @@ fn window_conf() -> Conf {
 
 #[macroquad::main(window_conf)]
 async fn main() {
-    let font_main = load_ttf_font("resources/times.ttf").await.unwrap();
+    let font_main = mqp::load_ttf_font("resources/times.ttf").await.unwrap();
 
-    let settings = settings::Settings::init();
-    
-    let gl = unsafe { get_internal_gl() };
+    let mut settings = settings::Settings::init();
+
+    let mut gl = unsafe { mqp::get_internal_gl() };
 
     let mut stage = stage::Stage::new(gl.quad_context, &settings);
 
-    let mut img = Image {
+    let mut img = mqp::Image {
         bytes: stage.ass.wall_image.as_raw().to_owned(),
         width: settings::MAPSIZE as u16,
         height: settings::MAPSIZE as u16,
@@ -39,14 +40,14 @@ async fn main() {
         for j in 0..settings::MAPSIZE {
             let col = stage.game_map.wall_array[i][settings::MAPSIZE - j - 1];
             if col == 255 {
-                img.set_pixel(i as u32, j as u32, BLANK);
+                img.set_pixel(i as u32, j as u32, mqp::BLANK);
             }
         }
     }
-    let walls_texture = Texture2D::from_image(&img);
-    walls_texture.set_filter(FilterMode::Nearest);
+    let walls_texture = mqp::Texture2D::from_image(&img);
+    walls_texture.set_filter(mqp::FilterMode::Nearest);
 
-    img = Image {
+    img = mqp::Image {
         bytes: stage.ass.floor_image.as_raw().to_owned(),
         width: settings::MAPSIZE as u16,
         height: settings::MAPSIZE as u16,
@@ -54,44 +55,52 @@ async fn main() {
     for i in 0..settings::MAPSIZE {
         for j in 0..settings::MAPSIZE {
             if stage.game_map.floor_visible[i][settings::MAPSIZE - j - 1] {
-                img.set_pixel(i as u32, j as u32, BLUE);
+                img.set_pixel(i as u32, j as u32, mqp::BLUE);
             }
         }
     }
-    let mut floor_texture = Texture2D::from_image(&img);
-    floor_texture.set_filter(FilterMode::Nearest);
+    let mut floor_texture = mqp::Texture2D::from_image(&img);
+    floor_texture.set_filter(mqp::FilterMode::Nearest);
 
-    let t_par = TextParams {
+    let t_par = mqp::TextParams {
         font_size: 30,
         font: Some(&font_main),
-        color: BLACK,
+        color: mqp::BLACK,
         ..Default::default()
     };
 
-    let mut request_map = false;
+    let mut map_state;
 
     loop {
-        //clear_background(Color::from_rgba(135, 206, 235, 255));
-
-        if is_key_pressed(KeyCode::M) {
-            if request_map {
-                request_map = false;
+        if mqp::is_key_pressed(mqp::KeyCode::M) {
+            if settings.draw_menu {
+                settings.draw_menu = false;
             } else {
-                request_map = true
+                settings.draw_menu = true
             }
         }
 
-        
-            // Ensure that macroquad's shapes are not going to be lost
-            //gl.flush();
+        if settings.draw_map {
+            map_state = "Hide map"
+        } else {
+            map_state = "Show map"
+        }
 
-            gl.quad_context.begin_default_pass(miniquad::PassAction::clear_color(0.5294118,0.8078431,0.9215686,1.0000000));
+        // Ensure that macroquad's shapes are not going to be lost
+        {
+            //gl = unsafe { mqp::get_internal_gl() };
+
+            gl.flush();
+
+            gl.quad_context
+                .begin_default_pass(miniquad::PassAction::clear_color(
+                    0.5294118, 0.8078431, 0.9215686, 1.0000000,
+                ));
 
             stage.update(gl.quad_context, &settings);
+        }
 
-        
-
-        img = Image {
+        img = mqp::Image {
             bytes: stage.ass.floor_image.as_raw().to_owned(),
             width: settings::MAPSIZE as u16,
             height: settings::MAPSIZE as u16,
@@ -99,43 +108,73 @@ async fn main() {
         for i in 0..settings::MAPSIZE {
             for j in 0..settings::MAPSIZE {
                 if stage.game_map.floor_visible[i][settings::MAPSIZE - j - 1] {
-                    let d = stage.game_map.wall_dist[i][settings::MAPSIZE - j - 1] / stage.game_map.dmax;
+                    let d = stage.game_map.wall_dist[i][settings::MAPSIZE - j - 1]
+                        / stage.game_map.dmax;
                     let b = 255 - d as u8;
-                    let col = Color::from_rgba(255 - b, 255 - b, b, 255);
+                    let col = mqp::Color::from_rgba(255 - b, 255 - b, b, 255);
                     img.set_pixel(i as u32, j as u32, col);
                 }
             }
         }
-        floor_texture = Texture2D::from_image(&img);
-        floor_texture.set_filter(FilterMode::Nearest);
+        floor_texture = mqp::Texture2D::from_image(&img);
+        floor_texture.set_filter(mqp::FilterMode::Nearest);
 
-        if request_map {
+        if settings.draw_map {
             draw_map(&walls_texture, &floor_texture, &settings);
             stage.player.draw(&settings);
         }
 
         draw_words(&t_par, &stage.depth_buffer);
 
-        next_frame().await
+        //=================
+        //GUI
+        //=================
+
+        // egui_macroquad::ui(|egui_ctx: &egui_macroquad::egui::Context| {
+        //     egui_ctx.set_pixels_per_point(1.5);
+        //     let win = egui_macroquad::egui::Window::new("Set initial parameters");
+        //     win.anchor(egui_macroquad::egui::Align2::RIGHT_TOP, [0.0, 0.0])
+        //         .show(egui_ctx, |ui| {
+        //             ui.label("Draw distance");
+        //             ui.horizontal(|ui| {
+        //                 ui.add(egui_macroquad::egui::Slider::new(
+        //                     &mut settings.draw_max_dist,
+        //                     50..=500,
+        //                 ));
+        //             });
+        //             ui.label("Fullscreen");
+        //             ui.toggle_value(&mut settings.full_screen, "");
+        //             if ui.button(map_state).clicked() {
+        //                 settings.draw_map = true;
+        //             }
+        //         });
+        // });
+
+        // Draw things before egui
+        if settings.draw_menu {
+            //egui_macroquad::draw();
+        }
+
+        mqp::next_frame().await
     }
 }
 
-fn draw_words(t_par: &TextParams, depth_buffer: &camera::DepthBuffer) {
-    draw_rectangle(10.0, 10.0, 220.0, 120.0, WHITE);
-    draw_rectangle_lines(10.0, 10.0, 220.0, 120.0, 4.0, BLACK);
-    let fps = get_fps();
+fn draw_words(t_par: &mqp::TextParams, depth_buffer: &camera::DepthBuffer) {
+    mqp::draw_rectangle(10.0, 10.0, 220.0, 120.0, mqp::WHITE);
+    mqp::draw_rectangle_lines(10.0, 10.0, 220.0, 120.0, 4.0, mqp::BLACK);
+    let fps = mqp::get_fps();
     let mut fps_display = fps;
     if fps > 50 && fps < 70 {
         fps_display = 60
     }
-    draw_text_ex(
+    mqp::draw_text_ex(
         &format!("FPS is {}", fps_display),
         20.0,
         40.0,
         t_par.to_owned(),
     );
-    draw_text_ex("Quads drawn:", 20.0, 75.0, t_par.to_owned());
-    draw_text_ex(
+    mqp::draw_text_ex("Quads drawn:", 20.0, 75.0, t_par.to_owned());
+    mqp::draw_text_ex(
         &format!("{}", depth_buffer.len),
         20.0,
         110.0,
@@ -143,25 +182,29 @@ fn draw_words(t_par: &TextParams, depth_buffer: &camera::DepthBuffer) {
     );
 }
 
-fn draw_map(walls_texture: &Texture2D, floor_texture: &Texture2D, settings: &settings::Settings) {
+fn draw_map(
+    walls_texture: &mqp::Texture2D,
+    floor_texture: &mqp::Texture2D,
+    settings: &settings::Settings,
+) {
     let size = settings::MAPSIZE as f32 * settings.tile_screen_size;
-    draw_texture_ex(
+    mqp::draw_texture_ex(
         &floor_texture,
         settings.map_offset_x,
         20.0,
-        WHITE,
-        DrawTextureParams {
-            dest_size: Some(vec2(size, size)),
+        mqp::WHITE,
+        mqp::DrawTextureParams {
+            dest_size: Some(mqp::vec2(size, size)),
             ..Default::default()
         },
     );
-    draw_texture_ex(
+    mqp::draw_texture_ex(
         &walls_texture,
         settings.map_offset_x,
         20.0,
-        WHITE,
-        DrawTextureParams {
-            dest_size: Some(vec2(size, size)),
+        mqp::WHITE,
+        mqp::DrawTextureParams {
+            dest_size: Some(mqp::vec2(size, size)),
             ..Default::default()
         },
     );
