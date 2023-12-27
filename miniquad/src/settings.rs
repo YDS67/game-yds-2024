@@ -1,7 +1,9 @@
 pub const PI: f32 = 3.1415926538;
+pub const _INVSQRT2: f32 = 0.707106781186547;
 pub const MAPSIZE: usize = 256;
 pub const WIDTH0: i32 = 1280;
 pub const HEIGHT0: i32 = 800;
+pub const MAXDIST: usize = 5*MAPSIZE;
 
 pub struct Settings {
     pub screen_width: i32,
@@ -24,7 +26,7 @@ pub struct Settings {
     pub delta_tile: f32,
     pub player_speed: f32,
     pub player_radius: f32,
-    pub draw_max_dist: usize,
+    pub draw_max_dist: f32,
     pub light_dist: f32,
     pub draw_rays_num: usize,
     pub tolerance: f32,
@@ -52,8 +54,8 @@ impl Settings {
         let delta_tile = 1.0/60.0;
         let player_speed = 0.2;
         let player_radius = 0.5;
-        let draw_max_dist = 2*MAPSIZE;
-        let light_dist = 100.0;
+        let draw_max_dist = (MAPSIZE as f32 / 4.0).powi(2);
+        let light_dist = 400.0;
         let draw_rays_num = 250;
         let tolerance = 1e-16;
         Settings {
