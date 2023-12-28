@@ -10,7 +10,7 @@ uniform vec4 playerdir;
 
 varying vec3 texcoord;
 varying vec4 cols;
-varying vec2 angles;
+varying float draw;
 
 const float pi = 3.1415926538;
 const float fov = pi/4.0;
@@ -42,13 +42,18 @@ void main() {
     texcoord = vec3(uv/l,1.0/l);
 
     cols = col;
-    angles = vec2(at,bt);
+    
+    if (cos(at) > 0.0 && cos(bt) > 0.0) {
+        draw = 2.0;
+    } else {
+        draw = 0.0;
+    }
 }"#;
 
 pub const FRAGMENT: &str = r#"#version 330
 varying vec3 texcoord;
 varying vec4 cols;
-varying vec2 angles;
+varying float draw;
 
 uniform sampler2D tex;
 
@@ -60,9 +65,7 @@ float at;
 float bt;
 
 void main() {
-    at = angles.x;
-    bt = angles.y;
-    if (at >= -fov && at <= fov && bt >= -fov*asp && bt <= fov*asp) {
+    if (draw > 1.0) {
         gl_FragColor = vec4(textureProj(tex, texcoord).xyz * cols.xyz, 1.0);
     } else {
         discard;
