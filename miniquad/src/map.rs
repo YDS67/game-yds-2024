@@ -5,8 +5,8 @@ use image::{self, Pixel};
 pub struct GameMap {
     pub wall_array: Vec<Vec<u8>>,
     pub floor_array: Vec<Vec<u8>>,
-    pub wall_visible: [[bool; settings::MAPSIZE]; settings::MAPSIZE],
-    pub floor_visible: [[bool; settings::MAPSIZE]; settings::MAPSIZE],
+    pub wall_visible: Vec<Vec<bool>>,
+    pub floor_visible: Vec<Vec<bool>>,
     pub wall_dist: Vec<Vec<f32>>,
     pub floor_dist: Vec<Vec<f32>>,
 }
@@ -27,8 +27,8 @@ impl GameMap {
             }
         }
 
-        let wall_visible = [[false; settings::MAPSIZE]; settings::MAPSIZE];
-        let floor_visible = [[false; settings::MAPSIZE]; settings::MAPSIZE];
+        let wall_visible = vec![vec![false; settings::MAPSIZE]; settings::MAPSIZE];
+        let floor_visible = vec![vec![false; settings::MAPSIZE]; settings::MAPSIZE];
 
         let wall_dist = vec![vec![1.0; settings::MAPSIZE]; settings::MAPSIZE];
         let floor_dist = vec![vec![1.0; settings::MAPSIZE]; settings::MAPSIZE];

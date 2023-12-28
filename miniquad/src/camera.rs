@@ -148,8 +148,8 @@ impl DepthBuffer {
 }
 
 pub fn find_visible_tiles(game_map: &mut map::GameMap, player: &player::Player, settings: &settings::Settings) {
-    game_map.wall_visible = [[false; settings::MAPSIZE]; settings::MAPSIZE];
-    game_map.floor_visible = [[false; settings::MAPSIZE]; settings::MAPSIZE];
+    game_map.wall_visible = vec![vec![false; settings::MAPSIZE]; settings::MAPSIZE];
+    game_map.floor_visible = vec![vec![false; settings::MAPSIZE]; settings::MAPSIZE];
     let ip = player.position.x.floor() as usize;
     let jp = player.position.y.floor() as usize;
     for i in 0..settings::MAPSIZE {
