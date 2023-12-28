@@ -25,6 +25,7 @@ pub struct Settings {
     pub player_speed: f32,
     pub player_radius: f32,
     pub draw_max_dist: usize,
+    pub draw_min_dist: usize,
     pub light_dist: f32,
     pub draw_rays_num: usize,
     pub tolerance: f32,
@@ -40,7 +41,7 @@ impl Settings {
         let screen_width_f = screen_width as f32;
         let screen_height_f = screen_height as f32;
         let screen_aspect = screen_width_f/screen_height_f;
-        let player_height = 0.5;
+        let player_height = 1.0;
         let tile_screen_size = 1.0;
         let map_offset_x = screen_width_f - tile_screen_size * (MAPSIZE as f32) - 20.0;
         let player_x0 = 4.5;
@@ -52,8 +53,9 @@ impl Settings {
         let delta_tile = 1.0/60.0;
         let player_speed = 0.2;
         let player_radius = 0.5;
-        let draw_max_dist = 2*MAPSIZE;
-        let light_dist = 100.0;
+        let draw_max_dist = MAPSIZE*2;
+        let draw_min_dist = 5*5;
+        let light_dist = ((MAPSIZE as f32)/15.0).powi(2);
         let draw_rays_num = 250;
         let tolerance = 1e-16;
         Settings {
@@ -78,6 +80,7 @@ impl Settings {
             player_speed,
             player_radius,
             draw_max_dist,
+            draw_min_dist,
             light_dist,
             draw_rays_num,
             tolerance,

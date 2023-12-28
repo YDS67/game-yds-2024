@@ -115,7 +115,8 @@ impl DepthBuffer {
                     });
                     len += 1;
 
-                } else if game_map.floor_visible[i][j] {
+                } 
+                if game_map.floor_visible[i][j] {
                     let dist = (xi+2.0/4.0-xp).powi(2)+(yj+2.0/4.0-yp).powi(2);
                     if dist > dmax_current {dmax_current = dist}
                     faces.push(FaceData {
@@ -149,6 +150,17 @@ impl DepthBuffer {
 pub fn find_visible_tiles(game_map: &mut map::GameMap, player: &player::Player, settings: &settings::Settings) {
     game_map.wall_visible = [[false; settings::MAPSIZE]; settings::MAPSIZE];
     game_map.floor_visible = [[false; settings::MAPSIZE]; settings::MAPSIZE];
+    let ip = player.position.x.floor() as usize;
+    let jp = player.position.y.floor() as usize;
+    for i in 0..settings::MAPSIZE {
+        for j in 0..settings::MAPSIZE {
+            let d = (ip-i).pow(2)+(jp-j).pow(2);
+            if d < settings.draw_min_dist {
+                game_map.floor_visible[i][j] = true;
+                game_map.floor_dist[i][j] = d as f32;
+            }
+        }
+    }
     for k in 0..=settings.draw_rays_num {
         let phi =
             player.position.a + settings.fov_xy * (0.5 - (k as f32) / (settings.draw_rays_num as f32));
@@ -157,8 +169,8 @@ pub fn find_visible_tiles(game_map: &mut map::GameMap, player: &player::Player, 
         let mut xr = 0.0;
         let mut yr = 0.0;
         for _l in 0..settings.draw_max_dist {
-            xr += 0.1 * cphi;
-            yr += 0.1 * sphi;
+            xr += 0.2 * cphi;
+            yr += 0.2 * sphi;
             let x = player.position.x + xr;
             let y = player.position.y + yr;
             let d = xr * xr + yr * yr;
@@ -168,6 +180,8 @@ pub fn find_visible_tiles(game_map: &mut map::GameMap, player: &player::Player, 
                 if game_map.wall_array[i][j] < 255 {
                     game_map.wall_visible[i][j] = true;
                     game_map.wall_dist[i][j] = d;
+                    game_map.floor_visible[i][j] = true;
+                    game_map.floor_dist[i][j] = d;
                     if game_map.dmax < d {game_map.dmax = d}
                     break;
                 } else {

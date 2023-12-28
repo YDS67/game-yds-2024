@@ -40,7 +40,7 @@ void main() {
     gl_Position = vec4(u, v, 0, 1);
     texcoord = vec3(uv/l,1.0/l);
 
-    if (at < -1.4*fov || at > 1.4*fov || bt < -1.4*fov*asp || bt > 1.4*fov*asp) {
+    if (at < -2.0 || at > 2.0 || bt < -2.0 || bt > 2.0) {
         cols = vec4(1.0,1.0,1.0,0.0);
     } else {
         cols = col;
