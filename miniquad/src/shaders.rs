@@ -1,77 +1,40 @@
 use miniquad::*;
+use glam;
 
 pub const VERTEX: &str = r#"#version 330
 attribute vec3 pos;
 attribute vec2 uv;
 attribute vec4 col;
 
+uniform mat4 mvp;
 uniform vec3 playerpos;
-uniform vec4 playerdir;
 
-varying vec3 texcoord;
+varying vec2 texcoord;
 varying vec4 cols;
-varying float draw;
 
-const float pi = 3.1415926538;
-const float fov = pi/4.0;
-const float asp = 800.0/1280.0;
-
-float at, u, bt, v, d, l, col1;
-
-vec3 dir1, dir2, cros, nor1, nor2;
+float col1, l;
+vec3 dir;
 
 void main() {
+    dir = pos - playerpos;
+    l = length(dir);
 
-    dir1 = vec3(playerdir.xy*playerdir.w, playerdir.z);
-    dir2 = pos - playerpos;
-    nor1 = vec3(0.0,0.0,1.0);
-    nor2 = vec3(vec2(playerdir.y,-playerdir.x),0);
-
-    cros = cross(dir1, dir2);
-    d = dot(dir1, dir2);
-
-    at = atan(-dot(cros, nor1),d);
-    bt = atan(dot(cros, nor2),d);
-
-    u = 2.0*sin(at)/sin(fov);
-    v = 2.0*sin(bt)/sin(fov*asp);
-
-    l = length(dir2);
-
-    gl_Position = vec4(u, v, 0, 1);
+    gl_Position = mvp * vec4(pos, 1.0);
 
     col1 = 1.0/(1.0+(l/10.0)*(l/10.0));
     cols = vec4(col1,0.8*col1,0.7*col1,1.0);
     
-    if (cos(at) > 0 && cos(bt) > 0) {
-        draw = 2.0;
-        texcoord = vec3(uv/l/cos(at),1.0/l/cos(at));
-    } else {
-        draw = 0.0;
-        texcoord = vec3(uv,1.0);
-    }
+    texcoord = uv;
 }"#;
 
 pub const FRAGMENT: &str = r#"#version 330
-varying vec3 texcoord;
+varying vec2 texcoord;
 varying vec4 cols;
-varying float draw;
 
 uniform sampler2D tex;
 
-const float pi = 3.1415926538;
-const float fov = pi/4.0;
-const float asp = 800.0/1280.0;
-
-float at;
-float bt;
-
 void main() {
-    if (draw > 1.0) {
-        gl_FragColor = vec4(textureProj(tex, texcoord).xyz * cols.xyz, 1.0);
-    } else {
-        discard;
-    }
+    gl_FragColor = vec4(texture(tex, texcoord).xyz * cols.xyz, 1.0);
 }"#;
 
 pub fn meta() -> ShaderMeta {
@@ -79,8 +42,8 @@ pub fn meta() -> ShaderMeta {
         images: vec!["tex".to_string()],
         uniforms: UniformBlockLayout {
             uniforms: vec![
+                UniformDesc::new("mvp", UniformType::Mat4),
                 UniformDesc::new("playerpos", UniformType::Float3),
-                UniformDesc::new("playerdir", UniformType::Float4),
             ],
         },
     }
@@ -88,6 +51,6 @@ pub fn meta() -> ShaderMeta {
 
 #[repr(C)]
 pub struct Uniforms {
+    pub mvp: glam::Mat4,
     pub playerpos: (f32, f32, f32),
-    pub playerdir: (f32, f32, f32, f32),
 }

@@ -80,6 +80,21 @@ async fn main() {
             }
         }
 
+        if mqp::is_key_pressed(mqp::KeyCode::F) {
+            settings.full_screen = true;
+            mqp::set_fullscreen(true);
+        }
+
+        settings.screen_change(mqp::screen_width(), mqp::screen_height());
+
+        if mqp::is_key_pressed(mqp::KeyCode::Escape) {
+            // settings.full_screen = false;
+            // mqp::set_fullscreen(false);
+            // mqp::request_new_screen_size(1280.0, 800.0);
+            // settings.screen_change(1280.0, 800.0)
+            break;
+        }
+
         // if settings.draw_map {
         //     map_state = "Hide map"
         // } else {
@@ -191,7 +206,7 @@ fn draw_map(
     mqp::draw_texture_ex(
         &floor_texture,
         settings.map_offset_x,
-        20.0,
+        settings.map_offset_y,
         mqp::WHITE,
         mqp::DrawTextureParams {
             dest_size: Some(mqp::vec2(size, size)),
@@ -201,7 +216,7 @@ fn draw_map(
     mqp::draw_texture_ex(
         &walls_texture,
         settings.map_offset_x,
-        20.0,
+        settings.map_offset_y,
         mqp::WHITE,
         mqp::DrawTextureParams {
             dest_size: Some(mqp::vec2(size, size)),

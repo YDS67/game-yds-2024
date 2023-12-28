@@ -61,8 +61,8 @@ impl Player {
 
     pub fn draw(&self, settings: &settings::Settings) {
         let x = settings.map_offset_x + self.position.x * settings.tile_screen_size;
-        let y = 20.0 + (settings::MAPSIZE as f32 - self.position.y) * settings.tile_screen_size;
-        let s = self.radius * settings.tile_screen_size * 2.0;
+        let y = settings.map_offset_y + (settings::MAPSIZE as f32 - self.position.y) * settings.tile_screen_size;
+        let s = self.radius * settings.tile_screen_size * 5.0;
 
         draw_circle(x, y, s, RED);
     }
@@ -208,13 +208,13 @@ impl Player {
             self.position.ay = self.position.a.sin();
         }
 
-        if is_key_down(KeyCode::Down) && self.position.b+settings.fov_z < settings::PI / 4.0 {
+        if is_key_down(KeyCode::Down) && self.position.b+settings.fov_z < settings::PI / 2.0 {
             self.position.b = angle_round(self.position.b + 0.1 * settings.player_speed);
             self.position.bxy = self.position.b.cos();
             self.position.bz = self.position.b.sin();
         }
 
-        if is_key_down(KeyCode::Up) && self.position.b-settings.fov_z > -settings::PI / 4.0 {
+        if is_key_down(KeyCode::Up) && self.position.b-settings.fov_z > -settings::PI / 2.0 {
             self.position.b = angle_round(self.position.b - 0.1 * settings.player_speed);
             self.position.bxy = self.position.b.cos();
             self.position.bz = self.position.b.sin();

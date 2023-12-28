@@ -1,5 +1,6 @@
 use image::{self, EncodableLayout, ImageBuffer, Rgba};
 use miniquad::*;
+use glam::{vec3, Mat4};
 
 use crate::assets;
 use crate::camera;
@@ -125,17 +126,20 @@ impl Stage {
 
         ctx.apply_bindings(&self.bindings);
 
+        let proj = Mat4::perspective_rh_gl(settings.fov_z, settings.screen_aspect, 0.01, settings::MAPSIZE as f32);
+        let view = Mat4::look_to_rh(
+            vec3(self.player.position.x, self.player.position.y, self.player.position.z),
+            vec3(self.player.position.ax*self.player.position.bxy, self.player.position.ay*self.player.position.bxy, self.player.position.bz),
+            vec3(0.0, 0.0, 1.0),
+        );
+        let mvp = proj * view;
+
         ctx.apply_uniforms(miniquad::UniformsSource::table(&shaders::Uniforms {
+            mvp,
             playerpos: (
                 self.player.position.x,
                 self.player.position.y,
                 self.player.position.z,
-            ),
-            playerdir: (
-                self.player.position.ax,
-                self.player.position.ay,
-                self.player.position.bz,
-                self.player.position.bxy,
             ),
         }));
         ctx.draw(0, &self.mesh.num * 6, 1);

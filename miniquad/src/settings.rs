@@ -15,6 +15,7 @@ pub struct Settings {
     pub player_height: f32,
     pub tile_screen_size: f32,
     pub map_offset_x: f32,
+    pub map_offset_y: f32,
     pub player_x0: f32,
     pub player_y0: f32,
     pub player_a0: f32,
@@ -42,8 +43,9 @@ impl Settings {
         let screen_height_f = screen_height as f32;
         let screen_aspect = screen_width_f/screen_height_f;
         let player_height = 0.5;
-        let tile_screen_size = 1.0;
-        let map_offset_x = screen_width_f - tile_screen_size * (MAPSIZE as f32) - 20.0;
+        let tile_screen_size = 1.5;
+        let map_offset_x = 20.0;
+        let map_offset_y = screen_height_f - tile_screen_size * (MAPSIZE as f32) - 20.0;
         let player_x0 = 128.5;
         let player_y0 = 4.5;
         let player_a0 = 1.55;
@@ -53,10 +55,10 @@ impl Settings {
         let delta_tile = 1.0/60.0;
         let player_speed = 0.2;
         let player_radius = 0.5;
-        let draw_max_dist = MAPSIZE*2;
+        let draw_max_dist = MAPSIZE*4;
         let draw_min_dist = 5*5;
         let light_dist = 15.0*15.0;
-        let draw_rays_num = 250;
+        let draw_rays_num = 750;
         let tolerance = 1e-16;
         Settings {
             screen_width,
@@ -70,6 +72,7 @@ impl Settings {
             player_height,
             tile_screen_size,
             map_offset_x,
+            map_offset_y,
             player_x0,
             player_y0,
             player_a0,
@@ -85,5 +88,14 @@ impl Settings {
             draw_rays_num,
             tolerance,
         }
+    }
+
+    pub fn screen_change(&mut self, screen_width: f32, screen_height: f32) {
+        self.screen_width = screen_width as i32;
+        self.screen_height = screen_height as i32;
+        self.screen_width_f = screen_width;
+        self.screen_height_f = screen_height;
+        self.screen_aspect = screen_width/screen_height;
+        self.map_offset_y = screen_height - self.tile_screen_size * (MAPSIZE as f32) - 20.0;
     }
 }
