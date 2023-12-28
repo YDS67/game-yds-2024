@@ -3,18 +3,18 @@ use crate::settings;
 use image::{self, Pixel};
 
 pub struct GameMap {
-    pub wall_array: [[u8; settings::MAPSIZE]; settings::MAPSIZE],
-    pub floor_array: [[u8; settings::MAPSIZE]; settings::MAPSIZE],
+    pub wall_array: Vec<Vec<u8>>,
+    pub floor_array: Vec<Vec<u8>>,
     pub wall_visible: [[bool; settings::MAPSIZE]; settings::MAPSIZE],
     pub floor_visible: [[bool; settings::MAPSIZE]; settings::MAPSIZE],
-    pub wall_dist: [[f32; settings::MAPSIZE]; settings::MAPSIZE],
-    pub floor_dist: [[f32; settings::MAPSIZE]; settings::MAPSIZE],
+    pub wall_dist: Vec<Vec<f32>>,
+    pub floor_dist: Vec<Vec<f32>>,
 }
 
 impl GameMap {
     pub fn new(ass: &assets::Ass) -> GameMap {
-        let mut wall_array = [[0; settings::MAPSIZE]; settings::MAPSIZE];
-        let mut floor_array = [[0; settings::MAPSIZE]; settings::MAPSIZE];
+        let mut wall_array = vec![vec![0; settings::MAPSIZE]; settings::MAPSIZE];
+        let mut floor_array = vec![vec![0; settings::MAPSIZE]; settings::MAPSIZE];
 
         for i in 0..settings::MAPSIZE {
             for j in 0..settings::MAPSIZE {
@@ -30,8 +30,8 @@ impl GameMap {
         let wall_visible = [[false; settings::MAPSIZE]; settings::MAPSIZE];
         let floor_visible = [[false; settings::MAPSIZE]; settings::MAPSIZE];
 
-        let wall_dist = [[1.0; settings::MAPSIZE]; settings::MAPSIZE];
-        let floor_dist = [[1.0; settings::MAPSIZE]; settings::MAPSIZE];
+        let wall_dist = vec![vec![1.0; settings::MAPSIZE]; settings::MAPSIZE];
+        let floor_dist = vec![vec![1.0; settings::MAPSIZE]; settings::MAPSIZE];
 
         GameMap {
             wall_array,

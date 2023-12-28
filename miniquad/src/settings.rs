@@ -1,5 +1,5 @@
 pub const PI: f32 = 3.1415926538;
-pub const MAPSIZE: usize = 64;
+pub const MAPSIZE: usize = 256;
 pub const WIDTH0: i32 = 1280;
 pub const HEIGHT0: i32 = 800;
 
@@ -46,7 +46,7 @@ impl Settings {
         let tile_screen_size = 1.5;
         let map_offset_x = 20.0;
         let map_offset_y = screen_height_f - tile_screen_size * (MAPSIZE as f32) - 20.0;
-        let player_x0 = 4.5;
+        let player_x0 = MAPSIZE as f32 / 2.0;
         let player_y0 = 4.5;
         let player_a0 = 1.55;
         let player_b0 = 0.0;
