@@ -1,16 +1,16 @@
 use miniquad::*;
 use glam;
 
-pub const VERTEX: &str = r#"#version 330
-attribute vec3 pos;
-attribute vec2 uv;
-attribute vec4 col;
+pub const VERTEX: &str = r#"#version 330 core
+in vec3 pos;
+in vec2 uv;
+in vec4 col;
 
 uniform mat4 mvp;
 uniform vec3 playerpos;
 
-varying vec2 texcoord;
-varying vec4 cols;
+out vec2 texcoord;
+out vec4 cols;
 
 float col1, l;
 vec3 dir;
@@ -27,14 +27,16 @@ void main() {
     texcoord = uv;
 }"#;
 
-pub const FRAGMENT: &str = r#"#version 330
-varying vec2 texcoord;
-varying vec4 cols;
+pub const FRAGMENT: &str = r#"#version 330 core
+in vec2 texcoord;
+in vec4 cols;
+
+out vec4 FragColor;
 
 uniform sampler2D tex;
 
 void main() {
-    gl_FragColor = vec4(texture(tex, texcoord).xyz * cols.xyz, 1.0);
+    FragColor = vec4(texture(tex, texcoord).xyz * cols.xyz, 1.0);
 }"#;
 
 pub fn meta() -> ShaderMeta {

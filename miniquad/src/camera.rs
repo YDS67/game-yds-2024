@@ -170,7 +170,7 @@ pub fn find_visible_tiles(game_map: &mut map::GameMap, player: &player::Player, 
         let mut yr = 0.0;
         let mut break_soon = 0;
         for _l in 0..settings.draw_max_dist {
-            if break_soon == 3 {break}
+            if break_soon >= 3 {break}
             xr += 0.1 * cphi;
             yr += 0.1 * sphi;
             let x = player.position.x + xr;
@@ -182,15 +182,15 @@ pub fn find_visible_tiles(game_map: &mut map::GameMap, player: &player::Player, 
                 if game_map.wall_array[i][j] < 255 {
                     game_map.wall_visible[i][j] = true;
                     game_map.wall_dist[i][j] = d;
-                    for ii in (i-2)..(i+2) {
-                        for jj in (j-2)..(j+2) {
+                    for ii in (i-2)..(i+3) {
+                        for jj in (j-2)..(j+3) {
                             if ii as i32 > 0 && ii < settings::MAPSIZE-1 && jj as i32 > 0 && jj < settings::MAPSIZE-1 {
                             game_map.floor_visible[ii][jj] = true;
                             game_map.floor_dist[ii][jj] = d;
                             }
                         }
                     }
-                    break_soon = 1;
+                    break_soon += 1;
                 } else {
                     game_map.floor_visible[i][j] = true;
                     game_map.floor_dist[i][j] = d;

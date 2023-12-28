@@ -1,5 +1,5 @@
 pub const PI: f32 = 3.1415926538;
-pub const MAPSIZE: usize = 256;
+pub const MAPSIZE: usize = 64;
 pub const WIDTH0: i32 = 1280;
 pub const HEIGHT0: i32 = 800;
 
@@ -22,7 +22,7 @@ pub struct Settings {
     pub player_b0: f32,
     pub fov_xy: f32,
     pub fov_z: f32,
-    pub delta_tile: f32,
+    pub delta_time: f32,
     pub player_speed: f32,
     pub player_radius: f32,
     pub draw_max_dist: usize,
@@ -46,16 +46,16 @@ impl Settings {
         let tile_screen_size = 1.5;
         let map_offset_x = 20.0;
         let map_offset_y = screen_height_f - tile_screen_size * (MAPSIZE as f32) - 20.0;
-        let player_x0 = 128.5;
+        let player_x0 = 4.5;
         let player_y0 = 4.5;
         let player_a0 = 1.55;
         let player_b0 = 0.0;
         let fov_xy = PI / 4.0;
         let fov_z = fov_xy / screen_aspect;
-        let delta_tile = 1.0/60.0;
+        let delta_time = 1.0/60.0;
         let player_speed = 0.2;
         let player_radius = 0.5;
-        let draw_max_dist = MAPSIZE*4;
+        let draw_max_dist = 500;
         let draw_min_dist = 5*5;
         let light_dist = 15.0*15.0;
         let draw_rays_num = 750;
@@ -79,7 +79,7 @@ impl Settings {
             player_b0,
             fov_xy,
             fov_z,
-            delta_tile,
+            delta_time,
             player_speed,
             player_radius,
             draw_max_dist,

@@ -13,10 +13,10 @@ impl Ass {
             wall_atlas: image::open(Path::new("resources/walls.png"))
                 .unwrap()
                 .to_rgba8(),
-            floor_image: image::open(Path::new("resources/floor_map_256.png"))
+            floor_image: image::open(Path::new("resources/map_floor.png"))
                 .unwrap()
                 .to_rgba8(),
-            wall_image: image::open(Path::new("resources/wall_map_256.png"))
+            wall_image: image::open(Path::new("resources/map_walls.png"))
                 .unwrap()
                 .to_rgba8(),
         }
