@@ -64,16 +64,16 @@ impl Player {
     }
 
     fn coll_check(&mut self, game_map: &map::GameMap) {
-        let i = (self.position.x).floor() as usize;
-        let j = (self.position.y).floor() as usize;
-        let ip = (self.position.x + self.radius * self.position.ax).floor() as usize;
-        let jp = (self.position.y + self.radius * self.position.ay).floor() as usize;
-        let im = (self.position.x - self.radius * self.position.ax).floor() as usize;
-        let jm = (self.position.y - self.radius * self.position.ay).floor() as usize;
-        let il = (self.position.x - self.radius * self.position.ay).floor() as usize;
-        let jl = (self.position.y + self.radius * self.position.ax).floor() as usize;
-        let ir = (self.position.x + self.radius * self.position.ay).floor() as usize;
-        let jr = (self.position.y - self.radius * self.position.ax).floor() as usize;
+        let i = f32::trunc(self.position.x) as usize;
+        let j = f32::trunc(self.position.y) as usize;
+        let ip = f32::trunc(self.position.x + self.radius * self.position.ax) as usize;
+        let jp = f32::trunc(self.position.y + self.radius * self.position.ay) as usize;
+        let im = f32::trunc(self.position.x - self.radius * self.position.ax) as usize;
+        let jm = f32::trunc(self.position.y - self.radius * self.position.ay) as usize;
+        let il = f32::trunc(self.position.x - self.radius * self.position.ay) as usize;
+        let jl = f32::trunc(self.position.y + self.radius * self.position.ax) as usize;
+        let ir = f32::trunc(self.position.x + self.radius * self.position.ay) as usize;
+        let jr = f32::trunc(self.position.y - self.radius * self.position.ax) as usize;
 
         self.position.cxp = false;
         self.position.cxm = false;
@@ -183,14 +183,14 @@ impl Player {
             self.position.ay = self.position.a.sin();
         }
 
-        if is_key_down(KeyCode::Down) && self.position.b < settings::PI / 4.0 {
-            self.position.b = self.position.b + 0.1 * settings.player_speed;
+        if is_key_down(KeyCode::Down) && self.position.bz < settings::INVSQRT2 {
+            self.position.b = angle_round(self.position.b + 0.1 * settings.player_speed);
             self.position.bxy = self.position.b.cos();
             self.position.bz = self.position.b.sin();
         }
 
-        if is_key_down(KeyCode::Up) && self.position.b > -settings::PI / 4.0 {
-            self.position.b = self.position.b - 0.1 * settings.player_speed;
+        if is_key_down(KeyCode::Up) && self.position.bz > -settings::INVSQRT2 {
+            self.position.b = angle_round(self.position.b - 0.1 * settings.player_speed);
             self.position.bxy = self.position.b.cos();
             self.position.bz = self.position.b.sin();
         }
@@ -199,10 +199,10 @@ impl Player {
 
 pub fn angle_round(angle: f32) -> f32 {
     let mut in_degrees = angle * 180.0 / settings::PI;
-    while in_degrees < -180.0 {
+    while in_degrees < 0.0 {
         in_degrees = 360.0 + in_degrees
     }
-    while in_degrees > 179.9 {
+    while in_degrees > 360.0 {
         in_degrees = -360.0 + in_degrees
     }
     in_degrees * settings::PI / 180.0

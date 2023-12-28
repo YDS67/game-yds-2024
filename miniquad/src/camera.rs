@@ -33,7 +33,6 @@ pub struct FaceData {
 pub struct DepthBuffer {
     pub faces: Vec<FaceData>,
     pub len: usize,
-    pub dmax_current: f32,
     pub dmax: f32,
 }
 
@@ -47,7 +46,6 @@ impl DepthBuffer {
         let mut len = 0;
         let xp = player.position.x;
         let yp = player.position.y;
-        let mut dmax_current = 1.0;
 
         for i in 0..settings::MAPSIZE {
             for j in 0..settings::MAPSIZE {
@@ -55,9 +53,6 @@ impl DepthBuffer {
                 let yj = j as f32;
                 if game_map.wall_visible[i][j] {
                     let dist = (xi - xp).powi(2) + (yj + 2.0 / 4.0 - yp).powi(2);
-                    if dist > dmax_current {
-                        dmax_current = dist
-                    }
                     faces.push(FaceData {
                         // face 1
                         top_right_x: i,
@@ -74,9 +69,6 @@ impl DepthBuffer {
                     len += 1;
 
                     let dist = (xi + 2.0 / 4.0 - xp).powi(2) + (yj + 4.0 / 4.0 - yp).powi(2);
-                    if dist > dmax_current {
-                        dmax_current = dist
-                    }
                     faces.push(FaceData {
                         // face 2
                         top_right_x: i,
@@ -93,9 +85,6 @@ impl DepthBuffer {
                     len += 1;
 
                     let dist = (xi + 4.0 / 4.0 - xp).powi(2) + (yj + 2.0 / 4.0 - yp).powi(2);
-                    if dist > dmax_current {
-                        dmax_current = dist
-                    }
                     faces.push(FaceData {
                         // face 3
                         top_right_x: i + 1,
@@ -112,9 +101,6 @@ impl DepthBuffer {
                     len += 1;
 
                     let dist = (xi + 2.0 / 4.0 - xp).powi(2) + (yj - yp).powi(2);
-                    if dist > dmax_current {
-                        dmax_current = dist
-                    }
                     faces.push(FaceData {
                         // face 4
                         top_right_x: i + 1,
@@ -131,9 +117,6 @@ impl DepthBuffer {
                     len += 1;
                 } else if game_map.floor_visible[i][j] {
                     let dist = (xi + 2.0 / 4.0 - xp).powi(2) + (yj + 2.0 / 4.0 - yp).powi(2);
-                    if dist > dmax_current {
-                        dmax_current = dist
-                    }
                     faces.push(FaceData {
                         top_right_x: i + 1,
                         top_right_y: j + 1,
@@ -156,7 +139,6 @@ impl DepthBuffer {
         DepthBuffer {
             faces,
             len,
-            dmax_current,
             dmax: settings.light_dist,
         }
     }
@@ -171,109 +153,22 @@ pub fn find_visible_tiles(
     game_map.floor_visible = [[false; settings::MAPSIZE]; settings::MAPSIZE];
     let xp = player.position.x;
     let yp = player.position.y;
-    let ip = xp.floor() as usize;
-    let jp = yp.floor() as usize;
+    let ip = f32::trunc(xp) as usize;
+    let jp = f32::trunc(yp) as usize;
     game_map.floor_visible[ip][jp] = true;
-    game_map.floor_dist[ip][jp] = 1.0;
+    let phi1 = player::angle_round(player.position.a - 0.5*settings.fov_xy - settings.tolerance);
+    let phi2 = player::angle_round(player.position.a + 0.5*settings.fov_xy + settings.tolerance);
+    let cond = phi1 < phi2;
 
-    for k in 0..=settings.draw_rays_num {
-        let phi = player.position.a
-            + settings.tolerance
-            + settings.fov_xy * (0.5 - (k as f32) / (settings.draw_rays_num as f32));
-        let cphi = phi.cos();
-        let sphi = phi.sin();
+    for i in 0..settings::MAPSIZE {
+        for j in 0..settings::MAPSIZE {
+            let di = i as f32 + 0.5 - xp;
+            let dj = j as f32 + 0.5 - yp;
+            let d = (di.powi(2)+dj.powi(2)).sqrt();
+            let phi = player::angle_round(dj.atan2(di));
 
-        // let mut phi_cond: u8 = 0;
-        // if sphi > settings::INVSQRT2 {
-        //     phi_cond = 1
-        // }
-        // if sphi < -settings::INVSQRT2 {
-        //     phi_cond = 2
-        // }
-        // if cphi > settings::INVSQRT2 {
-        //     phi_cond = 3
-        // }
-        // if cphi < -settings::INVSQRT2 {
-        //     phi_cond = 4
-        // }
-
-        // if phi_cond > 0 {
-        //     let tphi = phi.tan();
-        //     let ctphi = 1.0 / tphi;
-
-        //     let mut x = xp.floor();
-        //     let mut y = yp.floor();
-        //     let mut d;
-        //     let mut i;
-        //     let mut j;
-
-        //     for _l in 0..settings::MAXDIST {
-        //         if phi_cond == 1 {
-        //             x += ctphi.abs() * cphi.signum();
-        //             y += 1.0;
-        //         }
-        //         if phi_cond == 2 {
-        //             x += ctphi.abs() * cphi.signum();
-        //             y -= 1.0;
-        //         }
-        //         if phi_cond == 3 {
-        //             x += 1.0;
-        //             y += tphi.abs() * sphi.signum();
-        //         }
-        //         if phi_cond == 4 {
-        //             x -= 1.0;
-        //             y += tphi.abs() * sphi.signum();
-        //         }
-
-        //         d = (x - xp).powi(2) + (y - yp).powi(2);
-        //         if game_map.dmax < d {
-        //             game_map.dmax = d
-        //         }
-        //         if d > settings.draw_max_dist {break}
-
-        //         i = x.floor() as usize;
-        //         j = y.floor() as usize;
-
-        //         if i as i32 >= 0
-        //             && i < settings::MAPSIZE
-        //             && j as i32 >= 0
-        //             && j < settings::MAPSIZE
-        //         {
-        //             if game_map.wall_array[i][j] < 255 {
-        //                 game_map.wall_visible[i][j] = true;
-        //                 game_map.wall_dist[i][j] = d;
-        //                 break;
-        //             } else {
-        //                 game_map.floor_visible[i][j] = true;
-        //                 game_map.floor_dist[i][j] = d;
-        //             }
-        //         }
-
-        //     }
-        // }
-
-        let mut x = xp;
-        let mut y = yp;
-
-        for _l in 0..settings::MAXDIST {
-            x += 0.1 * cphi;
-            y += 0.1 * sphi;
-            let d = (x - xp).powi(2) + (y - yp).powi(2);
-            if game_map.dmax < d {
-                game_map.dmax = d
-            }
-            if d > settings.draw_max_dist {break}
-            let i = x.floor() as usize;
-            let j = y.floor() as usize;
-            if i as i32 >= 0 && i < settings::MAPSIZE && j as i32 >= 0 && j < settings::MAPSIZE {
-                if game_map.wall_array[i][j] < 255 {
-                    game_map.wall_visible[i][j] = true;
-                    game_map.wall_dist[i][j] = d;
-                    break;
-                } else {
-                    game_map.floor_visible[i][j] = true;
-                    game_map.floor_dist[i][j] = d;
-                }
+            if (((cond && (phi1 < phi && phi < phi2)) || (!cond && (phi1 < phi || phi < phi2))) && d < settings.draw_max_dist) || d < settings.draw_min_dist {
+                game_map.floor_visible[i][j] = true;
             }
         }
     }
