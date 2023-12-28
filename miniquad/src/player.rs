@@ -208,13 +208,13 @@ impl Player {
             self.position.ay = self.position.a.sin();
         }
 
-        if is_key_down(KeyCode::Down) && self.position.b < settings::PI / 4.0 {
+        if is_key_down(KeyCode::Down) && self.position.b+settings.fov_z < settings::PI / 4.0 {
             self.position.b = angle_round(self.position.b + 0.1 * settings.player_speed);
             self.position.bxy = self.position.b.cos();
             self.position.bz = self.position.b.sin();
         }
 
-        if is_key_down(KeyCode::Up) && self.position.b > -settings::PI / 4.0 {
+        if is_key_down(KeyCode::Up) && self.position.b-settings.fov_z > -settings::PI / 4.0 {
             self.position.b = angle_round(self.position.b - 0.1 * settings.player_speed);
             self.position.bxy = self.position.b.cos();
             self.position.bz = self.position.b.sin();

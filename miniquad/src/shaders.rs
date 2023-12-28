@@ -39,14 +39,15 @@ void main() {
     l = length(dir2);
 
     gl_Position = vec4(u, v, 0, 1);
-    texcoord = vec3(uv/l,1.0/l);
 
     cols = col;
     
-    if (cos(at) > 0.0 && cos(bt) > 0.0) {
+    if (cos(at) > 0 && cos(bt) > 0) {
         draw = 2.0;
+        texcoord = vec3(uv/l/cos(at),1.0/l/cos(at));
     } else {
         draw = 0.0;
+        texcoord = vec3(uv,1.0);
     }
 }"#;
 
