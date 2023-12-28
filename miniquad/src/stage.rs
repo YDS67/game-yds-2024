@@ -90,38 +90,40 @@ impl Stage {
 
     pub fn update(&mut self, ctx: &mut dyn RenderingBackend, settings: &settings::Settings) {
         self.player.walk(&self.game_map, &settings);
-        camera::find_visible_tiles(&mut self.game_map, &self.player, &settings);
-        self.depth_buffer = camera::DepthBuffer::generate(&self.game_map, &self.player, &settings);
-
-        self.mesh = mesh::Mesh::new(&self.depth_buffer, &self.player);
-
-        for b in 0..self.bindings.vertex_buffers.len() {
-            ctx.delete_buffer(self.bindings.vertex_buffers[b]);
-            //ctx.buffer_update(self.bindings.vertex_buffers[b], BufferSource::slice(&self.mesh.vertices));
+        if self.player.moved {
+            camera::find_visible_tiles(&mut self.game_map, &self.player, &settings);
+            self.depth_buffer = camera::DepthBuffer::generate(&self.game_map, &self.player, &settings);
+    
+            self.mesh = mesh::Mesh::new(&self.depth_buffer, &self.player);
+    
+            for b in 0..self.bindings.vertex_buffers.len() {
+                ctx.delete_buffer(self.bindings.vertex_buffers[b]);
+                //ctx.buffer_update(self.bindings.vertex_buffers[b], BufferSource::slice(&self.mesh.vertices));
+            }
+            ctx.delete_buffer(self.bindings.index_buffer);
+            //ctx.buffer_update(self.bindings.index_buffer, BufferSource::slice(&self.mesh.indices));
+    
+            // for t in 0..self.bindings.images.len() {
+            //     ctx.delete_texture(self.bindings.images[t]);
+            // }
+    
+            let vertex_buffer = ctx.new_buffer(
+                BufferType::VertexBuffer,
+                BufferUsage::Stream,
+                BufferSource::slice(&self.mesh.vertices),
+            );
+    
+            let index_buffer = ctx.new_buffer(
+                BufferType::IndexBuffer,
+                BufferUsage::Stream,
+                BufferSource::slice(&self.mesh.indices),
+            );
+    
+            self.bindings.vertex_buffers = vec![vertex_buffer];
+    
+            self.bindings.index_buffer = index_buffer;
+    
         }
-        ctx.delete_buffer(self.bindings.index_buffer);
-        //ctx.buffer_update(self.bindings.index_buffer, BufferSource::slice(&self.mesh.indices));
-
-        // for t in 0..self.bindings.images.len() {
-        //     ctx.delete_texture(self.bindings.images[t]);
-        // }
-
-        let vertex_buffer = ctx.new_buffer(
-            BufferType::VertexBuffer,
-            BufferUsage::Stream,
-            BufferSource::slice(&self.mesh.vertices),
-        );
-
-        let index_buffer = ctx.new_buffer(
-            BufferType::IndexBuffer,
-            BufferUsage::Stream,
-            BufferSource::slice(&self.mesh.indices),
-        );
-
-        self.bindings.vertex_buffers = vec![vertex_buffer];
-
-        self.bindings.index_buffer = index_buffer;
-
         ctx.apply_pipeline(&self.pipeline);
 
         ctx.apply_bindings(&self.bindings);
@@ -145,5 +147,7 @@ impl Stage {
         ctx.draw(0, &self.mesh.num * 6, 1);
 
         ctx.end_render_pass();
+
+        self.player.moved = false;
     }
 }

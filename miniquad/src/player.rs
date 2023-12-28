@@ -24,6 +24,7 @@ pub struct PlayerPos {
 
 pub struct Player {
     pub position: PlayerPos,
+    pub moved: bool,
     pub rising: bool,
     pub falling: bool,
     pub radius: f32,
@@ -53,6 +54,7 @@ impl Player {
                 cxr: false,
                 cyr: false,
             },
+            moved: false,
             rising: false,
             falling: false,
             radius: settings.player_radius,
@@ -140,6 +142,7 @@ impl Player {
         self.coll_check(game_map);
 
         if is_key_pressed(KeyCode::Space) && !self.rising && !self.falling {
+            self.moved = true;
             self.rising = true
         }
 
@@ -162,59 +165,71 @@ impl Player {
 
         if is_key_down(KeyCode::W) {
             if !self.position.cxp {
+                self.moved = true;
                 self.position.x = self.position.x + settings.player_speed * self.position.ax;
             }
             if !self.position.cyp {
+                self.moved = true;
                 self.position.y = self.position.y + settings.player_speed * self.position.ay;
             }
         }
 
         if is_key_down(KeyCode::S) {
             if !self.position.cxm {
+                self.moved = true;
                 self.position.x = self.position.x - settings.player_speed * self.position.ax;
             }
             if !self.position.cym {
+                self.moved = true;
                 self.position.y = self.position.y - settings.player_speed * self.position.ay;
             }
         }
 
         if is_key_down(KeyCode::A) {
             if !self.position.cxl {
+                self.moved = true;
                 self.position.x = self.position.x - settings.player_speed * self.position.ay;
             }
             if !self.position.cyl {
+                self.moved = true;
                 self.position.y = self.position.y + settings.player_speed * self.position.ax;
             }
         }
 
         if is_key_down(KeyCode::D) {
             if !self.position.cxr {
+                self.moved = true;
                 self.position.x = self.position.x + settings.player_speed * self.position.ay;
             }
             if !self.position.cyr {
+                self.moved = true;
                 self.position.y = self.position.y - settings.player_speed * self.position.ax;
             }
         }
 
         if is_key_down(KeyCode::Left) {
+            self.moved = true;
             self.position.a = angle_round(self.position.a + 0.1 * settings.player_speed);
             self.position.ax = self.position.a.cos();
             self.position.ay = self.position.a.sin();
         }
 
         if is_key_down(KeyCode::Right) {
+            self.moved = true;
             self.position.a = angle_round(self.position.a - 0.1 * settings.player_speed);
             self.position.ax = self.position.a.cos();
             self.position.ay = self.position.a.sin();
         }
 
         if is_key_down(KeyCode::Down) && self.position.b+settings.fov_z < settings::PI / 2.0 {
+            self.moved = true;
             self.position.b = angle_round(self.position.b + 0.1 * settings.player_speed);
             self.position.bxy = self.position.b.cos();
             self.position.bz = self.position.b.sin();
         }
 
         if is_key_down(KeyCode::Up) && self.position.b-settings.fov_z > -settings::PI / 2.0 {
+            self.moved = true;
             self.position.b = angle_round(self.position.b - 0.1 * settings.player_speed);
             self.position.bxy = self.position.b.cos();
             self.position.bz = self.position.b.sin();

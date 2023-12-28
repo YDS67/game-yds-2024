@@ -53,9 +53,9 @@ impl Settings {
         let fov_xy = PI / 4.0;
         let fov_z = fov_xy / screen_aspect;
         let delta_time = 1.0/60.0;
-        let player_speed = 0.2;
+        let player_speed = 12.0*delta_time;
         let player_radius = 0.5;
-        let draw_max_dist = 500;
+        let draw_max_dist = 1000;
         let draw_min_dist = 5*5;
         let light_dist = 15.0*15.0;
         let draw_rays_num = 750;

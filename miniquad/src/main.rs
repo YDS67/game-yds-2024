@@ -1,7 +1,7 @@
-//#![windows_subsystem = "windows"]
+#![windows_subsystem = "windows"]
 
 use macroquad::prelude as mqp;
-use miniquad;
+use miniquad::{self, conf::Platform};
 
 mod assets;
 mod camera;
@@ -13,12 +13,15 @@ mod shaders;
 mod stage;
 
 fn window_conf() -> mqp::Conf {
-    mqp::Conf {
+    let mut conf = mqp::Conf {
         window_title: "Raycasting + GPU rendering".to_owned(),
         window_width: settings::WIDTH0,
         window_height: settings::HEIGHT0,
+        platform: Platform::default(),
         ..Default::default()
-    }
+    };
+    conf.platform.swap_interval = Some(0);
+    conf
 }
 
 #[macroquad::main(window_conf)]
@@ -85,8 +88,6 @@ async fn main() {
             mqp::set_fullscreen(true);
         }
 
-        settings.screen_change(mqp::screen_width(), mqp::screen_height());
-
         if mqp::is_key_pressed(mqp::KeyCode::Escape) {
             // settings.full_screen = false;
             // mqp::set_fullscreen(false);
@@ -95,12 +96,10 @@ async fn main() {
             break;
         }
 
-        // if settings.draw_map {
-        //     map_state = "Hide map"
-        // } else {
-        //     map_state = "Show map"
-        // }
-
+        settings.screen_change(mqp::screen_width(), mqp::screen_height());
+        settings.delta_time = 1.0/(mqp::get_fps() as f32);
+        settings.player_speed = 12.0*settings.delta_time;
+        
         // Ensure that macroquad's shapes are not going to be lost
         {
             //gl = unsafe { mqp::get_internal_gl() };
@@ -178,10 +177,10 @@ fn draw_words(t_par: &mqp::TextParams, depth_buffer: &camera::DepthBuffer) {
     mqp::draw_rectangle(10.0, 10.0, 220.0, 120.0, mqp::WHITE);
     mqp::draw_rectangle_lines(10.0, 10.0, 220.0, 120.0, 4.0, mqp::BLACK);
     let fps = mqp::get_fps();
-    let mut fps_display = fps;
-    if fps > 50 && fps < 70 {
-        fps_display = 60
-    }
+    let fps_display = fps;
+    // if fps > 50 && fps < 70 {
+    //     fps_display = 60
+    // }
     mqp::draw_text_ex(
         &format!("FPS is {}", fps_display),
         20.0,
