@@ -35,7 +35,7 @@ async fn main() {
     let mut stage = stage::Stage::new(gl.quad_context, &settings);
 
     let mut img = mqp::Image {
-        bytes: stage.ass.wall_image.as_raw().to_owned(),
+        bytes: stage.ass.wall_image_bot.as_raw().to_owned(),
         width: settings::MAPSIZE as u16,
         height: settings::MAPSIZE as u16,
     };
@@ -189,7 +189,7 @@ fn draw_words(t_par: &mqp::TextParams, depth_buffer: &camera::DepthBuffer) {
     );
     mqp::draw_text_ex("Quads drawn:", 20.0, 75.0, t_par.to_owned());
     mqp::draw_text_ex(
-        &format!("{}", depth_buffer.len),
+        &format!("{}", depth_buffer.len*2),
         20.0,
         110.0,
         t_par.to_owned(),

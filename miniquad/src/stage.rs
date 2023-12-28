@@ -44,7 +44,7 @@ impl Stage {
             BufferSource::slice(&mesh.indices),
         );
 
-        let pixels: ImageBuffer<Rgba<u8>, Vec<u8>> = ass.wall_atlas.clone();
+        let pixels: ImageBuffer<Rgba<u8>, Vec<u8>> = ass.tile_atlas.clone();
         let dims = pixels.dimensions();
         let texture = ctx.new_texture_from_rgba8(dims.0 as u16, dims.1 as u16, pixels.as_bytes());
 

@@ -19,7 +19,7 @@ impl GameMap {
         for i in 0..settings::MAPSIZE {
             for j in 0..settings::MAPSIZE {
                 let pixel1 =
-                    image::ImageBuffer::get_pixel(&ass.wall_image, i as u32, j as u32).to_rgba();
+                    image::ImageBuffer::get_pixel(&ass.wall_image_bot, i as u32, j as u32).to_rgba();
                 let pixel2 =
                     image::ImageBuffer::get_pixel(&ass.floor_image, i as u32, j as u32).to_rgba();
                 wall_array[i][settings::MAPSIZE - j - 1] = pixel1[0];

@@ -45,19 +45,45 @@ impl Mesh {
             if depth_buffer.faces[l].is_wall {
                 let x = depth_buffer.faces[l].top_right_x as f32;
                 let y = depth_buffer.faces[l].top_right_y as f32;
-                vertices.push(Vertex { pos : Vec3 { x, y, z: 2.0 }, uv: Vec2 { x: 1., y: 2./5. },
+                vertices.push(Vertex { pos : Vec3 { x, y, z: 2.0 }, uv: Vec2 { x: 2.*0.0625, y: 0.*0.0625 },
                     col: Vec4{x: d, y: 0.8*d, z: 0.7*d, w: 1.0} }); // top right
                 let x = depth_buffer.faces[l].bottom_right_x as f32;
                 let y = depth_buffer.faces[l].bottom_right_y as f32;
-                vertices.push(Vertex { pos : Vec3 { x, y, z: 0.0 }, uv: Vec2 { x: 1., y: 4./5. },
+                vertices.push(Vertex { pos : Vec3 { x, y, z: 1.0 }, uv: Vec2 { x: 2.*0.0625, y: 1.*0.0625 },
                     col: Vec4{x: d, y: 0.8*d, z: 0.7*d, w: 1.0} }); // bottom right
                 let x = depth_buffer.faces[l].bottom_left_x as f32;
                 let y = depth_buffer.faces[l].bottom_left_y as f32;
-                vertices.push(Vertex { pos : Vec3 { x, y, z: 0.0 }, uv: Vec2 { x: 0., y: 4./5. },
+                vertices.push(Vertex { pos : Vec3 { x, y, z: 1.0 }, uv: Vec2 { x: 3.*0.0625, y: 1.*0.0625 },
                     col: Vec4{x: d, y: 0.8*d, z: 0.7*d, w: 1.0} }); // bottom left
                 let x = depth_buffer.faces[l].top_left_x as f32;
                 let y = depth_buffer.faces[l].top_left_y as f32;
-                vertices.push(Vertex { pos : Vec3 { x, y, z: 2.0 }, uv: Vec2 { x: 0., y: 2./5. },
+                vertices.push(Vertex { pos : Vec3 { x, y, z: 2.0 }, uv: Vec2 { x: 3.*0.0625, y: 0.*0.0625 },
+                    col: Vec4{x: d, y: 0.8*d, z: 0.7*d, w: 1.0} }); // top left
+
+                indices.push(4*idx);
+                indices.push(4*idx+1);
+                indices.push(4*idx+3);
+                indices.push(4*idx+1);
+                indices.push(4*idx+2);
+                indices.push(4*idx+3);
+
+                idx = idx+1;
+
+                let x = depth_buffer.faces[l].top_right_x as f32;
+                let y = depth_buffer.faces[l].top_right_y as f32;
+                vertices.push(Vertex { pos : Vec3 { x, y, z: 1.0 }, uv: Vec2 { x: 3.*0.0625, y: 0.*0.0625 },
+                    col: Vec4{x: d, y: 0.8*d, z: 0.7*d, w: 1.0} }); // top right
+                let x = depth_buffer.faces[l].bottom_right_x as f32;
+                let y = depth_buffer.faces[l].bottom_right_y as f32;
+                vertices.push(Vertex { pos : Vec3 { x, y, z: 0.0 }, uv: Vec2 { x: 3.*0.0625, y: 1.*0.0625 },
+                    col: Vec4{x: d, y: 0.8*d, z: 0.7*d, w: 1.0} }); // bottom right
+                let x = depth_buffer.faces[l].bottom_left_x as f32;
+                let y = depth_buffer.faces[l].bottom_left_y as f32;
+                vertices.push(Vertex { pos : Vec3 { x, y, z: 0.0 }, uv: Vec2 { x: 4.*0.0625, y: 1.*0.0625 },
+                    col: Vec4{x: d, y: 0.8*d, z: 0.7*d, w: 1.0} }); // bottom left
+                let x = depth_buffer.faces[l].top_left_x as f32;
+                let y = depth_buffer.faces[l].top_left_y as f32;
+                vertices.push(Vertex { pos : Vec3 { x, y, z: 1.0 }, uv: Vec2 { x: 4.*0.0625, y: 0.*0.0625 },
                     col: Vec4{x: d, y: 0.8*d, z: 0.7*d, w: 1.0} }); // top left
 
                 indices.push(4*idx);
@@ -73,29 +99,29 @@ impl Mesh {
                 //ceiling and floor
                 let mut z1: f32 = 2.0;
                 let mut z2: f32 = 0.0;
-                let mut v1: f32 = 1.0;
-                let mut v2: f32 = 4.0;
+                let mut v1: f32 = 7.0;
+                let mut v2: f32 = 3.0;
                 if player.position.z > 1.0 && player.position.b > 0.0 {
                     z1 = 0.0;
                     z2 = 2.0;
-                    v1 = 4.0;
-                    v2 = 1.0;
+                    v1 = 3.0;
+                    v2 = 7.0;
                 }
                 let x = depth_buffer.faces[l].top_right_x as f32;
                 let y = depth_buffer.faces[l].top_right_y as f32;
-                vertices.push(Vertex { pos : Vec3 { x, y, z: z1 }, uv: Vec2 { x: 1., y: (v1+1.0)/5. },
+                vertices.push(Vertex { pos : Vec3 { x, y, z: z1 }, uv: Vec2 { x: (v1+1.0)*0.0625, y: 2.*0.0625 },
                     col: Vec4{x: d, y: 0.8*d, z: 0.7*d, w: 1.0} }); // top right
                 let x = depth_buffer.faces[l].bottom_right_x as f32;
                 let y = depth_buffer.faces[l].bottom_right_y as f32;
-                vertices.push(Vertex { pos : Vec3 { x, y, z: z1 }, uv: Vec2 { x: 1., y: v1/5. },
+                vertices.push(Vertex { pos : Vec3 { x, y, z: z1 }, uv: Vec2 { x: (v1+1.0)*0.0625, y: 1.*0.0625 },
                     col: Vec4{x: d, y: 0.8*d, z: 0.7*d, w: 1.0} }); // bottom right
                 let x = depth_buffer.faces[l].bottom_left_x as f32;
                 let y = depth_buffer.faces[l].bottom_left_y as f32;
-                vertices.push(Vertex { pos : Vec3 { x, y, z: z1 }, uv: Vec2 { x: 0., y: v1/5. },
+                vertices.push(Vertex { pos : Vec3 { x, y, z: z1 }, uv: Vec2 { x: v1*0.0625, y: 1.*0.0625 },
                     col: Vec4{x: d, y: 0.8*d, z: 0.7*d, w: 1.0} }); // bottom left
                 let x = depth_buffer.faces[l].top_left_x as f32;
                 let y = depth_buffer.faces[l].top_left_y as f32;
-                vertices.push(Vertex { pos : Vec3 { x, y, z: z1 }, uv: Vec2 { x: 0., y: (v1+1.0)/5. },
+                vertices.push(Vertex { pos : Vec3 { x, y, z: z1 }, uv: Vec2 { x: v1*0.0625, y: 2.*0.0625 },
                     col: Vec4{x: d, y: 0.8*d, z: 0.7*d, w: 1.0} }); // top left
 
                 indices.push(4*idx);
@@ -109,19 +135,19 @@ impl Mesh {
 
                 let x = depth_buffer.faces[l].top_right_x as f32;
                 let y = depth_buffer.faces[l].top_right_y as f32;
-                vertices.push(Vertex { pos : Vec3 { x, y, z: z2 }, uv: Vec2 { x: 1., y: (v2+1.0)/5. },
+                vertices.push(Vertex { pos : Vec3 { x, y, z: z2 }, uv: Vec2 { x: (v2+1.0)*0.0625, y: 2.*0.0625 },
                     col: Vec4{x: d, y: 0.8*d, z: 0.7*d, w: 1.0} }); // top right
                 let x = depth_buffer.faces[l].bottom_right_x as f32;
                 let y = depth_buffer.faces[l].bottom_right_y as f32;
-                vertices.push(Vertex { pos : Vec3 { x, y, z: z2 }, uv: Vec2 { x: 1., y: v2/5. },
+                vertices.push(Vertex { pos : Vec3 { x, y, z: z2 }, uv: Vec2 { x: (v2+1.0)*0.0625, y: 1.*0.0625 },
                     col: Vec4{x: d, y: 0.8*d, z: 0.7*d, w: 1.0} }); // bottom right
                 let x = depth_buffer.faces[l].bottom_left_x as f32;
                 let y = depth_buffer.faces[l].bottom_left_y as f32;
-                vertices.push(Vertex { pos : Vec3 { x, y, z: z2 }, uv: Vec2 { x: 0., y: v2/5. },
+                vertices.push(Vertex { pos : Vec3 { x, y, z: z2 }, uv: Vec2 { x: v2*0.0625, y: 1.*0.0625 },
                     col: Vec4{x: d, y: 0.8*d, z: 0.7*d, w: 1.0} }); // bottom left
                 let x = depth_buffer.faces[l].top_left_x as f32;
                 let y = depth_buffer.faces[l].top_left_y as f32;
-                vertices.push(Vertex { pos : Vec3 { x, y, z: z2 }, uv: Vec2 { x: 0., y: (v2+1.0)/5. },
+                vertices.push(Vertex { pos : Vec3 { x, y, z: z2 }, uv: Vec2 { x: v2*0.0625, y: 2.*0.0625 },
                     col: Vec4{x: d, y: 0.8*d, z: 0.7*d, w: 1.0} }); // top left
 
                 indices.push(4*idx);
