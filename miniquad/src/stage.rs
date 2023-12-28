@@ -29,7 +29,7 @@ impl Stage {
         camera::find_visible_tiles(&mut game_map, &player, &settings);
         let depth_buffer = camera::DepthBuffer::generate(&game_map, &player, &settings);
 
-        let mesh = mesh::Mesh::new(&depth_buffer);
+        let mesh = mesh::Mesh::new(&depth_buffer, &player);
 
         let vertex_buffer = ctx.new_buffer(
             BufferType::VertexBuffer,
@@ -92,7 +92,7 @@ impl Stage {
         camera::find_visible_tiles(&mut self.game_map, &self.player, &settings);
         self.depth_buffer = camera::DepthBuffer::generate(&self.game_map, &self.player, &settings);
 
-        self.mesh = mesh::Mesh::new(&self.depth_buffer);
+        self.mesh = mesh::Mesh::new(&self.depth_buffer, &self.player);
 
         for b in 0..self.bindings.vertex_buffers.len() {
             ctx.delete_buffer(self.bindings.vertex_buffers[b]);

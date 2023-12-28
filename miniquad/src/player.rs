@@ -24,6 +24,8 @@ pub struct PlayerPos {
 
 pub struct Player {
     pub position: PlayerPos,
+    pub rising: bool,
+    pub falling: bool,
     pub radius: f32,
 }
 
@@ -51,6 +53,8 @@ impl Player {
                 cxr: false,
                 cyr: false,
             },
+            rising: false,
+            falling: false,
             radius: settings.player_radius,
         }
     }
@@ -135,6 +139,27 @@ impl Player {
     pub fn walk(&mut self, game_map: &map::GameMap, settings: &settings::Settings) {
         self.coll_check(game_map);
 
+        if is_key_pressed(KeyCode::Space) && !self.rising && !self.falling {
+            self.rising = true
+        }
+
+        if self.rising {
+            if self.position.z >= 1.5 {
+                self.rising = false;
+                self.falling = true;
+            } else {
+                self.position.z = self.position.z + 0.2*settings.player_speed;
+            }
+        }
+
+        if self.falling {
+            if self.position.z <= 0.5 {
+                self.falling = false;
+            } else {
+                self.position.z = self.position.z - 0.25*settings.player_speed;
+            }
+        }
+
         if is_key_down(KeyCode::W) {
             if !self.position.cxp {
                 self.position.x = self.position.x + settings.player_speed * self.position.ax;
@@ -199,10 +224,10 @@ impl Player {
 
 pub fn angle_round(angle: f32) -> f32 {
     let mut in_degrees = angle * 180.0 / settings::PI;
-    while in_degrees < -180.0 {
+    while in_degrees < -90.0 {
         in_degrees = 360.0 + in_degrees
     }
-    while in_degrees > 179.9 {
+    while in_degrees > 89.9 {
         in_degrees = -360.0 + in_degrees
     }
     in_degrees * settings::PI / 180.0

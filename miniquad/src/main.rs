@@ -110,9 +110,7 @@ async fn main() {
         for i in 0..settings::MAPSIZE {
             for j in 0..settings::MAPSIZE {
                 if stage.game_map.floor_visible[i][settings::MAPSIZE - j - 1] {
-                    let d = stage.game_map.wall_dist[i][settings::MAPSIZE - j - 1]
-                        / stage.game_map.dmax;
-                    let b = 255 - d as u8;
+                    let b = 255;
                     let col = mqp::Color::from_rgba(255 - b, 255 - b, b, 255);
                     img.set_pixel(i as u32, j as u32, col);
                 }
