@@ -16,7 +16,7 @@ const float pi = 3.1415926538;
 const float fov = pi/4.0;
 const float asp = 800.0/1280.0;
 
-float at, u, bt, v, d, l;
+float at, u, bt, v, d, l, col1;
 
 vec3 dir1, dir2, cros, nor1, nor2;
 
@@ -40,7 +40,8 @@ void main() {
 
     gl_Position = vec4(u, v, 0, 1);
 
-    cols = col;
+    col1 = 1.0/(1.0+(l/10.0)*(l/10.0));
+    cols = vec4(col1,0.8*col1,0.7*col1,1.0);
     
     if (cos(at) > 0 && cos(bt) > 0) {
         draw = 2.0;
