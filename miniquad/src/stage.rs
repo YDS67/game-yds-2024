@@ -72,7 +72,6 @@ impl Stage {
             &[
                 VertexAttribute::new("pos", VertexFormat::Float3),
                 VertexAttribute::new("uv", VertexFormat::Float2),
-                VertexAttribute::new("col", VertexFormat::Float4),
             ],
             shader,
         );
@@ -98,14 +97,8 @@ impl Stage {
     
             for b in 0..self.bindings.vertex_buffers.len() {
                 ctx.delete_buffer(self.bindings.vertex_buffers[b]);
-                //ctx.buffer_update(self.bindings.vertex_buffers[b], BufferSource::slice(&self.mesh.vertices));
             }
             ctx.delete_buffer(self.bindings.index_buffer);
-            //ctx.buffer_update(self.bindings.index_buffer, BufferSource::slice(&self.mesh.indices));
-    
-            // for t in 0..self.bindings.images.len() {
-            //     ctx.delete_texture(self.bindings.images[t]);
-            // }
     
             let vertex_buffer = ctx.new_buffer(
                 BufferType::VertexBuffer,
@@ -128,7 +121,7 @@ impl Stage {
 
         ctx.apply_bindings(&self.bindings);
 
-        let proj = Mat4::perspective_rh_gl(settings.fov_z, settings.screen_aspect, 0.01, settings::MAPSIZE as f32);
+        let proj = Mat4::perspective_rh_gl(settings.fov_xy, settings.screen_aspect, 0.01, settings::MAPSIZE as f32);
         let view = Mat4::look_to_rh(
             vec3(self.player.position.x, self.player.position.y, self.player.position.z),
             vec3(self.player.position.ax*self.player.position.bxy, self.player.position.ay*self.player.position.bxy, self.player.position.bz),

@@ -20,7 +20,7 @@ fn window_conf() -> mqp::Conf {
         platform: Platform::default(),
         ..Default::default()
     };
-    conf.platform.swap_interval = Some(0);
+    conf.platform.swap_interval = Some(-1);
     conf
 }
 
@@ -89,10 +89,6 @@ async fn main() {
         }
 
         if mqp::is_key_pressed(mqp::KeyCode::Escape) {
-            // settings.full_screen = false;
-            // mqp::set_fullscreen(false);
-            // mqp::request_new_screen_size(1280.0, 800.0);
-            // settings.screen_change(1280.0, 800.0)
             break;
         }
 
@@ -139,35 +135,6 @@ async fn main() {
         }
 
         draw_words(&t_par, &stage.depth_buffer);
-
-        //=================
-        //GUI
-        //=================
-
-        // egui_macroquad::ui(|egui_ctx: &egui_macroquad::egui::Context| {
-        //     egui_ctx.set_pixels_per_point(1.5);
-        //     let win = egui_macroquad::egui::Window::new("Set initial parameters");
-        //     win.anchor(egui_macroquad::egui::Align2::RIGHT_TOP, [0.0, 0.0])
-        //         .show(egui_ctx, |ui| {
-        //             ui.label("Draw distance");
-        //             ui.horizontal(|ui| {
-        //                 ui.add(egui_macroquad::egui::Slider::new(
-        //                     &mut settings.draw_max_dist,
-        //                     50..=500,
-        //                 ));
-        //             });
-        //             ui.label("Fullscreen");
-        //             ui.toggle_value(&mut settings.full_screen, "");
-        //             if ui.button(map_state).clicked() {
-        //                 settings.draw_map = true;
-        //             }
-        //         });
-        // });
-
-        // Draw things before egui
-        if settings.draw_menu {
-            //egui_macroquad::draw();
-        }
 
         mqp::next_frame().await
     }

@@ -268,25 +268,25 @@ impl Player {
         }
 
         if self.movement.dir.lt {
-            self.position.a = angle_round(self.position.a + 0.1 * settings.player_speed);
+            self.position.a = angle_round(self.position.a + 0.2 * settings.player_speed);
             self.position.ax = self.position.a.cos();
             self.position.ay = self.position.a.sin();
         }
 
         if self.movement.dir.rt {
-            self.position.a = angle_round(self.position.a - 0.1 * settings.player_speed);
+            self.position.a = angle_round(self.position.a - 0.2 * settings.player_speed);
             self.position.ax = self.position.a.cos();
             self.position.ay = self.position.a.sin();
         }
 
         if self.movement.dir.dt && self.position.b+settings.fov_z < settings::PI / 2.0 {
-            self.position.b = angle_round(self.position.b + 0.1 * settings.player_speed);
+            self.position.b = angle_round(self.position.b + 0.2 * settings.player_speed);
             self.position.bxy = self.position.b.cos();
             self.position.bz = self.position.b.sin();
         }
 
         if self.movement.dir.ut && self.position.b-settings.fov_z > -settings::PI / 2.0 {
-            self.position.b = angle_round(self.position.b - 0.1 * settings.player_speed);
+            self.position.b = angle_round(self.position.b - 0.2 * settings.player_speed);
             self.position.bxy = self.position.b.cos();
             self.position.bz = self.position.b.sin();
         }

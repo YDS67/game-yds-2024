@@ -4,7 +4,6 @@ use glam;
 pub const VERTEX: &str = r#"#version 330 core
 in vec3 pos;
 in vec2 uv;
-in vec4 col;
 
 uniform mat4 mvp;
 uniform vec3 playerpos;
@@ -12,16 +11,16 @@ uniform vec3 playerpos;
 out vec2 texcoord;
 out vec4 cols;
 
-float col1, l;
+float col1, d;
 vec3 dir;
 
 void main() {
     dir = pos - playerpos;
-    l = length(dir);
+    d = length(dir);
 
     gl_Position = mvp * vec4(pos, 1.0);
 
-    col1 = 1.0/(1.0+(l/10.0)*(l/10.0));
+    col1 = 1.0/(1.0+(d/5.0)*(d/5.0));
     cols = vec4(col1,col1,col1,1.0);
     
     texcoord = uv;
