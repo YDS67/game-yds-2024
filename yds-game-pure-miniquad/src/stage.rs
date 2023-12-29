@@ -2,6 +2,11 @@ use image::{self, EncodableLayout, ImageBuffer, Rgba};
 use miniquad::*;
 use glam::{vec3, Mat4};
 
+use std::thread::sleep;
+use std::time::Duration;
+
+const FT_DESIRED: f64 = 0.01666666666667;
+
 use crate::assets;
 use crate::camera;
 use crate::map;
@@ -21,6 +26,8 @@ pub struct Stage {
     pub mesh: mesh::Mesh,
     pub pipeline: Pipeline,
     pub bindings: Bindings,
+    last_frame: std::time::Instant,
+    elapsed_seconds: f64,
 }
 
 impl Stage {
@@ -104,6 +111,8 @@ impl Stage {
             pipeline,
             bindings,
             mesh,
+            last_frame: Some(std::time::Instant::now()).unwrap(),
+            elapsed_seconds: 0.0,
         }
     }
 
@@ -112,6 +121,16 @@ impl Stage {
 impl EventHandler for Stage {
     fn update(&mut self) {
         self.player.walk(&self.game_map, &self.settings);
+
+        self.elapsed_seconds = self.last_frame.elapsed().as_secs_f64();
+        if self.elapsed_seconds < FT_DESIRED {
+            sleep(Duration::from_secs_f64(FT_DESIRED - self.elapsed_seconds));
+        }
+        self.elapsed_seconds = self.last_frame.elapsed().as_secs_f64();
+        println!("Frame time: {:.5}", self.elapsed_seconds);
+        let fps = 1. / self.elapsed_seconds;
+        println!("FPS: {:.0}", fps);
+
         if self.player.movement.moving {
             camera::find_visible_tiles(&mut self.game_map, &self.player, &self.settings);
             self.depth_buffer = camera::DepthBuffer::generate(&self.game_map, &self.player, &self.settings);
@@ -171,6 +190,8 @@ impl EventHandler for Stage {
         self.ctx.end_render_pass();
 
         self.ctx.commit_frame();
+
+        self.last_frame = Some(std::time::Instant::now()).unwrap();
     }
 
     fn key_down_event(&mut self, keycode: KeyCode, _keymods: KeyMods, _repeat: bool) {

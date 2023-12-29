@@ -198,8 +198,6 @@ impl Player {
         // if is_key_pressed(KeyCode::Space) && !self.movement.dir.u && !self.movement.dir.d {
         //     self.movement.dir.u = true
         // }
-
-        self.movement.check()
     }
 
     pub fn read_key_up(&mut self, keycode: KeyCode) {
@@ -231,12 +229,11 @@ impl Player {
         // if is_key_pressed(KeyCode::Space) && !self.movement.dir.u && !self.movement.dir.d {
         //     self.movement.dir.u = true
         // }
-
-        self.movement.check()
     }
 
     pub fn walk(&mut self, game_map: &map::GameMap, settings: &settings::Settings) {
         self.coll_check(game_map);
+        self.movement.check();
 
         if self.movement.dir.u {
             if self.position.z >= 1.5 {

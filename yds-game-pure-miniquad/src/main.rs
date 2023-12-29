@@ -19,7 +19,7 @@ fn window_conf() -> Conf {
         platform: Platform::default(),
         ..Default::default()
     };
-    conf.platform.swap_interval = Some(-1);
+    conf.platform.swap_interval = Some(0);
     conf
 }
 
