@@ -2,6 +2,11 @@ use image::{self, EncodableLayout, ImageBuffer, Rgba};
 use miniquad::*;
 use glam::{vec3, Mat4};
 
+use std::thread::sleep;
+use std::time::Duration;
+
+const FT_DESIRED: f64 = 0.01666666666667;
+
 use crate::assets;
 use crate::camera;
 use crate::map;
@@ -11,17 +16,25 @@ use crate::shaders;
 use crate::settings;
 
 pub struct Stage {
-    pub ass: assets::Ass,
-    pub player: player::Player,
-    pub depth_buffer: camera::DepthBuffer,
-    pub game_map: map::GameMap,
-    pub mesh: mesh::Mesh,
-    pub pipeline: Pipeline,
-    pub bindings: Bindings,
+    ctx: Box<dyn RenderingBackend>,
+
+    settings: settings::Settings,
+    player: player::Player,
+    depth_buffer: camera::DepthBuffer,
+    game_map: map::GameMap,
+    mesh: mesh::Mesh,
+    pipeline: Pipeline,
+    bindings: Bindings,
+    last_frame: std::time::Instant,
+    elapsed_seconds: f64,
 }
 
 impl Stage {
-    pub fn new(ctx: &mut dyn RenderingBackend, settings: &settings::Settings) -> Stage {
+    pub fn new() -> Stage {
+
+        let mut ctx: Box<dyn RenderingBackend> = window::new_rendering_backend();
+
+        let settings = settings::Settings::init();
         let ass = assets::Ass::load();
         let player = player::Player::new(&settings);
 
@@ -88,36 +101,60 @@ impl Stage {
         );
 
         Stage {
-            ass,
+            ctx,
+            settings,
             player,
             game_map,
             depth_buffer,
             pipeline,
             bindings,
             mesh,
+            last_frame: Some(std::time::Instant::now()).unwrap(),
+            elapsed_seconds: 0.0,
         }
     }
 
-    pub fn update(&mut self, ctx: &mut dyn RenderingBackend, settings: &settings::Settings) {
-        self.player.walk(&self.game_map, &settings);
+    fn fps_measure(&mut self) {
+        self.elapsed_seconds = self.last_frame.elapsed().as_secs_f64();
+        if self.elapsed_seconds < FT_DESIRED {
+            sleep(Duration::from_secs_f64(FT_DESIRED - self.elapsed_seconds));
+        }
+        self.elapsed_seconds = self.last_frame.elapsed().as_secs_f64();
+        self.settings.delta_time = self.elapsed_seconds as f32;
+        println!("Frame time: {}", self.elapsed_seconds);
+        let fps = 1. / self.elapsed_seconds;
+        self.settings.player_speed = 12.0*self.settings.delta_time;
+        println!("FPS: {:.0}", fps);
+        println!("Moving: {}", self.player.movement.moving);
+        println!("Mesh quad count: {}", self.mesh.num);
+    }
+
+}
+
+impl EventHandler for Stage {
+    fn update(&mut self) {
+        self.fps_measure();
+
+        self.player.walk(&self.game_map, &self.settings);
+
         if self.player.movement.moving {
-            camera::find_visible_tiles(&mut self.game_map, &self.player, &settings);
-            self.depth_buffer = camera::DepthBuffer::generate(&self.game_map, &self.player, &settings);
+            camera::find_visible_tiles(&mut self.game_map, &self.player, &self.settings);
+            self.depth_buffer = camera::DepthBuffer::generate(&self.game_map, &self.player, &self.settings);
     
             self.mesh = mesh::Mesh::new(&self.depth_buffer, &self.player);
     
             for b in 0..self.bindings.vertex_buffers.len() {
-                ctx.delete_buffer(self.bindings.vertex_buffers[b]);
+                self.ctx.delete_buffer(self.bindings.vertex_buffers[b]);
             }
-            ctx.delete_buffer(self.bindings.index_buffer);
+            self.ctx.delete_buffer(self.bindings.index_buffer);
     
-            let vertex_buffer = ctx.new_buffer(
+            let vertex_buffer = self.ctx.new_buffer(
                 BufferType::VertexBuffer,
                 BufferUsage::Stream,
                 BufferSource::slice(&self.mesh.vertices),
             );
     
-            let index_buffer = ctx.new_buffer(
+            let index_buffer = self.ctx.new_buffer(
                 BufferType::IndexBuffer,
                 BufferUsage::Stream,
                 BufferSource::slice(&self.mesh.indices),
@@ -128,11 +165,17 @@ impl Stage {
             self.bindings.index_buffer = index_buffer;
     
         }
-        ctx.apply_pipeline(&self.pipeline);
 
-        ctx.apply_bindings(&self.bindings);
+    }
 
-        let proj = Mat4::perspective_rh_gl(settings.fov_xy, settings.screen_aspect, 0.01, settings::MAPSIZE as f32);
+    fn draw(&mut self) {
+        self.ctx.begin_default_pass(miniquad::PassAction::clear_color(0., 0., 0., 1.0000000));
+
+        self.ctx.apply_pipeline(&self.pipeline);
+
+        self.ctx.apply_bindings(&self.bindings);
+
+        let proj = Mat4::perspective_rh_gl(self.settings.fov_xy, self.settings.screen_aspect, 0.01, settings::MAPSIZE as f32);
         let view = Mat4::look_to_rh(
             vec3(self.player.position.x, self.player.position.y, self.player.position.z),
             vec3(self.player.position.ax*self.player.position.bxy, self.player.position.ay*self.player.position.bxy, self.player.position.bz),
@@ -140,7 +183,7 @@ impl Stage {
         );
         let mvp = proj * view;
 
-        ctx.apply_uniforms(miniquad::UniformsSource::table(&shaders::Uniforms {
+        self.ctx.apply_uniforms(miniquad::UniformsSource::table(&shaders::Uniforms {
             mvp,
             playerpos: (
                 self.player.position.x,
@@ -148,9 +191,26 @@ impl Stage {
                 self.player.position.z,
             ),
         }));
-        ctx.draw(0, &self.mesh.num * 6, 1);
+        self.ctx.draw(0, &self.mesh.num * 6, 1);
 
-        ctx.end_render_pass();
+        self.ctx.end_render_pass();
 
+        self.ctx.commit_frame();
+
+        self.last_frame = Some(std::time::Instant::now()).unwrap();
+    }
+
+    fn key_down_event(&mut self, keycode: KeyCode, _keymods: KeyMods, _repeat: bool) {
+        if keycode == KeyCode::F {
+            miniquad::window::set_fullscreen(true)
+        }
+        if keycode == KeyCode::Escape {
+            miniquad::window::quit()
+        } 
+        self.player.read_key_down(keycode)
+    }
+
+    fn key_up_event(&mut self, keycode: KeyCode, _keymods: KeyMods) {
+        self.player.read_key_up(keycode)
     }
 }

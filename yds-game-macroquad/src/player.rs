@@ -1,6 +1,6 @@
 use crate::map;
 use crate::settings;
-use miniquad::*;
+use macroquad::prelude::*;
 
 pub struct PlayerPos {
     pub x: f32,
@@ -116,6 +116,14 @@ impl Player {
         }
     }
 
+    pub fn draw(&self, settings: &settings::Settings) {
+        let x = settings.map_offset_x + self.position.x * settings.tile_screen_size;
+        let y = settings.map_offset_y + (settings::MAPSIZE as f32 - self.position.y) * settings.tile_screen_size;
+        let s = self.radius * settings.tile_screen_size * 5.0;
+
+        draw_circle(x, y, s, RED);
+    }
+
     fn coll_check(&mut self, game_map: &map::GameMap) {
         let i = (self.position.x).floor() as usize;
         let j = (self.position.y).floor() as usize;
@@ -185,68 +193,26 @@ impl Player {
         }
     }
 
-    pub fn read_key_down(&mut self, keycode: KeyCode) {
+    pub fn read_input(&mut self) {
+        self.movement.dir.f = is_key_down(KeyCode::W);
+        self.movement.dir.b = is_key_down(KeyCode::S);
+        self.movement.dir.l = is_key_down(KeyCode::A);
+        self.movement.dir.r = is_key_down(KeyCode::D);
+        self.movement.dir.lt = is_key_down(KeyCode::Left);
+        self.movement.dir.rt = is_key_down(KeyCode::Right);
+        self.movement.dir.ut = is_key_down(KeyCode::Down);
+        self.movement.dir.dt = is_key_down(KeyCode::Up);
 
-        if keycode == KeyCode::W {
-            self.movement.dir.f = true
-        }
-        if keycode == KeyCode::S {
-            self.movement.dir.b = true
-        }
-        if keycode == KeyCode::A {
-            self.movement.dir.l = true
-        }
-        if keycode == KeyCode::D {
-            self.movement.dir.r = true
-        }
-        if keycode == KeyCode::Left {
-            self.movement.dir.lt = true
-        }
-        if keycode == KeyCode::Right {
-            self.movement.dir.rt = true
-        }
-        if keycode == KeyCode::Down {
-            self.movement.dir.ut = true
-        }
-        if keycode == KeyCode::Up {
-            self.movement.dir.dt = true
+        if is_key_pressed(KeyCode::Space) && !self.movement.dir.u && !self.movement.dir.d {
+            self.movement.dir.u = true
         }
 
-        if keycode == KeyCode::Space && !self.movement.dir.u && !self.movement.dir.d {
-             self.movement.dir.u = true
-        }
-    }
-
-    pub fn read_key_up(&mut self, keycode: KeyCode) {
-        if keycode == KeyCode::W {
-            self.movement.dir.f = false
-        }
-        if keycode == KeyCode::S {
-            self.movement.dir.b = false
-        }
-        if keycode == KeyCode::A {
-            self.movement.dir.l = false
-        }
-        if keycode == KeyCode::D {
-            self.movement.dir.r = false
-        }
-        if keycode == KeyCode::Left {
-            self.movement.dir.lt = false
-        }
-        if keycode == KeyCode::Right {
-            self.movement.dir.rt = false
-        }
-        if keycode == KeyCode::Down {
-            self.movement.dir.ut = false
-        }
-        if keycode == KeyCode::Up {
-            self.movement.dir.dt = false
-        }
+        self.movement.check()
     }
 
     pub fn walk(&mut self, game_map: &map::GameMap, settings: &settings::Settings) {
         self.coll_check(game_map);
-        self.movement.check();
+        self.read_input();
 
         if self.movement.dir.u {
             if self.position.z >= 1.5 {

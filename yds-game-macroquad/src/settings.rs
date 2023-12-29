@@ -93,12 +93,12 @@ impl Settings {
         }
     }
 
-    // pub fn screen_change(&mut self, screen_width: f32, screen_height: f32) {
-    //     self.screen_width = screen_width as i32;
-    //     self.screen_height = screen_height as i32;
-    //     self.screen_width_f = screen_width;
-    //     self.screen_height_f = screen_height;
-    //     self.screen_aspect = screen_width/screen_height;
-    //     self.map_offset_y = screen_height - self.tile_screen_size * (MAPSIZE as f32) - 20.0;
-    // }
+    pub fn screen_change(&mut self, screen_width: f32, screen_height: f32) {
+        self.screen_width = screen_width as i32;
+        self.screen_height = screen_height as i32;
+        self.screen_width_f = screen_width;
+        self.screen_height_f = screen_height;
+        self.screen_aspect = screen_width/screen_height;
+        self.map_offset_y = screen_height - self.tile_screen_size * (MAPSIZE as f32) - 20.0;
+    }
 }
