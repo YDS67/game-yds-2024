@@ -186,14 +186,31 @@ impl Player {
     }
 
     pub fn read_key_down(&mut self, keycode: KeyCode) {
-        self.movement.dir.f = keycode == KeyCode::W;
-        self.movement.dir.b = keycode == KeyCode::S;
-        self.movement.dir.l = keycode == KeyCode::A;
-        self.movement.dir.r = keycode == KeyCode::D;
-        self.movement.dir.lt = keycode == KeyCode::Left;
-        self.movement.dir.rt = keycode == KeyCode::Right;
-        self.movement.dir.ut = keycode == KeyCode::Down;
-        self.movement.dir.dt = keycode == KeyCode::Up;
+
+        if keycode == KeyCode::W {
+            self.movement.dir.f = true
+        }
+        if keycode == KeyCode::S {
+            self.movement.dir.b = true
+        }
+        if keycode == KeyCode::A {
+            self.movement.dir.l = true
+        }
+        if keycode == KeyCode::D {
+            self.movement.dir.r = true
+        }
+        if keycode == KeyCode::Left {
+            self.movement.dir.lt = true
+        }
+        if keycode == KeyCode::Right {
+            self.movement.dir.rt = true
+        }
+        if keycode == KeyCode::Down {
+            self.movement.dir.ut = true
+        }
+        if keycode == KeyCode::Up {
+            self.movement.dir.dt = true
+        }
 
         // if is_key_pressed(KeyCode::Space) && !self.movement.dir.u && !self.movement.dir.d {
         //     self.movement.dir.u = true

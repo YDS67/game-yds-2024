@@ -5,7 +5,7 @@ use glam::{vec3, Mat4};
 use std::thread::sleep;
 use std::time::Duration;
 
-const FT_DESIRED: f64 = 0.001666666666667;
+const FT_DESIRED: f64 = 0.01666666666667;
 
 use crate::assets;
 use crate::camera;
@@ -18,6 +18,7 @@ use crate::settings;
 pub struct Stage {
     ctx: Box<dyn RenderingBackend>,
 
+    pub keys: Vec<KeyCode>,
     pub settings: settings::Settings,
     pub ass: assets::Ass,
     pub player: player::Player,
@@ -34,6 +35,8 @@ impl Stage {
     pub fn new() -> Stage {
 
         let mut ctx: Box<dyn RenderingBackend> = window::new_rendering_backend();
+
+        let keys = vec![KeyCode::W, KeyCode::S, KeyCode::A, KeyCode::D, KeyCode::Left, KeyCode::Right, KeyCode::Down, KeyCode::Up];
 
         let settings = settings::Settings::init();
         let ass = assets::Ass::load();
@@ -103,6 +106,7 @@ impl Stage {
 
         Stage {
             ctx,
+            keys,
             settings,
             ass,
             player,
@@ -116,22 +120,27 @@ impl Stage {
         }
     }
 
-}
-
-impl EventHandler for Stage {
-    fn update(&mut self) {
-        self.player.walk(&self.game_map, &self.settings);
-
+    fn fps_measure(&mut self) {
         self.elapsed_seconds = self.last_frame.elapsed().as_secs_f64();
         if self.elapsed_seconds < FT_DESIRED {
             sleep(Duration::from_secs_f64(FT_DESIRED - self.elapsed_seconds));
         }
         self.elapsed_seconds = self.last_frame.elapsed().as_secs_f64();
+        self.settings.delta_time = self.elapsed_seconds as f32;
         println!("Frame time: {:.5}", self.elapsed_seconds);
         let fps = 1. / self.elapsed_seconds;
-        self.settings.delta_time = self.elapsed_seconds as f32;
         self.settings.player_speed = 12.0*self.settings.delta_time;
         println!("FPS: {:.0}", fps);
+        println!("Moving: {}", self.player.movement.moving);
+    }
+
+}
+
+impl EventHandler for Stage {
+    fn update(&mut self) {
+        self.fps_measure();
+
+        self.player.walk(&self.game_map, &self.settings);
 
         if self.player.movement.moving {
             camera::find_visible_tiles(&mut self.game_map, &self.player, &self.settings);
@@ -202,7 +211,7 @@ impl EventHandler for Stage {
         }
         if keycode == KeyCode::Escape {
             miniquad::window::quit()
-        }
+        } 
         self.player.read_key_down(keycode)
     }
 
