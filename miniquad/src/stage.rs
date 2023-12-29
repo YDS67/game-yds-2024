@@ -90,7 +90,7 @@ impl Stage {
 
     pub fn update(&mut self, ctx: &mut dyn RenderingBackend, settings: &settings::Settings) {
         self.player.walk(&self.game_map, &settings);
-        if self.player.moved {
+        if self.player.movement.moving {
             camera::find_visible_tiles(&mut self.game_map, &self.player, &settings);
             self.depth_buffer = camera::DepthBuffer::generate(&self.game_map, &self.player, &settings);
     
@@ -148,6 +148,5 @@ impl Stage {
 
         ctx.end_render_pass();
 
-        self.player.moved = false;
     }
 }

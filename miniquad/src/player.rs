@@ -12,6 +12,9 @@ pub struct PlayerPos {
     pub ay: f32,
     pub bxy: f32,
     pub bz: f32,
+}
+
+pub struct CollisionState {
     pub cxp: bool,
     pub cyp: bool,
     pub cxm: bool,
@@ -22,11 +25,49 @@ pub struct PlayerPos {
     pub cyr: bool,
 }
 
+pub struct Direction {
+    pub f: bool, // forward
+    pub b: bool, // backward
+    pub l: bool, // left
+    pub r: bool, // right
+    pub u: bool, // up
+    pub d: bool, // down
+    pub lt: bool, // left turn
+    pub rt: bool, // right turn
+    pub ut: bool, // up turn
+    pub dt: bool, // down turn
+}
+
+impl Direction {
+    pub fn _erase(&mut self) {
+        self.f = false;
+        self.b = false;
+        self.l = false;
+        self.r = false;
+        self.u = false;
+        self.d = false;
+        self.lt = false;
+        self.rt = false;
+        self.ut = false;
+        self.dt = false;
+    }
+}
+
+pub struct MovementState {
+    pub moving: bool,
+    pub dir: Direction,
+}
+
+impl MovementState {
+    pub fn check(&mut self) {
+        self.moving = self.dir.f || self.dir.b || self.dir.l || self.dir.r || self.dir.u || self.dir.d || self.dir.lt || self.dir.rt || self.dir.ut || self.dir.dt
+    }
+}
+
 pub struct Player {
     pub position: PlayerPos,
-    pub moved: bool,
-    pub rising: bool,
-    pub falling: bool,
+    pub collision: CollisionState,
+    pub movement: MovementState,
     pub radius: f32,
 }
 
@@ -45,6 +86,8 @@ impl Player {
                 ay: a.sin(),
                 bxy: b.cos(),
                 bz: b.sin(),
+            },
+            collision: CollisionState {
                 cxp: false,
                 cyp: false,
                 cxm: false,
@@ -54,9 +97,21 @@ impl Player {
                 cxr: false,
                 cyr: false,
             },
-            moved: false,
-            rising: false,
-            falling: false,
+            movement: MovementState {
+                moving: false,
+                dir: Direction {
+                    f: false,
+                    b: false,
+                    l: false,
+                    r: false,
+                    u: false,
+                    d: false,
+                    lt: false,
+                    rt: false,
+                    ut: false,
+                    dt: false,
+                },
+            },
             radius: settings.player_radius,
         }
     }
@@ -81,155 +136,156 @@ impl Player {
         let ir = (self.position.x + self.radius * self.position.ay).floor() as usize;
         let jr = (self.position.y - self.radius * self.position.ax).floor() as usize;
 
-        self.position.cxp = false;
-        self.position.cxm = false;
-        self.position.cyp = false;
-        self.position.cym = false;
-        self.position.cxl = false;
-        self.position.cxr = false;
-        self.position.cyl = false;
-        self.position.cyr = false;
+        self.collision.cxp = false;
+        self.collision.cxm = false;
+        self.collision.cyp = false;
+        self.collision.cym = false;
+        self.collision.cxl = false;
+        self.collision.cxr = false;
+        self.collision.cyl = false;
+        self.collision.cyr = false;
 
         if game_map.wall_array[ip][jp] < 255
             || game_map.wall_array[im][jm] < 255
             || game_map.wall_array[il][jl] < 255
             || game_map.wall_array[ir][jr] < 255
         {
-            self.position.cxp = true;
-            self.position.cxm = true;
-            self.position.cyp = true;
-            self.position.cym = true;
-            self.position.cxl = true;
-            self.position.cxr = true;
-            self.position.cyl = true;
-            self.position.cyr = true;
+            self.collision.cxp = true;
+            self.collision.cxm = true;
+            self.collision.cyp = true;
+            self.collision.cym = true;
+            self.collision.cxl = true;
+            self.collision.cxr = true;
+            self.collision.cyl = true;
+            self.collision.cyr = true;
         }
 
         if game_map.wall_array[ip][j] == 255 {
-            self.position.cxp = false;
+            self.collision.cxp = false;
         }
 
         if game_map.wall_array[i][jp] == 255 {
-            self.position.cyp = false;
+            self.collision.cyp = false;
         }
 
         if game_map.wall_array[im][j] == 255 {
-            self.position.cxm = false;
+            self.collision.cxm = false;
         }
 
         if game_map.wall_array[i][jm] == 255 {
-            self.position.cym = false;
+            self.collision.cym = false;
         }
 
         if game_map.wall_array[il][j] == 255 {
-            self.position.cxl = false;
+            self.collision.cxl = false;
         }
 
         if game_map.wall_array[ir][j] == 255 {
-            self.position.cxr = false;
+            self.collision.cxr = false;
         }
 
         if game_map.wall_array[i][jl] == 255 {
-            self.position.cyl = false;
+            self.collision.cyl = false;
         }
 
         if game_map.wall_array[i][jr] == 255 {
-            self.position.cyr = false;
+            self.collision.cyr = false;
         }
+    }
+
+    pub fn read_input(&mut self) {
+        self.movement.dir.f = is_key_down(KeyCode::W);
+        self.movement.dir.b = is_key_down(KeyCode::S);
+        self.movement.dir.l = is_key_down(KeyCode::A);
+        self.movement.dir.r = is_key_down(KeyCode::D);
+        self.movement.dir.lt = is_key_down(KeyCode::Left);
+        self.movement.dir.rt = is_key_down(KeyCode::Right);
+        self.movement.dir.ut = is_key_down(KeyCode::Down);
+        self.movement.dir.dt = is_key_down(KeyCode::Up);
+
+        if is_key_pressed(KeyCode::Space) && !self.movement.dir.u && !self.movement.dir.d {
+            self.movement.dir.u = true
+        }
+
+        self.movement.check()
     }
 
     pub fn walk(&mut self, game_map: &map::GameMap, settings: &settings::Settings) {
         self.coll_check(game_map);
+        self.read_input();
 
-        if is_key_pressed(KeyCode::Space) && !self.rising && !self.falling {
-            self.moved = true;
-            self.rising = true
-        }
-
-        if self.rising {
+        if self.movement.dir.u {
             if self.position.z >= 1.5 {
-                self.rising = false;
-                self.falling = true;
+                self.movement.dir.u = false;
+                self.movement.dir.d = true;
             } else {
                 self.position.z = self.position.z + 0.2*settings.player_speed;
             }
         }
 
-        if self.falling {
+        if self.movement.dir.d {
             if self.position.z <= 0.5 {
-                self.falling = false;
+                self.movement.dir.d = false;
             } else {
                 self.position.z = self.position.z - 0.25*settings.player_speed;
             }
         }
 
-        if is_key_down(KeyCode::W) {
-            if !self.position.cxp {
-                self.moved = true;
+        if self.movement.dir.f {
+            if !self.collision.cxp {
                 self.position.x = self.position.x + settings.player_speed * self.position.ax;
             }
-            if !self.position.cyp {
-                self.moved = true;
+            if !self.collision.cyp {
                 self.position.y = self.position.y + settings.player_speed * self.position.ay;
             }
         }
 
-        if is_key_down(KeyCode::S) {
-            if !self.position.cxm {
-                self.moved = true;
+        if self.movement.dir.b {
+            if !self.collision.cxm {
                 self.position.x = self.position.x - settings.player_speed * self.position.ax;
             }
-            if !self.position.cym {
-                self.moved = true;
+            if !self.collision.cym {
                 self.position.y = self.position.y - settings.player_speed * self.position.ay;
             }
         }
 
-        if is_key_down(KeyCode::A) {
-            if !self.position.cxl {
-                self.moved = true;
+        if self.movement.dir.l {
+            if !self.collision.cxl {
                 self.position.x = self.position.x - settings.player_speed * self.position.ay;
             }
-            if !self.position.cyl {
-                self.moved = true;
+            if !self.collision.cyl {
                 self.position.y = self.position.y + settings.player_speed * self.position.ax;
             }
         }
 
-        if is_key_down(KeyCode::D) {
-            if !self.position.cxr {
-                self.moved = true;
+        if self.movement.dir.r {
+            if !self.collision.cxr {
                 self.position.x = self.position.x + settings.player_speed * self.position.ay;
             }
-            if !self.position.cyr {
-                self.moved = true;
+            if !self.collision.cyr {
                 self.position.y = self.position.y - settings.player_speed * self.position.ax;
             }
         }
 
-        if is_key_down(KeyCode::Left) {
-            self.moved = true;
+        if self.movement.dir.lt {
             self.position.a = angle_round(self.position.a + 0.1 * settings.player_speed);
             self.position.ax = self.position.a.cos();
             self.position.ay = self.position.a.sin();
         }
 
-        if is_key_down(KeyCode::Right) {
-            self.moved = true;
+        if self.movement.dir.rt {
             self.position.a = angle_round(self.position.a - 0.1 * settings.player_speed);
             self.position.ax = self.position.a.cos();
             self.position.ay = self.position.a.sin();
         }
 
-        if is_key_down(KeyCode::Down) && self.position.b+settings.fov_z < settings::PI / 2.0 {
-            self.moved = true;
+        if self.movement.dir.dt && self.position.b+settings.fov_z < settings::PI / 2.0 {
             self.position.b = angle_round(self.position.b + 0.1 * settings.player_speed);
             self.position.bxy = self.position.b.cos();
             self.position.bz = self.position.b.sin();
         }
 
-        if is_key_down(KeyCode::Up) && self.position.b-settings.fov_z > -settings::PI / 2.0 {
-            self.moved = true;
+        if self.movement.dir.ut && self.position.b-settings.fov_z > -settings::PI / 2.0 {
             self.position.b = angle_round(self.position.b - 0.1 * settings.player_speed);
             self.position.bxy = self.position.b.cos();
             self.position.bz = self.position.b.sin();
