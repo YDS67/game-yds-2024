@@ -5,7 +5,7 @@ use glam::{vec3, Mat4};
 use std::thread::sleep;
 use std::time::Duration;
 
-const FT_DESIRED: f64 = 0.01666666666667;
+const FT_DESIRED: f64 = 0.001666666666667;
 
 use crate::assets;
 use crate::camera;
@@ -129,6 +129,8 @@ impl EventHandler for Stage {
         self.elapsed_seconds = self.last_frame.elapsed().as_secs_f64();
         println!("Frame time: {:.5}", self.elapsed_seconds);
         let fps = 1. / self.elapsed_seconds;
+        self.settings.delta_time = self.elapsed_seconds as f32;
+        self.settings.player_speed = 12.0*self.settings.delta_time;
         println!("FPS: {:.0}", fps);
 
         if self.player.movement.moving {
