@@ -18,15 +18,13 @@ use crate::settings;
 pub struct Stage {
     ctx: Box<dyn RenderingBackend>,
 
-    pub keys: Vec<KeyCode>,
-    pub settings: settings::Settings,
-    pub ass: assets::Ass,
-    pub player: player::Player,
-    pub depth_buffer: camera::DepthBuffer,
-    pub game_map: map::GameMap,
-    pub mesh: mesh::Mesh,
-    pub pipeline: Pipeline,
-    pub bindings: Bindings,
+    settings: settings::Settings,
+    player: player::Player,
+    depth_buffer: camera::DepthBuffer,
+    game_map: map::GameMap,
+    mesh: mesh::Mesh,
+    pipeline: Pipeline,
+    bindings: Bindings,
     last_frame: std::time::Instant,
     elapsed_seconds: f64,
 }
@@ -35,8 +33,6 @@ impl Stage {
     pub fn new() -> Stage {
 
         let mut ctx: Box<dyn RenderingBackend> = window::new_rendering_backend();
-
-        let keys = vec![KeyCode::W, KeyCode::S, KeyCode::A, KeyCode::D, KeyCode::Left, KeyCode::Right, KeyCode::Down, KeyCode::Up];
 
         let settings = settings::Settings::init();
         let ass = assets::Ass::load();
@@ -106,9 +102,7 @@ impl Stage {
 
         Stage {
             ctx,
-            keys,
             settings,
-            ass,
             player,
             game_map,
             depth_buffer,
@@ -127,11 +121,12 @@ impl Stage {
         }
         self.elapsed_seconds = self.last_frame.elapsed().as_secs_f64();
         self.settings.delta_time = self.elapsed_seconds as f32;
-        println!("Frame time: {:.5}", self.elapsed_seconds);
+        println!("Frame time: {}", self.elapsed_seconds);
         let fps = 1. / self.elapsed_seconds;
         self.settings.player_speed = 12.0*self.settings.delta_time;
         println!("FPS: {:.0}", fps);
         println!("Moving: {}", self.player.movement.moving);
+        println!("Mesh quad count: {}", self.mesh.num);
     }
 
 }

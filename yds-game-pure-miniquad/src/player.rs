@@ -212,9 +212,9 @@ impl Player {
             self.movement.dir.dt = true
         }
 
-        // if is_key_pressed(KeyCode::Space) && !self.movement.dir.u && !self.movement.dir.d {
-        //     self.movement.dir.u = true
-        // }
+        if keycode == KeyCode::Space && !self.movement.dir.u && !self.movement.dir.d {
+             self.movement.dir.u = true
+        }
     }
 
     pub fn read_key_up(&mut self, keycode: KeyCode) {
@@ -242,10 +242,6 @@ impl Player {
         if keycode == KeyCode::Up {
             self.movement.dir.dt = false
         }
-
-        // if is_key_pressed(KeyCode::Space) && !self.movement.dir.u && !self.movement.dir.d {
-        //     self.movement.dir.u = true
-        // }
     }
 
     pub fn walk(&mut self, game_map: &map::GameMap, settings: &settings::Settings) {
