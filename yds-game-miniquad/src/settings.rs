@@ -26,6 +26,7 @@ pub struct Settings {
     pub player_speed: f32,
     pub player_radius: f32,
     pub draw_max_dist: usize,
+    pub draw_steps: usize,
     pub draw_min_dist: usize,
     pub light_dist: f32,
     pub draw_rays_num: usize,
@@ -55,7 +56,8 @@ impl Settings {
         let delta_time = 1.0/60.0;
         let player_speed = 12.0*delta_time;
         let player_radius = 0.5;
-        let draw_max_dist = 1000;
+        let draw_max_dist = 100;
+        let draw_steps = 10;
         let draw_min_dist = 5*5;
         let light_dist = 15.0*15.0;
         let draw_rays_num = 750;
@@ -83,6 +85,7 @@ impl Settings {
             player_speed,
             player_radius,
             draw_max_dist,
+            draw_steps,
             draw_min_dist,
             light_dist,
             draw_rays_num,

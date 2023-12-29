@@ -33,7 +33,6 @@ pub struct FaceData {
 pub struct DepthBuffer {
     pub faces: Vec<FaceData>,
     pub len: usize,
-    pub dmax_current: f32,
     pub dmax: f32,
 }
 
@@ -43,16 +42,21 @@ impl DepthBuffer {
         let mut len = 0;
         let xp = player.position.x;
         let yp = player.position.y;
-        let mut dmax_current = 1.0;
+        let ip = xp.floor() as i32;
+        let jp = yp.floor() as i32;
 
-        for i in 0..settings::MAPSIZE {
-            for j in 0..settings::MAPSIZE {
+        let i1 = (ip-(settings.draw_max_dist as i32)-2).max(0) as usize;
+        let i2 = 1+(ip+(settings.draw_max_dist as i32)+2).min(settings::MAPSIZE as i32 - 1) as usize;
+        let j1 = (jp-(settings.draw_max_dist as i32)-2).max(0) as usize;
+        let j2 = 1+(jp+(settings.draw_max_dist as i32)+2).min(settings::MAPSIZE as i32 - 1) as usize;
+
+        for i in i1..i2 {
+            for j in j1..j2 {
                 let xi = i as f32;
                 let yj = j as f32;
                 if game_map.wall_visible[i][j] {
                 
                     let dist = (xi-xp).powi(2)+(yj+2.0/4.0-yp).powi(2);
-                    if dist > dmax_current {dmax_current = dist}
                     faces.push(FaceData { // face 1
                         top_right_x: i,
                         top_right_y: j,
@@ -68,7 +72,6 @@ impl DepthBuffer {
                     len += 1;
 
                     let dist = (xi+2.0/4.0-xp).powi(2)+(yj+4.0/4.0-yp).powi(2);
-                    if dist > dmax_current {dmax_current = dist}
                     faces.push(FaceData { // face 2
                         top_right_x: i,
                         top_right_y: j+1,
@@ -84,7 +87,6 @@ impl DepthBuffer {
                     len += 1;
 
                     let dist = (xi+4.0/4.0-xp).powi(2)+(yj+2.0/4.0-yp).powi(2);
-                    if dist > dmax_current {dmax_current = dist}
                     faces.push(FaceData { // face 3
                         top_right_x: i+1,
                         top_right_y: j+1,
@@ -100,7 +102,6 @@ impl DepthBuffer {
                     len += 1;
 
                     let dist = (xi+2.0/4.0-xp).powi(2)+(yj-yp).powi(2);
-                    if dist > dmax_current {dmax_current = dist}
                     faces.push(FaceData { // face 4
                         top_right_x: i+1,
                         top_right_y: j,
@@ -118,7 +119,6 @@ impl DepthBuffer {
                 } 
                 if game_map.floor_visible[i][j] {
                     let dist = (xi+2.0/4.0-xp).powi(2)+(yj+2.0/4.0-yp).powi(2);
-                    if dist > dmax_current {dmax_current = dist}
                     faces.push(FaceData {
                         top_right_x: i+1,
                         top_right_y: j+1,
@@ -141,7 +141,6 @@ impl DepthBuffer {
         DepthBuffer {
             faces,
             len,
-            dmax_current,
             dmax: settings.light_dist,
         }
     }
@@ -169,10 +168,10 @@ pub fn find_visible_tiles(game_map: &mut map::GameMap, player: &player::Player, 
         let mut xr = 0.0;
         let mut yr = 0.0;
         let mut break_soon = 0;
-        for _l in 0..settings.draw_max_dist {
+        for _l in 0..settings.draw_max_dist*settings.draw_steps {
             if break_soon >= 3 {break}
-            xr += 0.1 * cphi;
-            yr += 0.1 * sphi;
+            xr += cphi / settings.draw_steps as f32;
+            yr += sphi / settings.draw_steps as f32;
             let x = player.position.x + xr;
             let y = player.position.y + yr;
             let d = xr * xr + yr * yr;
