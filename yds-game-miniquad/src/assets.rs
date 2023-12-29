@@ -7,6 +7,7 @@ pub struct Ass {
     pub ceil_image: ImageBuffer<Rgba<u8>, Vec<u8>>,
     pub wall_image_bot: ImageBuffer<Rgba<u8>, Vec<u8>>,
     pub wall_image_top: ImageBuffer<Rgba<u8>, Vec<u8>>,
+    pub font: ImageBuffer<Rgba<u8>, Vec<u8>>,
 }
 
 impl Ass {
@@ -25,6 +26,9 @@ impl Ass {
                 .unwrap()
                 .to_rgba8(),
             wall_image_top: image::open(Path::new("resources/wall_map_top.png"))
+                .unwrap()
+                .to_rgba8(),
+            font: image::open(Path::new("resources/font.png"))
                 .unwrap()
                 .to_rgba8(),
         }

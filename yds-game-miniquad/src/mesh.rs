@@ -34,7 +34,7 @@ pub struct Mesh {
 }
 
 impl Mesh {
-    pub fn new(depth_buffer: &camera::DepthBuffer, player: &player::Player) -> Mesh {
+    pub fn new_main(depth_buffer: &camera::DepthBuffer, player: &player::Player) -> Mesh {
         #[rustfmt::skip]
         let mut vertices: Vec<Vertex> = Vec::new();
         let mut indices: Vec<i16> = Vec::new();
