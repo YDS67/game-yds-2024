@@ -46,10 +46,21 @@ impl Stage {
 
         let pixels: ImageBuffer<Rgba<u8>, Vec<u8>> = ass.tile_atlas.clone();
         let dims = pixels.dimensions();
-        let texture = ctx.new_texture_from_rgba8(dims.0 as u16, dims.1 as u16, pixels.as_bytes());
 
-        ctx.texture_set_min_filter(texture, FilterMode::Linear, MipmapFilterMode::None);
-        ctx.texture_set_mag_filter(texture, FilterMode::Nearest);
+        let params = TextureParams{
+            kind: TextureKind::Texture2D,
+            format: TextureFormat::RGBA8,
+            wrap: TextureWrap::Clamp,
+            min_filter: FilterMode::Nearest,
+            mag_filter: FilterMode::Nearest,
+            mipmap_filter: MipmapFilterMode::Linear,
+            width: dims.0,
+            height: dims.1,
+            allocate_mipmaps: true,
+        };
+        let texture = ctx.new_texture_from_data_and_format(pixels.as_bytes(), params);
+        ctx.texture_generate_mipmaps(texture);
+        
 
         let bindings = Bindings {
             vertex_buffers: vec![vertex_buffer],

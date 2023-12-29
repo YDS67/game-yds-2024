@@ -20,7 +20,7 @@ void main() {
 
     gl_Position = mvp * vec4(pos, 1.0);
 
-    col1 = 1.0/(1.0+(d/5.0)*(d/5.0));
+    col1 = 1.0/(1.0+(d/10.0)*(d/10.0));
     cols = vec4(col1,col1,col1,1.0);
     
     texcoord = uv;
