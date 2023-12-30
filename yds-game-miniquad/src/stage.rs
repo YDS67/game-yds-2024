@@ -191,9 +191,9 @@ impl Stage {
         let fps = 1. / self.elapsed_seconds;
         self.settings.player_speed = 12.0*self.settings.delta_time;
         self.text = vec![
-            format!("FPS: {:.0}", fps),
-            format!("Quads drawn: {}", self.mesh_main.num),
-            format!("Player moving: {}", self.player.movement.moving),
+            format!("FPS: {:.0},", fps),
+            format!("Quads drawn: {},", self.mesh_main.num),
+            format!("Player moving? {}.", self.player.movement.moving),
         ];
     }
 
