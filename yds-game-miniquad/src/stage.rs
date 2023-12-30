@@ -193,7 +193,7 @@ impl Stage {
         self.text = vec![
             format!("FPS: {:.0},", fps+1.0),
             format!("Quads drawn: {},", self.mesh_main.num),
-            format!("Player moving? {}.", self.player.movement.moving),
+            format!("Player moving: {}.", self.player.movement.moving),
         ];
     }
 
