@@ -10,6 +10,7 @@ mod player;
 mod settings;
 mod shaders;
 mod stage;
+mod text;
 
 fn window_conf() -> Conf {
     let mut conf = Conf {
