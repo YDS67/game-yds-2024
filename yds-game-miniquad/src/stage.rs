@@ -22,11 +22,15 @@ pub struct Stage {
     player: player::Player,
     depth_buffer: camera::DepthBuffer,
     game_map: map::GameMap,
-    mesh: mesh::Mesh,
-    pipeline: Pipeline,
-    bindings: Bindings,
+    mesh_main: mesh::Mesh,
+    mesh_text: mesh::Mesh,
+    pipeline_main: Pipeline,
+    pipeline_text: Pipeline,
+    bindings_main: Bindings,
+    bindings_text: Bindings,
     last_frame: std::time::Instant,
     elapsed_seconds: f64,
+    text: String,
 }
 
 impl Stage {
@@ -43,21 +47,36 @@ impl Stage {
         camera::find_visible_tiles(&mut game_map, &player, &settings);
         let depth_buffer = camera::DepthBuffer::generate(&game_map, &player, &settings);
 
-        let mesh = mesh::Mesh::new_main(&depth_buffer, &player);
+        let text = "text 1234";
 
-        let vertex_buffer = ctx.new_buffer(
+        let mesh_main = mesh::Mesh::new_main(&depth_buffer, &player);
+        let mesh_text = mesh::Mesh::new_text(text, 25.0, 35.0);
+
+        let vertex_buffer_main = ctx.new_buffer(
             BufferType::VertexBuffer,
-            BufferUsage::Stream,
-            BufferSource::slice(&mesh.vertices),
+            BufferUsage::Immutable,
+            BufferSource::slice(&mesh_main.vertices),
         );
 
-        let index_buffer = ctx.new_buffer(
+        let vertex_buffer_text = ctx.new_buffer(
+            BufferType::VertexBuffer,
+            BufferUsage::Immutable,
+            BufferSource::slice(&mesh_text.vertices),
+        );
+
+        let index_buffer_main = ctx.new_buffer(
             BufferType::IndexBuffer,
-            BufferUsage::Stream,
-            BufferSource::slice(&mesh.indices),
+            BufferUsage::Immutable,
+            BufferSource::slice(&mesh_main.indices),
         );
 
-        let pixels: ImageBuffer<Rgba<u8>, Vec<u8>> = ass.tile_atlas.clone();
+        let index_buffer_text = ctx.new_buffer(
+            BufferType::IndexBuffer,
+            BufferUsage::Immutable,
+            BufferSource::slice(&mesh_text.indices),
+        );
+
+        let pixels: ImageBuffer<Rgba<u8>, Vec<u8>> = ass.tile_atlas;
         let dims = pixels.dimensions();
 
         let params = TextureParams{
@@ -71,33 +90,74 @@ impl Stage {
             height: dims.1,
             allocate_mipmaps: true,
         };
-        let texture = ctx.new_texture_from_data_and_format(pixels.as_bytes(), params);
-        ctx.texture_generate_mipmaps(texture);
+        let texture_main = ctx.new_texture_from_data_and_format(pixels.as_bytes(), params);
+        ctx.texture_generate_mipmaps(texture_main);
+
+        let pixels: ImageBuffer<Rgba<u8>, Vec<u8>> = ass.font;
+        let dims = pixels.dimensions();
+
+        let params = TextureParams{
+            kind: TextureKind::Texture2D,
+            format: TextureFormat::RGBA8,
+            wrap: TextureWrap::Clamp,
+            min_filter: FilterMode::Nearest,
+            mag_filter: FilterMode::Linear,
+            mipmap_filter: MipmapFilterMode::None,
+            width: dims.0,
+            height: dims.1,
+            allocate_mipmaps: false,
+        };
+        let texture_text = ctx.new_texture_from_data_and_format(pixels.as_bytes(), params);
         
 
-        let bindings = Bindings {
-            vertex_buffers: vec![vertex_buffer],
-            index_buffer,
-            images: vec![texture],
+        let bindings_main = Bindings {
+            vertex_buffers: vec![vertex_buffer_main],
+            index_buffer: index_buffer_main,
+            images: vec![texture_main],
         };
 
-        let shader = ctx
+        let bindings_text = Bindings {
+            vertex_buffers: vec![vertex_buffer_main, vertex_buffer_text],
+            index_buffer: index_buffer_text,
+            images: vec![texture_text],
+        };
+
+        let shader_main = ctx
             .new_shader(
                 miniquad::ShaderSource::Glsl {
-                    vertex: shaders::VERTEX,
-                    fragment: shaders::FRAGMENT,
+                    vertex: shaders::VERTEX_MAIN,
+                    fragment: shaders::FRAGMENT_MAIN,
                 },
-                shaders::meta(),
+                shaders::meta_main(),
             )
             .unwrap();
 
-        let pipeline = ctx.new_pipeline(
+        let shader_text = ctx
+            .new_shader(
+                miniquad::ShaderSource::Glsl {
+                    vertex: shaders::VERTEX_TEXT,
+                    fragment: shaders::FRAGMENT_TEXT,
+                },
+                shaders::meta_text(),
+            )
+            .unwrap();
+
+        let pipeline_main = ctx.new_pipeline(
             &[BufferLayout::default()],
             &[
                 VertexAttribute::new("pos", VertexFormat::Float3),
                 VertexAttribute::new("uv", VertexFormat::Float2),
             ],
-            shader,
+            shader_main,
+        );
+
+        let pipeline_text = ctx.new_pipeline(
+            &[BufferLayout::default()],
+            &[
+                VertexAttribute::new("pos", VertexFormat::Float3),
+                VertexAttribute::new("uv", VertexFormat::Float2),
+            ],
+            shader_text,
         );
 
         Stage {
@@ -106,11 +166,15 @@ impl Stage {
             player,
             game_map,
             depth_buffer,
-            pipeline,
-            bindings,
-            mesh,
+            pipeline_main,
+            pipeline_text,
+            bindings_main,
+            bindings_text,
+            mesh_main,
+            mesh_text,
             last_frame: Some(std::time::Instant::now()).unwrap(),
             elapsed_seconds: 0.0,
+            text: text.to_string(),
         }
     }
 
@@ -122,9 +186,9 @@ impl Stage {
         self.elapsed_seconds = self.last_frame.elapsed().as_secs_f64();
         self.settings.delta_time = self.elapsed_seconds as f32;
         //println!("Frame time: {}", self.elapsed_seconds);
-        //let fps = 1. / self.elapsed_seconds;
+        let fps = 1. / self.elapsed_seconds;
         self.settings.player_speed = 12.0*self.settings.delta_time;
-        //println!("FPS: {:.0}", fps);
+        self.text = format!(" FPS {:.0} ", fps);
         //println!("Moving: {}", self.player.movement.moving);
         //println!("Mesh quad count: {}", self.mesh.num);
     }
@@ -137,32 +201,54 @@ impl EventHandler for Stage {
 
         self.player.walk(&self.game_map, &self.settings);
 
-        if self.player.movement.moving {
+        if true {
+            for b in 0..self.bindings_main.vertex_buffers.len() {
+                self.ctx.delete_buffer(self.bindings_main.vertex_buffers[b]);
+            }
+            self.ctx.delete_buffer(self.bindings_main.index_buffer);
+
+            for b in 0..self.bindings_text.vertex_buffers.len() {
+                self.ctx.delete_buffer(self.bindings_text.vertex_buffers[b]);
+            }
+            self.ctx.delete_buffer(self.bindings_text.index_buffer);
+
             camera::find_visible_tiles(&mut self.game_map, &self.player, &self.settings);
             self.depth_buffer = camera::DepthBuffer::generate(&self.game_map, &self.player, &self.settings);
     
-            self.mesh = mesh::Mesh::new_main(&self.depth_buffer, &self.player);
-    
-            for b in 0..self.bindings.vertex_buffers.len() {
-                self.ctx.delete_buffer(self.bindings.vertex_buffers[b]);
-            }
-            self.ctx.delete_buffer(self.bindings.index_buffer);
-    
-            let vertex_buffer = self.ctx.new_buffer(
+            self.mesh_main = mesh::Mesh::new_main(&self.depth_buffer, &self.player);
+            self.mesh_text = mesh::Mesh::new_text(&self.text, 25.0, 35.0);
+
+            let vertex_buffer_main = self.ctx.new_buffer(
                 BufferType::VertexBuffer,
-                BufferUsage::Stream,
-                BufferSource::slice(&self.mesh.vertices),
+                BufferUsage::Immutable,
+                BufferSource::slice(&self.mesh_main.vertices),
             );
-    
-            let index_buffer = self.ctx.new_buffer(
+
+            let vertex_buffer_text = self.ctx.new_buffer(
+                BufferType::VertexBuffer,
+                BufferUsage::Immutable,
+                BufferSource::slice(&self.mesh_text.vertices),
+            );
+
+            let index_buffer_main = self.ctx.new_buffer(
                 BufferType::IndexBuffer,
-                BufferUsage::Stream,
-                BufferSource::slice(&self.mesh.indices),
+                BufferUsage::Immutable,
+                BufferSource::slice(&self.mesh_main.indices),
+            );
+
+            let index_buffer_text = self.ctx.new_buffer(
+                BufferType::IndexBuffer,
+                BufferUsage::Immutable,
+                BufferSource::slice(&self.mesh_text.indices),
             );
     
-            self.bindings.vertex_buffers = vec![vertex_buffer];
+            self.bindings_main.vertex_buffers = vec![vertex_buffer_main];
     
-            self.bindings.index_buffer = index_buffer;
+            self.bindings_main.index_buffer = index_buffer_main;
+
+            self.bindings_text.vertex_buffers = vec![vertex_buffer_text];
+    
+            self.bindings_text.index_buffer = index_buffer_text;
     
         }
 
@@ -171,9 +257,9 @@ impl EventHandler for Stage {
     fn draw(&mut self) {
         self.ctx.begin_default_pass(miniquad::PassAction::clear_color(0., 0., 0., 1.0000000));
 
-        self.ctx.apply_pipeline(&self.pipeline);
+        self.ctx.apply_pipeline(&self.pipeline_main);
 
-        self.ctx.apply_bindings(&self.bindings);
+        self.ctx.apply_bindings(&self.bindings_main);
 
         let proj = Mat4::perspective_rh_gl(self.settings.fov_xy, self.settings.screen_aspect, 0.01, settings::MAPSIZE as f32);
         let view = Mat4::look_to_rh(
@@ -183,7 +269,7 @@ impl EventHandler for Stage {
         );
         let mvp = proj * view;
 
-        self.ctx.apply_uniforms(miniquad::UniformsSource::table(&shaders::Uniforms {
+        self.ctx.apply_uniforms(miniquad::UniformsSource::table(&shaders::UniformsMain {
             mvp,
             playerpos: (
                 self.player.position.x,
@@ -191,7 +277,16 @@ impl EventHandler for Stage {
                 self.player.position.z,
             ),
         }));
-        self.ctx.draw(0, &self.mesh.num * 6, 1);
+        self.ctx.draw(0, self.mesh_main.num * 6, 1);
+
+        self.ctx.apply_pipeline(&self.pipeline_text);
+
+        self.ctx.apply_bindings(&self.bindings_text);
+
+        self.ctx.apply_uniforms(miniquad::UniformsSource::table(&shaders::UniformsText {
+        }));
+
+        self.ctx.draw(0, self.mesh_text.num * 6, 1);
 
         self.ctx.end_render_pass();
 

@@ -193,16 +193,16 @@ impl Player {
         if keycode == KeyCode::S {
             self.movement.dir.b = true
         }
-        if keycode == KeyCode::A {
+        if keycode == KeyCode::Left {
             self.movement.dir.l = true
         }
-        if keycode == KeyCode::D {
+        if keycode == KeyCode::Right {
             self.movement.dir.r = true
         }
-        if keycode == KeyCode::Left {
+        if keycode == KeyCode::A {
             self.movement.dir.lt = true
         }
-        if keycode == KeyCode::Right {
+        if keycode == KeyCode::D {
             self.movement.dir.rt = true
         }
         if keycode == KeyCode::Down {
@@ -224,16 +224,16 @@ impl Player {
         if keycode == KeyCode::S {
             self.movement.dir.b = false
         }
-        if keycode == KeyCode::A {
+        if keycode == KeyCode::Left {
             self.movement.dir.l = false
         }
-        if keycode == KeyCode::D {
+        if keycode == KeyCode::Right {
             self.movement.dir.r = false
         }
-        if keycode == KeyCode::Left {
+        if keycode == KeyCode::A {
             self.movement.dir.lt = false
         }
-        if keycode == KeyCode::Right {
+        if keycode == KeyCode::D {
             self.movement.dir.rt = false
         }
         if keycode == KeyCode::Down {
