@@ -180,7 +180,7 @@ impl Stage {
         }
     }
 
-    fn show_data(&mut self) {
+    fn frame_time(&mut self) {
         self.elapsed_seconds = self.last_frame.elapsed().as_secs_f64();
         if self.elapsed_seconds < FT_DESIRED {
             sleep(Duration::from_secs_f64(FT_DESIRED - self.elapsed_seconds));
@@ -188,8 +188,11 @@ impl Stage {
         self.elapsed_seconds = self.last_frame.elapsed().as_secs_f64();
         self.settings.delta_time = self.elapsed_seconds as f32;
 
-        let fps = 1. / self.elapsed_seconds;
         self.settings.player_speed = 12.0*self.settings.delta_time;
+    }
+
+    fn show_data(&mut self) {
+        let fps = 1. / self.elapsed_seconds;
         self.text = vec![
             format!("FPS: {:.0},", fps+1.0),
             format!("Quads drawn: {},", self.mesh_main.num),
@@ -201,6 +204,7 @@ impl Stage {
 
 impl EventHandler for Stage {
     fn update(&mut self) {
+        self.frame_time();
         self.show_data();
 
         self.player.walk(&self.game_map, &self.settings);
