@@ -28,7 +28,7 @@ impl Ass {
             wall_image_top: image::open(Path::new("resources/wall_map_top.png"))
                 .unwrap()
                 .to_rgba8(),
-            font: image::open(Path::new("resources/font.png"))
+            font: image::open(Path::new("resources/monospace.png"))
                 .unwrap()
                 .to_rgba8(),
         }
