@@ -10,7 +10,7 @@ const Y2: f32 = 22.0;
 const Y3: f32 = 56.0;
 const Y4: f32 = Y3+HEIGHT;
 const Y5: f32 = 110.0;
-const TEXWIDTH: f32 = 276.0;
+const TEXWIDTH: f32 = 220.0;
 const TEXHEIGHT: f32 = 132.0;
 
 pub fn string_to_uv(text: &str) -> Vec<TextureUV> {
@@ -67,6 +67,11 @@ pub fn string_to_uv(text: &str) -> Vec<TextureUV> {
         ('x', TextureUV{u1: X1+10.0*WIDTH, u2: X1+11.0*WIDTH, v1: Y4, v2: Y4+HEIGHT}),
         ('y', TextureUV{u1: X1+11.0*WIDTH, u2: X1+12.0*WIDTH, v1: Y4, v2: Y4+HEIGHT}),
         ('z', TextureUV{u1: X1+12.0*WIDTH, u2: X1+13.0*WIDTH, v1: Y4, v2: Y4+HEIGHT}),
+        ('*', TextureUV{u1: X1+13.0*WIDTH, u2: X1+14.0*WIDTH, v1: Y4, v2: Y4+HEIGHT}),
+        ('“', TextureUV{u1: X1+14.0*WIDTH, u2: X1+15.0*WIDTH, v1: Y4, v2: Y4+HEIGHT}),
+        ('”', TextureUV{u1: X1+15.0*WIDTH, u2: X1+16.0*WIDTH, v1: Y4, v2: Y4+HEIGHT}),
+        ('!', TextureUV{u1: X1+16.0*WIDTH, u2: X1+17.0*WIDTH, v1: Y4, v2: Y4+HEIGHT}),
+        ('’', TextureUV{u1: X1+17.0*WIDTH, u2: X1+18.0*WIDTH, v1: Y4, v2: Y4+HEIGHT}),
         ('1', TextureUV{u1: X1+0.0*WIDTH, u2: X1+1.0*WIDTH, v1: Y5, v2: Y5+HEIGHT}),
         ('2', TextureUV{u1: X1+1.0*WIDTH, u2: X1+2.0*WIDTH, v1: Y5, v2: Y5+HEIGHT}),
         ('3', TextureUV{u1: X1+2.0*WIDTH, u2: X1+3.0*WIDTH, v1: Y5, v2: Y5+HEIGHT}),
@@ -85,10 +90,6 @@ pub fn string_to_uv(text: &str) -> Vec<TextureUV> {
         ('(', TextureUV{u1: X1+15.0*WIDTH, u2: X1+16.0*WIDTH, v1: Y5, v2: Y5+HEIGHT}),
         (')', TextureUV{u1: X1+16.0*WIDTH, u2: X1+17.0*WIDTH, v1: Y5, v2: Y5+HEIGHT}),
         (';', TextureUV{u1: X1+17.0*WIDTH, u2: X1+18.0*WIDTH, v1: Y5, v2: Y5+HEIGHT}),
-        ('*', TextureUV{u1: X1+18.0*WIDTH, u2: X1+19.0*WIDTH, v1: Y5, v2: Y5+HEIGHT}),
-        ('“', TextureUV{u1: X1+19.0*WIDTH, u2: X1+20.0*WIDTH, v1: Y5, v2: Y5+HEIGHT}),
-        ('”', TextureUV{u1: X1+20.0*WIDTH, u2: X1+21.0*WIDTH, v1: Y5, v2: Y5+HEIGHT}),
-        ('!', TextureUV{u1: X1+21.0*WIDTH, u2: X1+22.0*WIDTH, v1: Y5, v2: Y5+HEIGHT}),
     ]);
 
     let mut coords = Vec::new();
