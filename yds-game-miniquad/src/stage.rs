@@ -311,4 +311,8 @@ impl EventHandler for Stage {
     fn key_up_event(&mut self, keycode: KeyCode, _keymods: KeyMods) {
         self.player.read_key_up(keycode)
     }
+
+    fn resize_event(&mut self, width: f32, height: f32) {
+        self.settings.screen_change(width, height);
+    }
 }
