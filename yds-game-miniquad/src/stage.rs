@@ -187,12 +187,14 @@ impl Stage {
         }
         self.elapsed_seconds = self.last_frame.elapsed().as_secs_f64();
         self.settings.delta_time = self.elapsed_seconds as f32;
-        //println!("Frame time: {}", self.elapsed_seconds);
+
         let fps = 1. / self.elapsed_seconds;
         self.settings.player_speed = 12.0*self.settings.delta_time;
-        self.text = vec!["Awesome game".to_string(), format!("FPS: {:.0}", fps)];
-        //println!("Moving: {}", self.player.movement.moving);
-        //println!("Mesh quad count: {}", self.mesh.num);
+        self.text = vec![
+            format!("FPS: {:.0}", fps),
+            format!("Quads drawn: {}", self.mesh_main.num),
+            format!("Player moving: {}", self.player.movement.moving),
+        ];
     }
 
 }
