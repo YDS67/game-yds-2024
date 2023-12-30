@@ -42,22 +42,35 @@ pub const VERTEX_TEXT: &str = r#"#version 330 core
 in vec3 pos;
 in vec2 uv;
 
+uniform vec4 fontcolor;
+
 out vec2 texcoord;
+out vec4 fontcolor1;
 
 void main() {
-    gl_Position = vec4((pos.x/1280.0-0.5)*2.0, (0.5-pos.y/800.0)*2.0, 0.0, 1.0);
-    texcoord = uv/vec2(276.0,128.0);
+    gl_Position = vec4((pos.x-0.5)*2.0, (0.5-pos.y)*2.0, 0.0, 1.0);
+    texcoord = uv;
+    fontcolor1 = fontcolor;
 }"#;
 
 pub const FRAGMENT_TEXT: &str = r#"#version 330 core
 in vec2 texcoord;
+in vec4 fontcolor1;
 
 out vec4 FragColor;
 
 uniform sampler2D tex;
 
+vec4 col;
+
 void main() {
-    FragColor = texture(tex, texcoord);
+    col = texture(tex, texcoord);
+
+    if (col.x+col.y+col.z > 2.99) {
+        discard;
+    } else {
+        FragColor = fontcolor1;
+    }
 }"#;
 
 pub fn meta_main() -> ShaderMeta {
@@ -77,6 +90,7 @@ pub fn meta_text() -> ShaderMeta {
         images: vec!["tex".to_string()],
         uniforms: UniformBlockLayout {
             uniforms: vec![
+                UniformDesc::new("fontcolor", UniformType::Float4),
             ],
         },
     }
@@ -90,5 +104,5 @@ pub struct UniformsMain {
 
 #[repr(C)]
 pub struct UniformsText {
-    
+    pub fontcolor: (f32, f32, f32, f32),
 }

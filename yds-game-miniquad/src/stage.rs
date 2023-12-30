@@ -30,7 +30,8 @@ pub struct Stage {
     bindings_text: Bindings,
     last_frame: std::time::Instant,
     elapsed_seconds: f64,
-    text: String,
+    text: Vec<String>,
+    text_col: (f32, f32, f32, f32),
 }
 
 impl Stage {
@@ -50,7 +51,7 @@ impl Stage {
         let text = "text 1234";
 
         let mesh_main = mesh::Mesh::new_main(&depth_buffer, &player);
-        let mesh_text = mesh::Mesh::new_text(text, 25.0, 35.0);
+        let mesh_text = mesh::Mesh::new_text(&vec![text.to_string()], 25.0, 35.0,2.0/settings.screen_width_f, 2.0/settings.screen_height_f);
 
         let vertex_buffer_main = ctx.new_buffer(
             BufferType::VertexBuffer,
@@ -101,7 +102,7 @@ impl Stage {
             format: TextureFormat::RGBA8,
             wrap: TextureWrap::Clamp,
             min_filter: FilterMode::Nearest,
-            mag_filter: FilterMode::Linear,
+            mag_filter: FilterMode::Nearest,
             mipmap_filter: MipmapFilterMode::None,
             width: dims.0,
             height: dims.1,
@@ -174,7 +175,8 @@ impl Stage {
             mesh_text,
             last_frame: Some(std::time::Instant::now()).unwrap(),
             elapsed_seconds: 0.0,
-            text: text.to_string(),
+            text: vec!["          ".to_string(),text.to_string(),"          ".to_string()],
+            text_col: (1.0, 1.0, 0.0, 1.0),
         }
     }
 
@@ -188,7 +190,7 @@ impl Stage {
         //println!("Frame time: {}", self.elapsed_seconds);
         let fps = 1. / self.elapsed_seconds;
         self.settings.player_speed = 12.0*self.settings.delta_time;
-        self.text = format!(" FPS {:.0} ", fps);
+        self.text = vec!["Awesome game".to_string(), format!("FPS: {:.0}", fps)];
         //println!("Moving: {}", self.player.movement.moving);
         //println!("Mesh quad count: {}", self.mesh.num);
     }
@@ -216,7 +218,7 @@ impl EventHandler for Stage {
             self.depth_buffer = camera::DepthBuffer::generate(&self.game_map, &self.player, &self.settings);
     
             self.mesh_main = mesh::Mesh::new_main(&self.depth_buffer, &self.player);
-            self.mesh_text = mesh::Mesh::new_text(&self.text, 25.0, 35.0);
+            self.mesh_text = mesh::Mesh::new_text(&self.text, 10.0, 10.0,2.0/self.settings.screen_width_f, 2.0/self.settings.screen_height_f);
 
             let vertex_buffer_main = self.ctx.new_buffer(
                 BufferType::VertexBuffer,
@@ -284,6 +286,7 @@ impl EventHandler for Stage {
         self.ctx.apply_bindings(&self.bindings_text);
 
         self.ctx.apply_uniforms(miniquad::UniformsSource::table(&shaders::UniformsText {
+            fontcolor: self.text_col,
         }));
 
         self.ctx.draw(0, self.mesh_text.num * 6, 1);

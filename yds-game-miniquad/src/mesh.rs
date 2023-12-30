@@ -30,6 +30,15 @@ pub struct TextureUV {
     pub v2: f32,
 }
 
+impl TextureUV {
+    pub fn normalize(&mut self, width: f32, height: f32) {
+        self.u1 = self.u1/width;
+        self.u2 = self.u2/width;
+        self.v1 = self.v1/height;
+        self.v2 = self.v2/height;
+    }
+}
+
 #[repr(C)]
 pub struct Vertex {
     pos: Vec3,
@@ -289,63 +298,67 @@ impl Mesh {
         }
     }
 
-    pub fn new_text(text: &str, x0: f32, y0: f32) -> Mesh {
-        let coords = text::string_to_uv(text);
+    pub fn new_text(text: &Vec<String>, x0: f32, y0: f32, scalex: f32, scaley: f32) -> Mesh {
         let mut vertices: Vec<Vertex> = Vec::new();
         let mut indices: Vec<i16> = Vec::new();
-
         let mut idx = 0;
+        let mut ys = y0;
 
-        for l in 0..coords.len() {
-            let tex_uv = coords[l];
-            let dx = (l as f32)*text::WIDTH;
+        for s in text {
+            let coords = text::string_to_uv(&s);
 
-            let x = x0 + dx + text::WIDTH;
-            let y = y0;
-            vertices.push(Vertex {
-                pos: Vec3 { x, y, z: 0.0 },
-                uv: Vec2 {
-                    x: tex_uv.u2,
-                    y: tex_uv.v1,
-                },
-            }); // top right
-            let x = x0 + dx + text::WIDTH;
-            let y = y0 + text::HEIGHT;
-            vertices.push(Vertex {
-                pos: Vec3 { x, y, z: 0.0 },
-                uv: Vec2 {
-                    x: tex_uv.u2,
-                    y: tex_uv.v2,
-                },
-            }); // bottom right
-            let x = x0 + dx;
-            let y = y0 + text::HEIGHT;
-            vertices.push(Vertex {
-                pos: Vec3 { x, y, z: 0.0 },
-                uv: Vec2 {
-                    x: tex_uv.u1,
-                    y: tex_uv.v2,
-                },
-            }); // bottom left
-            let x = x0 + dx;
-            let y = y0;
-            vertices.push(Vertex {
-                pos: Vec3 { x, y, z: 0.0 },
-                uv: Vec2 {
-                    x: tex_uv.u1,
-                    y: tex_uv.v1,
-                },
-            }); // top left
+            for l in 0..coords.len() {
+                let tex_uv = coords[l];
+                let dx = (l as f32) * text::WIDTH;
 
-            indices.push(4 * idx);
-            indices.push(4 * idx + 1);
-            indices.push(4 * idx + 3);
-            indices.push(4 * idx + 1);
-            indices.push(4 * idx + 2);
-            indices.push(4 * idx + 3);
+                let x = (x0 + dx + text::WIDTH)*scalex;
+                let y = ys*scaley;
+                vertices.push(Vertex {
+                    pos: Vec3 { x, y, z: 0.0 },
+                    uv: Vec2 {
+                        x: tex_uv.u2,
+                        y: tex_uv.v1,
+                    },
+                }); // top right
+                let x = (x0 + dx + text::WIDTH)*scalex;
+                let y = (ys + text::HEIGHT)*scaley;
+                vertices.push(Vertex {
+                    pos: Vec3 { x, y, z: 0.0 },
+                    uv: Vec2 {
+                        x: tex_uv.u2,
+                        y: tex_uv.v2,
+                    },
+                }); // bottom right
+                let x = (x0 + dx)*scalex;
+                let y = (ys + text::HEIGHT)*scaley;
+                vertices.push(Vertex {
+                    pos: Vec3 { x, y, z: 0.0 },
+                    uv: Vec2 {
+                        x: tex_uv.u1,
+                        y: tex_uv.v2,
+                    },
+                }); // bottom left
+                let x = (x0 + dx)*scalex;
+                let y = ys*scaley;
+                vertices.push(Vertex {
+                    pos: Vec3 { x, y, z: 0.0 },
+                    uv: Vec2 {
+                        x: tex_uv.u1,
+                        y: tex_uv.v1,
+                    },
+                }); // top left
 
-            idx = idx + 1;
+                indices.push(4 * idx);
+                indices.push(4 * idx + 1);
+                indices.push(4 * idx + 3);
+                indices.push(4 * idx + 1);
+                indices.push(4 * idx + 2);
+                indices.push(4 * idx + 3);
 
+                idx = idx + 1;
+            }
+
+            ys = ys + text::HEIGHT;
         }
 
         Mesh {

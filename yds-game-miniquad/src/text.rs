@@ -9,6 +9,8 @@ const Y2: f32 = 23.0;
 const Y3: f32 = 56.0;
 const Y4: f32 = Y3+HEIGHT;
 const Y5: f32 = 111.0;
+const TEXWIDTH: f32 = 276.0;
+const TEXHEIGHT: f32 = 128.0;
 
 pub fn string_to_uv(text: &str) -> Vec<TextureUV> {
     let dictionary: HashMap<char, TextureUV> = HashMap::from([
@@ -75,6 +77,8 @@ pub fn string_to_uv(text: &str) -> Vec<TextureUV> {
         ('9', TextureUV{u1: X1+8.0*WIDTH, u2: X1+9.0*WIDTH, v1: Y5, v2: Y5+HEIGHT}),
         ('0', TextureUV{u1: X1+9.0*WIDTH, u2: X1+10.0*WIDTH, v1: Y5, v2: Y5+HEIGHT}),
         (' ', TextureUV{u1: X1+10.0*WIDTH, u2: X1+11.0*WIDTH, v1: Y5, v2: Y5+HEIGHT}),
+        ('.', TextureUV{u1: X1+11.0*WIDTH, u2: X1+12.0*WIDTH, v1: Y5, v2: Y5+HEIGHT}),
+        (':', TextureUV{u1: X1+12.0*WIDTH, u2: X1+13.0*WIDTH, v1: Y5, v2: Y5+HEIGHT}),
     ]);
 
     let mut coords = Vec::new();
@@ -83,6 +87,10 @@ pub fn string_to_uv(text: &str) -> Vec<TextureUV> {
 
     for letter in letters {
         coords.push(*dictionary.get(&letter).unwrap())
+    }
+
+    for c in 0..coords.len() {
+        coords[c].normalize(TEXWIDTH, TEXHEIGHT);
     }
 
     coords
