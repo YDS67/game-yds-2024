@@ -6,12 +6,12 @@ pub const HEIGHT: f32 = 20.0;
 pub const HEIGHT_CAP: f32 = 20.0;
 const X1: f32 = 3.0;
 const Y1: f32 = 2.0;
-const Y2: f32 = 22.0;
-const Y3: f32 = 56.0;
+const Y2: f32 = Y1+HEIGHT_CAP;
+const Y3: f32 = Y2+HEIGHT_CAP;
 const Y4: f32 = Y3+HEIGHT;
-const Y5: f32 = 110.0;
-const TEXWIDTH: f32 = 220.0;
-const TEXHEIGHT: f32 = 132.0;
+const Y5: f32 = Y4+HEIGHT;
+const TEXWIDTH: f32 = 256.0;
+const TEXHEIGHT: f32 = 128.0;
 
 pub fn string_to_uv(text: &str) -> Vec<TextureUV> {
     let dictionary: HashMap<char, TextureUV> = HashMap::from([

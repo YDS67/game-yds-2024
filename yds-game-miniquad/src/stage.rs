@@ -306,7 +306,9 @@ impl EventHandler for Stage {
 
     fn key_down_event(&mut self, keycode: KeyCode, _keymods: KeyMods, _repeat: bool) {
         if keycode == KeyCode::F {
-            miniquad::window::set_fullscreen(true)
+            miniquad::window::set_fullscreen(true);
+            let screen = miniquad::window::screen_size();
+            self.settings.screen_change(screen.0, screen.1);
         }
         if keycode == KeyCode::Escape {
             miniquad::window::quit()
