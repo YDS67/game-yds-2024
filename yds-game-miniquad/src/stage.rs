@@ -14,9 +14,11 @@ use crate::mesh;
 use crate::player;
 use crate::shaders;
 use crate::settings;
+use crate::text;
 
 pub struct Stage {
     ctx: Box<dyn RenderingBackend>,
+    mouse_coords: (f32, f32),
 
     settings: settings::Settings,
     player: player::Player,
@@ -30,8 +32,7 @@ pub struct Stage {
     bindings_text: Bindings,
     last_frame: std::time::Instant,
     elapsed_seconds: f64,
-    text: Vec<String>,
-    text_col: (f32, f32, f32, f32),
+    text: text::Text,
 }
 
 impl Stage {
@@ -48,10 +49,10 @@ impl Stage {
         camera::find_visible_tiles(&mut game_map, &player, &settings);
         let depth_buffer = camera::DepthBuffer::generate(&game_map, &player, &settings);
 
-        let text = "text 1234";
+        let text = text::Text::new_from(vec!["Text default"]);
 
         let mesh_main = mesh::Mesh::new_main(&depth_buffer, &player);
-        let mesh_text = mesh::Mesh::new_text(&vec![text.to_string()], 25.0, 35.0,2.0/settings.screen_width_f, 2.0/settings.screen_height_f);
+        let mesh_text = mesh::Mesh::new_text(&text.lines, text.x0, text.y0,text.scale/settings.screen_width_f, text.scale/settings.screen_height_f);
 
         let vertex_buffer_main = ctx.new_buffer(
             BufferType::VertexBuffer,
@@ -163,6 +164,7 @@ impl Stage {
 
         Stage {
             ctx,
+            mouse_coords: (0.0, 0.0),
             settings,
             player,
             game_map,
@@ -175,8 +177,7 @@ impl Stage {
             mesh_text,
             last_frame: Some(std::time::Instant::now()).unwrap(),
             elapsed_seconds: 0.0,
-            text: vec!["          ".to_string(),text.to_string(),"          ".to_string()],
-            text_col: (1.0, 1.0, 0.0, 1.0),
+            text: text::Text::new_from(vec!["          " , "          "]),
         }
     }
 
@@ -193,11 +194,29 @@ impl Stage {
 
     fn show_data(&mut self) {
         let fps = 1. / self.elapsed_seconds;
-        self.text = vec![
-            format!("FPS: {:.0},", fps+1.0),
-            format!("Quads drawn: {},", self.mesh_main.num),
-            format!("Player moving: {}.", self.player.movement.moving),
-        ];
+        self.text = text::Text::new_from(vec![
+            &format!("FPS: {:.0}", fps+1.0),
+            &format!("Line active: {}", self.text.act_no),
+            &format!("Light distance: {}", self.settings.light_dist),
+            //&format!("Mouse coords: ({}, {})", self.mouse_coords.0, self.mouse_coords.1),
+        ]);
+    }
+
+    fn gui_highlight(&mut self, x: f32, y: f32) {
+        let mut some_active = false;
+        for l in 0..self.text.lines.len() {
+            if x > self.text.x0*self.text.scale 
+                && x < self.text.x0*self.text.scale + self.text.line_width[l] 
+                && y > self.text.line_y[l+1]
+                && y < self.text.line_y[l+1] + self.text.line_height {
+                self.text.act_no = l+ 1;
+                some_active = true
+            }
+        }
+
+        if !some_active {
+            self.text.act_no = 0;
+        }
     }
 
 }
@@ -206,6 +225,7 @@ impl EventHandler for Stage {
     fn update(&mut self) {
         self.frame_time();
         self.show_data();
+        self.gui_highlight(self.mouse_coords.0, self.mouse_coords.1);
 
         self.player.walk(&self.game_map, &self.settings);
 
@@ -224,7 +244,7 @@ impl EventHandler for Stage {
             self.depth_buffer = camera::DepthBuffer::generate(&self.game_map, &self.player, &self.settings);
     
             self.mesh_main = mesh::Mesh::new_main(&self.depth_buffer, &self.player);
-            self.mesh_text = mesh::Mesh::new_text(&self.text, 10.0, 10.0,2.0/self.settings.screen_width_f, 2.0/self.settings.screen_height_f);
+            self.mesh_text = mesh::Mesh::new_text(&self.text.lines, self.text.x0, self.text.y0,self.text.scale/self.settings.screen_width_f, self.text.scale/self.settings.screen_height_f);
 
             let vertex_buffer_main = self.ctx.new_buffer(
                 BufferType::VertexBuffer,
@@ -284,6 +304,7 @@ impl EventHandler for Stage {
                 self.player.position.y,
                 self.player.position.z,
             ),
+            lightdist: self.settings.light_dist,
         }));
         self.ctx.draw(0, self.mesh_main.num * 6, 1);
 
@@ -292,7 +313,10 @@ impl EventHandler for Stage {
         self.ctx.apply_bindings(&self.bindings_text);
 
         self.ctx.apply_uniforms(miniquad::UniformsSource::table(&shaders::UniformsText {
-            fontcolor: self.text_col,
+            fontcolor: self.text.font_col,
+            actcolor: self.text.act_col,
+            activeline: (self.text.line_y[self.text.act_no]/self.settings.screen_height_f, 
+            (self.text.line_y[self.text.act_no] + self.text.line_height)/self.settings.screen_height_f),
         }));
 
         self.ctx.draw(0, self.mesh_text.num * 6, 1);
@@ -310,6 +334,12 @@ impl EventHandler for Stage {
             let screen = miniquad::window::screen_size();
             self.settings.screen_change(screen.0, screen.1);
         }
+        if keycode == KeyCode::L {
+            self.settings.light_dist += 1.0
+        }
+        if keycode == KeyCode::K && self.settings.light_dist > 0.0 {
+            self.settings.light_dist -= 1.0
+        }
         if keycode == KeyCode::Escape {
             miniquad::window::quit()
         } 
@@ -322,5 +352,9 @@ impl EventHandler for Stage {
 
     fn resize_event(&mut self, width: f32, height: f32) {
         self.settings.screen_change(width, height);
+    }
+
+    fn mouse_motion_event(&mut self, x: f32, y: f32) {
+        self.mouse_coords = (x, y)
     }
 }

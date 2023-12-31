@@ -59,7 +59,7 @@ impl Settings {
         let draw_max_dist = 100;
         let draw_steps = 10;
         let draw_min_dist = 5*5;
-        let light_dist = 15.0*15.0;
+        let light_dist = 10.0;
         let draw_rays_num = 750;
         let tolerance = 1e-16;
         Settings {
