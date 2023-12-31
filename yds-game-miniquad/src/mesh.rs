@@ -298,21 +298,21 @@ impl Mesh {
         }
     }
 
-    pub fn new_text(text: &Vec<String>, x0: f32, y0: f32, scalex: f32, scaley: f32) -> Mesh {
+    pub fn new_text(text: &text::Text, scalex: f32, scaley: f32) -> Mesh {
         let mut vertices: Vec<Vertex> = Vec::new();
         let mut indices: Vec<i16> = Vec::new();
         let mut idx = 0;
-        let mut ys = y0;
 
-        for s in text {
-            let coords = text::string_to_uv(&s);
+        for s in 0..text.lines.len() {
+            let coords = text::string_to_uv(&text.lines[s]);
 
             for l in 0..coords.len() {
                 let tex_uv = coords[l];
-                let dx = (l as f32) * text::WIDTH;
 
-                let x = (x0 + dx + text::WIDTH)*scalex;
-                let y = ys*scaley;
+                let lf = l as f32;
+
+                let x = (text.line_x[s+1] + (lf+1.0)*text::WIDTH*text.scale)*scalex;
+                let y = text.line_y[s+1]*scaley;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: 0.0 },
                     uv: Vec2 {
@@ -320,8 +320,8 @@ impl Mesh {
                         y: tex_uv.v1,
                     },
                 }); // top right
-                let x = (x0 + dx + text::WIDTH)*scalex;
-                let y = (ys + text::HEIGHT)*scaley;
+                let x = (text.line_x[s+1] + (lf+1.0)*text::WIDTH*text.scale)*scalex;
+                let y = (text.line_y[s+1]+text.line_height)*scaley;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: 0.0 },
                     uv: Vec2 {
@@ -329,8 +329,8 @@ impl Mesh {
                         y: tex_uv.v2,
                     },
                 }); // bottom right
-                let x = (x0 + dx)*scalex;
-                let y = (ys + text::HEIGHT)*scaley;
+                let x = (text.line_x[s+1] + lf*text::WIDTH*text.scale)*scalex;
+                let y = (text.line_y[s+1]+text.line_height)*scaley;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: 0.0 },
                     uv: Vec2 {
@@ -338,8 +338,8 @@ impl Mesh {
                         y: tex_uv.v2,
                     },
                 }); // bottom left
-                let x = (x0 + dx)*scalex;
-                let y = ys*scaley;
+                let x = (text.line_x[s+1] + lf*text::WIDTH*text.scale)*scalex;
+                let y = (text.line_y[s+1])*scaley;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: 0.0 },
                     uv: Vec2 {
@@ -357,8 +357,6 @@ impl Mesh {
 
                 idx = idx + 1;
             }
-
-            ys = ys + text::HEIGHT;
         }
 
         Mesh {

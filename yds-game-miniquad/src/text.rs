@@ -16,6 +16,7 @@ const TEXHEIGHT: f32 = 128.0;
 pub struct Text {
     pub lines: Vec<String>,
     pub line_width: Vec<f32>,
+    pub line_x: Vec<f32>,
     pub line_y: Vec<f32>,
     pub font_col: (f32, f32, f32, f32),
     pub act_col: (f32, f32, f32, f32),
@@ -29,23 +30,28 @@ pub struct Text {
 
 impl Text {
     pub fn new_from(lines: Vec<&str>) -> Text {
-        let x0 = 10.0;
-        let y0 = 10.0;
-        let scale = 2.0;
+        let x0 = 20.0;
+        let y0 = 20.0;
+        let scale = 1.5;
         let line_height = HEIGHT*scale;
         let mut lines1 = Vec::new();
         let mut line_width = Vec::new();
+        let mut line_x = Vec::new();
         let mut line_y = Vec::new();
+        line_x.push(x0);
         line_y.push(-HEIGHT);
+        line_width.push(0.0);
         for l in 0..lines.len() {
             lines1.push(lines[l].to_string());
             let letters: Vec<char> = lines[l].chars().collect();
             line_width.push(letters.len() as f32 * WIDTH * scale);
+            line_x.push(x0*scale);
             line_y.push(y0*scale + (l as f32)*line_height)
         }
         Text {
             lines: lines1,
             line_width,
+            line_x,
             line_y,
             font_col: (1.0, 1.0, 0.0, 1.0),
             act_col: (0.8, 0.0, 0.2, 1.0),
@@ -55,6 +61,14 @@ impl Text {
             scale,
             line_height,
             some_active: false,
+        }
+    }
+
+    pub fn center(&mut self) {
+        let wm = vec_max(&self.line_width);
+        self.x0 = self.x0 + 0.5*wm;
+        for l in 0..self.lines.len() {
+            self.line_x[l+1] = self.x0 - 0.5*self.line_width[l+1]
         }
     }
 }
@@ -151,4 +165,12 @@ pub fn string_to_uv(text: &str) -> Vec<TextureUV> {
     }
 
     coords
+}
+
+fn vec_max(vect: &Vec<f32>) -> f32{
+    let mut m = 0.0;
+    for e in 0..vect.len() {
+        if m < vect[e] {m = vect[e]}
+    }
+    m
 }

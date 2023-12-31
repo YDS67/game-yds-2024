@@ -52,7 +52,7 @@ impl Stage {
         let text = text::Text::new_from(vec!["Text default"]);
 
         let mesh_main = mesh::Mesh::new_main(&depth_buffer, &player);
-        let mesh_text = mesh::Mesh::new_text(&text.lines, text.x0, text.y0,text.scale/settings.screen_width_f, text.scale/settings.screen_height_f);
+        let mesh_text = mesh::Mesh::new_text(&text, 1.0/settings.screen_width_f,  1.0/settings.screen_height_f);
 
         let vertex_buffer_main = ctx.new_buffer(
             BufferType::VertexBuffer,
@@ -200,14 +200,15 @@ impl Stage {
             &format!("Light distance: {}", self.settings.light_dist),
             //&format!("Mouse coords: ({}, {})", self.mouse_coords.0, self.mouse_coords.1),
         ]);
+        self.text.center();
     }
 
     fn gui_highlight(&mut self, x: f32, y: f32) {
         let mut some_active = false;
         for l in 0..self.text.lines.len() {
-            if x > self.text.x0*self.text.scale 
-                && x < self.text.x0*self.text.scale + self.text.line_width[l] 
-                && y > self.text.line_y[l+1]
+            if x > self.text.line_x[l+1] 
+                && x < self.text.line_x[l+1] + self.text.line_width[l+1] 
+                && y > self.text.line_y[l+1] 
                 && y < self.text.line_y[l+1] + self.text.line_height {
                 self.text.act_no = l+ 1;
                 some_active = true
@@ -244,7 +245,7 @@ impl EventHandler for Stage {
             self.depth_buffer = camera::DepthBuffer::generate(&self.game_map, &self.player, &self.settings);
     
             self.mesh_main = mesh::Mesh::new_main(&self.depth_buffer, &self.player);
-            self.mesh_text = mesh::Mesh::new_text(&self.text.lines, self.text.x0, self.text.y0,self.text.scale/self.settings.screen_width_f, self.text.scale/self.settings.screen_height_f);
+            self.mesh_text = mesh::Mesh::new_text(&self.text, 1.0/self.settings.screen_width_f,  1.0/self.settings.screen_height_f);
 
             let vertex_buffer_main = self.ctx.new_buffer(
                 BufferType::VertexBuffer,
