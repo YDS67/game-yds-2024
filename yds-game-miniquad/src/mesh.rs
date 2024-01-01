@@ -303,6 +303,54 @@ impl Mesh {
         let mut indices: Vec<i16> = Vec::new();
         let mut idx = 0;
 
+        let tex_uv = text::string_to_uv("#")[0];
+
+        let x = 0.5+text::WIDTH*text.scale*scalex;
+        let y = 0.5-text::HEIGHT*text.scale*scaley;
+        vertices.push(Vertex {
+            pos: Vec3 { x, y, z: 0.0 },
+            uv: Vec2 {
+                x: tex_uv.u2,
+                y: tex_uv.v1,
+            },
+        }); // top right
+        let x = 0.5+text::WIDTH*text.scale*scalex;
+        let y = 0.5+text::HEIGHT*text.scale*scaley;
+        vertices.push(Vertex {
+            pos: Vec3 { x, y, z: 0.0 },
+            uv: Vec2 {
+                x: tex_uv.u2,
+                y: tex_uv.v2,
+            },
+        }); // bottom right
+        let x = 0.5-text::WIDTH*text.scale*scalex;
+        let y = 0.5+text::HEIGHT*text.scale*scaley;
+        vertices.push(Vertex {
+            pos: Vec3 { x, y, z: 0.0 },
+            uv: Vec2 {
+                x: tex_uv.u1,
+                y: tex_uv.v2,
+            },
+        }); // bottom left
+        let x = 0.5-text::WIDTH*text.scale*scalex;
+        let y = 0.5-text::HEIGHT*text.scale*scaley;
+        vertices.push(Vertex {
+            pos: Vec3 { x, y, z: 0.0 },
+            uv: Vec2 {
+                x: tex_uv.u1,
+                y: tex_uv.v1,
+            },
+        }); // top left
+
+        indices.push(4 * idx);
+        indices.push(4 * idx + 1);
+        indices.push(4 * idx + 3);
+        indices.push(4 * idx + 1);
+        indices.push(4 * idx + 2);
+        indices.push(4 * idx + 3);
+
+        idx = idx + 1;
+
         for s in 0..text.lines.len() {
             let coords = text::string_to_uv(&text.lines[s]);
 

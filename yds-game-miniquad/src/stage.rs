@@ -19,6 +19,7 @@ use crate::text;
 pub struct Stage {
     ctx: Box<dyn RenderingBackend>,
     mouse_coords: (f32, f32),
+    mouse_delta: (f32, f32),
 
     settings: settings::Settings,
     player: player::Player,
@@ -165,6 +166,7 @@ impl Stage {
         Stage {
             ctx,
             mouse_coords: (0.0, 0.0),
+            mouse_delta: (0.0, 0.0),
             settings,
             player,
             game_map,
@@ -228,7 +230,7 @@ impl EventHandler for Stage {
         self.show_data();
         self.gui_highlight(self.mouse_coords.0, self.mouse_coords.1);
 
-        self.player.walk(&self.game_map, &self.settings);
+        self.player.walk(&self.game_map, &self.settings, self.mouse_delta);
 
         if true {
             for b in 0..self.bindings_main.vertex_buffers.len() {
@@ -356,6 +358,8 @@ impl EventHandler for Stage {
     }
 
     fn mouse_motion_event(&mut self, x: f32, y: f32) {
-        self.mouse_coords = (x, y)
+        self.mouse_delta = (0.5 * self.mouse_delta.0 + 0.5*(x-self.mouse_coords.0)/self.settings.screen_height_f,
+        0.5 * self.mouse_delta.1 + 0.5*(y-self.mouse_coords.1)/self.settings.screen_height_f);
+        self.mouse_coords = (x, y);
     }
 }

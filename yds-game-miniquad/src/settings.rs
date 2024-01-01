@@ -61,7 +61,7 @@ impl Settings {
         let draw_min_dist = 5*5;
         let light_dist = 10.0;
         let draw_rays_num = 750;
-        let tolerance = 1e-16;
+        let tolerance = 1e-3;
         Settings {
             screen_width,
             screen_height,

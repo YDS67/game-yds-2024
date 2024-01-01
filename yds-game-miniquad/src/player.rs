@@ -55,6 +55,7 @@ impl Direction {
 
 pub struct MovementState {
     pub moving: bool,
+    pub mouse: bool,
     pub dir: Direction,
 }
 
@@ -99,6 +100,7 @@ impl Player {
             },
             movement: MovementState {
                 moving: false,
+                mouse: false,
                 dir: Direction {
                     f: false,
                     b: false,
@@ -244,9 +246,13 @@ impl Player {
         }
     }
 
-    pub fn walk(&mut self, game_map: &map::GameMap, settings: &settings::Settings) {
+    pub fn walk(&mut self, game_map: &map::GameMap, settings: &settings::Settings, mouse_delta: (f32, f32)) {
         self.coll_check(game_map);
         self.movement.check();
+
+        if mouse_delta.0.abs() < settings.tolerance && mouse_delta.1.abs() < settings.tolerance {
+            self.movement.mouse = false;
+        }
 
         if self.movement.dir.u {
             if self.position.z >= 1.5 {
@@ -313,6 +319,13 @@ impl Player {
             self.position.ay = self.position.a.sin();
         }
 
+        if mouse_delta.0.abs() > settings.tolerance {
+            //self.position.a = self.position.a - settings::PI * 2.0 * mouse_delta.0;
+            //self.position.ax = self.position.a.cos();
+            //self.position.ay = self.position.a.sin();
+            self.movement.mouse = true;
+        }
+
         if self.movement.dir.dt && self.position.b+settings.fov_z < settings::PI / 2.0 {
             self.position.b = angle_round(self.position.b + 0.2 * settings.player_speed);
             self.position.bxy = self.position.b.cos();
@@ -323,6 +336,15 @@ impl Player {
             self.position.b = angle_round(self.position.b - 0.2 * settings.player_speed);
             self.position.bxy = self.position.b.cos();
             self.position.bz = self.position.b.sin();
+        }
+
+        if self.position.b+settings.fov_z < settings::PI / 2.0
+            && self.position.b-settings.fov_z > -settings::PI / 2.0
+            && mouse_delta.1.abs() > settings.tolerance {
+            //self.position.b = angle_round(self.position.b - settings::PI / 2.0 * mouse_delta.1);
+            //self.position.bxy = self.position.b.cos();
+            //self.position.bz = self.position.b.sin();
+            self.movement.mouse = true;
         }
     }
 }

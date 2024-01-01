@@ -74,7 +74,11 @@ void main() {
         if (screenpos.y <= (0.5-activeline.x)*2.0 && screenpos.y >= (0.5-activeline.y)*2.0) {
             FragColor = actcolor;
         } else {
-            FragColor = fontcolor;
+            if (screenpos.x <= 0.1 && screenpos.x >= -0.1) {
+                FragColor = actcolor;
+            } else {
+                FragColor = fontcolor;
+            }   
         }
         
     }
