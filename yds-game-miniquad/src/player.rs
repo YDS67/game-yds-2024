@@ -148,10 +148,10 @@ impl Player {
         self.collision.cyl = false;
         self.collision.cyr = false;
 
-        if game_map.wall_array[ip][jp] < 255
-            || game_map.wall_array[im][jm] < 255
-            || game_map.wall_array[il][jl] < 255
-            || game_map.wall_array[ir][jr] < 255
+        if game_map.wall_bot_array[ip][jp] < 255
+            || game_map.wall_bot_array[im][jm] < 255
+            || game_map.wall_bot_array[il][jl] < 255
+            || game_map.wall_bot_array[ir][jr] < 255
         {
             self.collision.cxp = true;
             self.collision.cxm = true;
@@ -163,35 +163,35 @@ impl Player {
             self.collision.cyr = true;
         }
 
-        if game_map.wall_array[ip][j] == 255 {
+        if game_map.wall_bot_array[ip][j] == 255 {
             self.collision.cxp = false;
         }
 
-        if game_map.wall_array[i][jp] == 255 {
+        if game_map.wall_bot_array[i][jp] == 255 {
             self.collision.cyp = false;
         }
 
-        if game_map.wall_array[im][j] == 255 {
+        if game_map.wall_bot_array[im][j] == 255 {
             self.collision.cxm = false;
         }
 
-        if game_map.wall_array[i][jm] == 255 {
+        if game_map.wall_bot_array[i][jm] == 255 {
             self.collision.cym = false;
         }
 
-        if game_map.wall_array[il][j] == 255 {
+        if game_map.wall_bot_array[il][j] == 255 {
             self.collision.cxl = false;
         }
 
-        if game_map.wall_array[ir][j] == 255 {
+        if game_map.wall_bot_array[ir][j] == 255 {
             self.collision.cxr = false;
         }
 
-        if game_map.wall_array[i][jl] == 255 {
+        if game_map.wall_bot_array[i][jl] == 255 {
             self.collision.cyl = false;
         }
 
-        if game_map.wall_array[i][jr] == 255 {
+        if game_map.wall_bot_array[i][jr] == 255 {
             self.collision.cyr = false;
         }
     }

@@ -27,6 +27,8 @@ pub struct FaceData {
     pub bottom_left_x: usize,
     pub bottom_left_y: usize,
     pub is_wall: bool,
+    pub texture_bot: u8,
+    pub texture_top: u8,
     pub dist: f32,
 }
 
@@ -67,6 +69,8 @@ impl DepthBuffer {
                         top_left_x: i,
                         top_left_y: j+1,
                         is_wall: true,
+                        texture_bot: game_map.wall_bot_array[i][j],
+                        texture_top: game_map.wall_top_array[i][j],
                         dist,
                     });
                     len += 1;
@@ -82,6 +86,8 @@ impl DepthBuffer {
                         top_left_x: i+1,
                         top_left_y: j+1,
                         is_wall: true,
+                        texture_bot: game_map.wall_bot_array[i][j],
+                        texture_top: game_map.wall_top_array[i][j],
                         dist,
                     });
                     len += 1;
@@ -97,6 +103,8 @@ impl DepthBuffer {
                         top_left_x: i+1,
                         top_left_y: j,
                         is_wall: true,
+                        texture_bot: game_map.wall_bot_array[i][j],
+                        texture_top: game_map.wall_top_array[i][j],
                         dist,
                     });
                     len += 1;
@@ -112,6 +120,8 @@ impl DepthBuffer {
                         top_left_x: i,
                         top_left_y: j,
                         is_wall: true,
+                        texture_bot: game_map.wall_bot_array[i][j],
+                        texture_top: game_map.wall_top_array[i][j],
                         dist,
                     });
                     len += 1;
@@ -129,6 +139,8 @@ impl DepthBuffer {
                         top_left_x: i,
                         top_left_y: j+1,
                         is_wall: false,
+                        texture_bot: game_map.floor_array[i][j],
+                        texture_top: game_map.ceil_array[i][j],
                         dist,
                     });
                     len += 1;
@@ -178,7 +190,7 @@ pub fn find_visible_tiles(game_map: &mut map::GameMap, player: &player::Player, 
             let i = x.floor() as usize;
             let j = y.floor() as usize;
             if i as i32 >= 0 && i < settings::MAPSIZE && j as i32 >= 0 && j < settings::MAPSIZE {
-                if game_map.wall_array[i][j] < 255 {
+                if game_map.wall_bot_array[i][j] < 255 {
                     game_map.wall_visible[i][j] = true;
                     game_map.wall_dist[i][j] = d;
                     for ii in (i-2)..(i+3) {
