@@ -1,6 +1,6 @@
 use crate::map;
 use crate::settings;
-use miniquad::*;
+use crate::stage;
 
 pub struct PlayerPos {
     pub x: f32,
@@ -26,12 +26,12 @@ pub struct CollisionState {
 }
 
 pub struct Direction {
-    pub f: bool, // forward
-    pub b: bool, // backward
-    pub l: bool, // left
-    pub r: bool, // right
-    pub u: bool, // up
-    pub d: bool, // down
+    pub f: bool,  // forward
+    pub b: bool,  // backward
+    pub l: bool,  // left
+    pub r: bool,  // right
+    pub u: bool,  // up
+    pub d: bool,  // down
     pub lt: bool, // left turn
     pub rt: bool, // right turn
     pub ut: bool, // up turn
@@ -61,7 +61,16 @@ pub struct MovementState {
 
 impl MovementState {
     pub fn check(&mut self) {
-        self.moving = self.dir.f || self.dir.b || self.dir.l || self.dir.r || self.dir.u || self.dir.d || self.dir.lt || self.dir.rt || self.dir.ut || self.dir.dt
+        self.moving = self.dir.f
+            || self.dir.b
+            || self.dir.l
+            || self.dir.r
+            || self.dir.u
+            || self.dir.d
+            || self.dir.lt
+            || self.dir.rt
+            || self.dir.ut
+            || self.dir.dt
     }
 }
 
@@ -187,70 +196,44 @@ impl Player {
         }
     }
 
-    pub fn read_key_down(&mut self, keycode: KeyCode) {
+    pub fn read_key(&mut self, input: &stage::InputState) {
+        self.movement.dir.f = input.keys.w;
+        self.movement.dir.b = input.keys.s;
+        self.movement.dir.l = input.keys.a;
+        self.movement.dir.r = input.keys.d;
+        self.movement.dir.lt = input.keys.left;
+        self.movement.dir.rt = input.keys.right;
+        self.movement.dir.ut = input.keys.up;
+        self.movement.dir.dt = input.keys.down;
 
-        if keycode == KeyCode::W {
-            self.movement.dir.f = true
-        }
-        if keycode == KeyCode::S {
-            self.movement.dir.b = true
-        }
-        if keycode == KeyCode::Left {
-            self.movement.dir.l = true
-        }
-        if keycode == KeyCode::Right {
-            self.movement.dir.r = true
-        }
-        if keycode == KeyCode::A {
-            self.movement.dir.lt = true
-        }
-        if keycode == KeyCode::D {
-            self.movement.dir.rt = true
-        }
-        if keycode == KeyCode::Down {
-            self.movement.dir.ut = true
-        }
-        if keycode == KeyCode::Up {
-            self.movement.dir.dt = true
-        }
-
-        if keycode == KeyCode::Space && !self.movement.dir.u && !self.movement.dir.d {
-             self.movement.dir.u = true
+        if input.keys.space && !self.movement.dir.u && !self.movement.dir.d {
+            self.movement.dir.u = true
         }
     }
 
-    pub fn read_key_up(&mut self, keycode: KeyCode) {
-        if keycode == KeyCode::W {
-            self.movement.dir.f = false
-        }
-        if keycode == KeyCode::S {
-            self.movement.dir.b = false
-        }
-        if keycode == KeyCode::Left {
-            self.movement.dir.l = false
-        }
-        if keycode == KeyCode::Right {
-            self.movement.dir.r = false
-        }
-        if keycode == KeyCode::A {
-            self.movement.dir.lt = false
-        }
-        if keycode == KeyCode::D {
-            self.movement.dir.rt = false
-        }
-        if keycode == KeyCode::Down {
-            self.movement.dir.ut = false
-        }
-        if keycode == KeyCode::Up {
-            self.movement.dir.dt = false
-        }
-    }
-
-    pub fn walk(&mut self, game_map: &map::GameMap, settings: &settings::Settings, mouse_delta: (f32, f32)) {
+    pub fn walk(
+        &mut self,
+        game_map: &map::GameMap,
+        settings: &settings::Settings,
+        mouse_dx: f32,
+        mouse_dy: f32,
+        mouse_moving: bool,
+    ) {
         self.coll_check(game_map);
         self.movement.check();
 
-        if mouse_delta.0.abs() < settings.tolerance && mouse_delta.1.abs() < settings.tolerance {
+        let mut up_movement = mouse_moving;
+        let mut down_movement = mouse_moving;
+
+        if angle_round(self.position.b)+settings.fov_z > settings::PI/2.0 {
+            up_movement = false;
+        }
+
+        if angle_round(self.position.b)-settings.fov_z < -settings::PI/2.0 {
+            down_movement = false;
+        }
+
+        if mouse_dx.abs() < settings::TOLERANCE && mouse_dy.abs() < settings::TOLERANCE {
             self.movement.mouse = false;
         }
 
@@ -259,7 +242,7 @@ impl Player {
                 self.movement.dir.u = false;
                 self.movement.dir.d = true;
             } else {
-                self.position.z = self.position.z + 0.2*settings.player_speed;
+                self.position.z = self.position.z + 0.2 * settings.player_speed;
             }
         }
 
@@ -267,7 +250,7 @@ impl Player {
             if self.position.z <= 0.5 {
                 self.movement.dir.d = false;
             } else {
-                self.position.z = self.position.z - 0.25*settings.player_speed;
+                self.position.z = self.position.z - 0.25 * settings.player_speed;
             }
         }
 
@@ -319,31 +302,31 @@ impl Player {
             self.position.ay = self.position.a.sin();
         }
 
-        if mouse_delta.0.abs() > settings.tolerance {
-            //self.position.a = self.position.a - settings::PI * 2.0 * mouse_delta.0;
-            //self.position.ax = self.position.a.cos();
-            //self.position.ay = self.position.a.sin();
+        if mouse_moving {
+            self.position.a =
+                self.position.a - settings::PI * settings.mouse_sensitivity * mouse_dx;
+            self.position.ax = self.position.a.cos();
+            self.position.ay = self.position.a.sin();
             self.movement.mouse = true;
         }
 
-        if self.movement.dir.dt && self.position.b+settings.fov_z < settings::PI / 2.0 {
+        if self.movement.dir.dt && self.position.b + settings.fov_z < settings::PI / 2.0 {
             self.position.b = angle_round(self.position.b + 0.2 * settings.player_speed);
             self.position.bxy = self.position.b.cos();
             self.position.bz = self.position.b.sin();
         }
 
-        if self.movement.dir.ut && self.position.b-settings.fov_z > -settings::PI / 2.0 {
+        if self.movement.dir.ut && self.position.b - settings.fov_z > -settings::PI / 2.0 {
             self.position.b = angle_round(self.position.b - 0.2 * settings.player_speed);
             self.position.bxy = self.position.b.cos();
             self.position.bz = self.position.b.sin();
         }
 
-        if self.position.b+settings.fov_z < settings::PI / 2.0
-            && self.position.b-settings.fov_z > -settings::PI / 2.0
-            && mouse_delta.1.abs() > settings.tolerance {
-            //self.position.b = angle_round(self.position.b - settings::PI / 2.0 * mouse_delta.1);
-            //self.position.bxy = self.position.b.cos();
-            //self.position.bz = self.position.b.sin();
+        if (mouse_dy > 0.0 && down_movement) || (mouse_dy < 0.0 && up_movement)
+        {
+            self.position.b = angle_round(self.position.b - settings::PI * settings.mouse_sensitivity * mouse_dy);
+            self.position.bxy = self.position.b.cos();
+            self.position.bz = self.position.b.sin();
             self.movement.mouse = true;
         }
     }

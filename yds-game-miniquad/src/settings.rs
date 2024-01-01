@@ -2,6 +2,7 @@ pub const PI: f32 = 3.1415926538;
 pub const MAPSIZE: usize = 256;
 pub const WIDTH0: i32 = 1280;
 pub const HEIGHT0: i32 = 800;
+pub const TOLERANCE: f32 = 1e-3;
 
 pub struct Settings {
     pub screen_width: i32,
@@ -30,7 +31,7 @@ pub struct Settings {
     pub draw_min_dist: usize,
     pub light_dist: f32,
     pub draw_rays_num: usize,
-    pub tolerance: f32,
+    pub mouse_sensitivity: f32,
 }
 
 impl Settings {
@@ -61,7 +62,7 @@ impl Settings {
         let draw_min_dist = 5*5;
         let light_dist = 10.0;
         let draw_rays_num = 750;
-        let tolerance = 1e-3;
+        let mouse_sensitivity = 10.0;
         Settings {
             screen_width,
             screen_height,
@@ -89,7 +90,7 @@ impl Settings {
             draw_min_dist,
             light_dist,
             draw_rays_num,
-            tolerance,
+            mouse_sensitivity,
         }
     }
 

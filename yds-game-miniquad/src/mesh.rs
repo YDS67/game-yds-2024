@@ -298,12 +298,18 @@ impl Mesh {
         }
     }
 
-    pub fn new_text(text: &text::Text, scalex: f32, scaley: f32) -> Mesh {
+    pub fn new_text(text: &text::Text, scalex: f32, scaley: f32, fired: bool) -> Mesh {
         let mut vertices: Vec<Vertex> = Vec::new();
         let mut indices: Vec<i16> = Vec::new();
         let mut idx = 0;
 
-        let tex_uv = text::string_to_uv("#")[0];
+        let mut tex_uv;
+
+        if fired {
+            tex_uv = text::string_to_uv("#")[0]
+        } else {
+            tex_uv = text::string_to_uv("&")[0]
+        }
 
         let x = 0.5+text::WIDTH*text.scale*scalex;
         let y = 0.5-text::HEIGHT*text.scale*scaley;
@@ -355,7 +361,7 @@ impl Mesh {
             let coords = text::string_to_uv(&text.lines[s]);
 
             for l in 0..coords.len() {
-                let tex_uv = coords[l];
+                tex_uv = coords[l];
 
                 let lf = l as f32;
 
