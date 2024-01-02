@@ -3,6 +3,7 @@
 Combining raycasting (to find which tiles to render) with ordinary GPU rendering.
 
 Texture source: https://little-martian.itch.io/retro-texture-pack
+Map generated using: https://www.mazegenerator.net/
 
 # Screenshots
 ## January, 2nd, 2024
