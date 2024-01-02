@@ -6,6 +6,8 @@ Texture source: https://little-martian.itch.io/retro-texture-pack
 
 Map generated using: https://www.mazegenerator.net/
 
+Font is a heavily edited version of https://datagoblin.itch.io/monogram
+
 # Screenshots
 ## January, 2nd, 2024
 ![width:500px](./screenshots/1.png)
