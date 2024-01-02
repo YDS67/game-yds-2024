@@ -251,9 +251,7 @@ impl Stage {
 
     fn show_gui(&mut self) {
         self.gui = text::GUI::new_from(vec![
-            &format!("Line 1"),
-            &format!("Line 2"),
-            &format!("Quit menu"),
+            &format!("Continue"),
             &format!("Quit game"),
         ], self.settings.screen_width_f, self.settings.screen_height_f);
 
@@ -280,10 +278,10 @@ impl Stage {
     }
 
     fn gui_control(&mut self) {
-        if self.gui.act_no == 4 && self.input_state.mouse.left {
+        if self.gui.act_no == self.gui.lines.len() && self.input_state.mouse.left {
             window::quit()
         }
-        if self.gui.act_no == 3 && self.input_state.mouse.left {
+        if self.gui.act_no == 1 && self.input_state.mouse.left {
             self.gui.show = false
         }
     }
