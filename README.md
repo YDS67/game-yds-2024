@@ -11,3 +11,5 @@ Texture source: https://little-martian.itch.io/retro-texture-pack
 - Optimize text rendering. (Make a marker variable for highlighted text so the shader doesn't need to check the fragment position each time. Input the marker to Vertex shader).
 - Make a GUI struct and module, add methods for button and slider.
 - Put a single quad mesh generation in a separate function to optimize mesh module.
+- Add sprites. First static, then animated.
+- Add light sources and light map.

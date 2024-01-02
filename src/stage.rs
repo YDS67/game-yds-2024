@@ -23,13 +23,11 @@ pub struct Stage {
     player: player::Player,
     depth_buffer: camera::DepthBuffer,
     game_map: map::GameMap,
-    text: text::Text,
-    mesh_main: mesh::Mesh,
-    mesh_text: mesh::Mesh,
-    pipeline_main: Pipeline,
-    pipeline_text: Pipeline,
-    bindings_main: Bindings,
-    bindings_text: Bindings,
+    overlay: text::Overlay,
+    gui: text::GUI,
+    mesh: Vec<mesh::Mesh>,
+    pipeline: Vec<Pipeline>,
+    bindings: Vec<Bindings>,
 
     time_state: TimeState,
     input_state: InputState,
@@ -48,14 +46,20 @@ impl Stage {
         camera::find_visible_tiles(&mut game_map, &player, &settings);
         let depth_buffer = camera::DepthBuffer::generate(&game_map, &player, &settings);
 
-        let text = text::Text::new_from(vec!["Text default"]);
+        let overlay = text::Overlay::new_from(vec!["Text default"]);
+        let gui = text::GUI::new_from(vec!["Text default"], settings.screen_width_f, settings.screen_height_f);
 
         let mesh_main = mesh::Mesh::new_main(&depth_buffer, &player);
-        let mesh_text = mesh::Mesh::new_text(
-            &text,
+        let mesh_overlay = mesh::Mesh::new_overlay(
+            &overlay,
             1.0 / settings.screen_width_f,
             1.0 / settings.screen_height_f,
             false,
+        );
+        let mesh_gui = mesh::Mesh::new_gui(
+            &gui,
+            1.0 / settings.screen_width_f,
+            1.0 / settings.screen_height_f,
         );
 
         let vertex_buffer_main = ctx.new_buffer(
@@ -64,10 +68,16 @@ impl Stage {
             BufferSource::slice(&mesh_main.vertices),
         );
 
-        let vertex_buffer_text = ctx.new_buffer(
+        let vertex_buffer_overlay = ctx.new_buffer(
             BufferType::VertexBuffer,
             BufferUsage::Immutable,
-            BufferSource::slice(&mesh_text.vertices),
+            BufferSource::slice(&mesh_overlay.vertices),
+        );
+
+        let vertex_buffer_gui = ctx.new_buffer(
+            BufferType::VertexBuffer,
+            BufferUsage::Immutable,
+            BufferSource::slice(&mesh_gui.vertices),
         );
 
         let index_buffer_main = ctx.new_buffer(
@@ -76,10 +86,16 @@ impl Stage {
             BufferSource::slice(&mesh_main.indices),
         );
 
-        let index_buffer_text = ctx.new_buffer(
+        let index_buffer_overlay = ctx.new_buffer(
             BufferType::IndexBuffer,
             BufferUsage::Immutable,
-            BufferSource::slice(&mesh_text.indices),
+            BufferSource::slice(&mesh_overlay.indices),
+        );
+
+        let index_buffer_gui = ctx.new_buffer(
+            BufferType::IndexBuffer,
+            BufferUsage::Immutable,
+            BufferSource::slice(&mesh_gui.indices),
         );
 
         let pixels: ImageBuffer<Rgba<u8>, Vec<u8>> = ass.tile_atlas;
@@ -113,7 +129,7 @@ impl Stage {
             height: dims.1,
             allocate_mipmaps: false,
         };
-        let texture_text = ctx.new_texture_from_data_and_format(pixels.as_bytes(), params);
+        let texture_overlay = ctx.new_texture_from_data_and_format(pixels.as_bytes(), params);
 
         let bindings_main = Bindings {
             vertex_buffers: vec![vertex_buffer_main],
@@ -121,10 +137,16 @@ impl Stage {
             images: vec![texture_main],
         };
 
-        let bindings_text = Bindings {
-            vertex_buffers: vec![vertex_buffer_main, vertex_buffer_text],
-            index_buffer: index_buffer_text,
-            images: vec![texture_text],
+        let bindings_overlay = Bindings {
+            vertex_buffers: vec![vertex_buffer_overlay],
+            index_buffer: index_buffer_overlay,
+            images: vec![texture_overlay],
+        };
+
+        let bindings_gui = Bindings {
+            vertex_buffers: vec![vertex_buffer_gui],
+            index_buffer: index_buffer_gui,
+            images: vec![texture_overlay],
         };
 
         let shader_main = ctx
@@ -137,13 +159,23 @@ impl Stage {
             )
             .unwrap();
 
-        let shader_text = ctx
+        let shader_overlay = ctx
             .new_shader(
                 miniquad::ShaderSource::Glsl {
-                    vertex: shaders::VERTEX_TEXT,
-                    fragment: shaders::FRAGMENT_TEXT,
+                    vertex: shaders::VERTEX_OVERLAY,
+                    fragment: shaders::FRAGMENT_OVERLAY,
                 },
-                shaders::meta_text(),
+                shaders::meta_overlay(),
+            )
+            .unwrap();
+
+        let shader_gui = ctx
+            .new_shader(
+                miniquad::ShaderSource::Glsl {
+                    vertex: shaders::VERTEX_GUI,
+                    fragment: shaders::FRAGMENT_GUI,
+                },
+                shaders::meta_gui(),
             )
             .unwrap();
 
@@ -152,18 +184,32 @@ impl Stage {
             &[
                 VertexAttribute::new("pos", VertexFormat::Float3),
                 VertexAttribute::new("uv", VertexFormat::Float2),
+                VertexAttribute::new("act", VertexFormat::Int1),
             ],
             shader_main,
         );
 
-        let pipeline_text = ctx.new_pipeline(
+        let pipeline_overlay = ctx.new_pipeline(
             &[BufferLayout::default()],
             &[
                 VertexAttribute::new("pos", VertexFormat::Float3),
                 VertexAttribute::new("uv", VertexFormat::Float2),
+                VertexAttribute::new("act", VertexFormat::Int1),
             ],
-            shader_text,
+            shader_overlay,
         );
+
+        let pipeline_gui = ctx.new_pipeline(
+            &[BufferLayout::default()],
+            &[
+                VertexAttribute::new("pos", VertexFormat::Float3),
+                VertexAttribute::new("uv", VertexFormat::Float2),
+                VertexAttribute::new("act", VertexFormat::Int1),
+            ],
+            shader_gui,
+        );
+
+        let gui = text::GUI::new_from(vec!["Text default"], settings.screen_width_f, settings.screen_height_f);
 
         Stage {
             ctx,
@@ -172,13 +218,11 @@ impl Stage {
             player,
             game_map,
             depth_buffer,
-            text: text::Text::new_from(vec!["          ", "          "]),
-            pipeline_main,
-            pipeline_text,
-            bindings_main,
-            bindings_text,
-            mesh_main,
-            mesh_text,
+            overlay: text::Overlay::new_from(vec!["Text default"]),
+            gui,
+            pipeline: vec![pipeline_main, pipeline_overlay, pipeline_gui],
+            bindings: vec![bindings_main, bindings_overlay, bindings_gui],
+            mesh: vec![mesh_main, mesh_overlay, mesh_gui],
             time_state: TimeState::init(),
             input_state: InputState::init(),
         }
@@ -199,29 +243,48 @@ impl Stage {
     }
 
     fn show_data(&mut self) {
-        self.text = text::Text::new_from(vec![
+        self.overlay = text::Overlay::new_from(vec![
             &format!("FPS: {}", self.time_state.fps + 1),
-            &format!("Line active: {}", self.text.act_no),
-            &format!("Light distance: {}", self.settings.light_dist),
+            &format!("Press (Esc) for menu."),
         ]);
-        self.text.center();
+    }
+
+    fn show_gui(&mut self) {
+        self.gui = text::GUI::new_from(vec![
+            &format!("Line 1"),
+            &format!("Line 2"),
+            &format!("Quit menu"),
+            &format!("Quit game"),
+        ], self.settings.screen_width_f, self.settings.screen_height_f);
+
+        self.gui_highlight(self.input_state.mouse.x, self.input_state.mouse.y);
     }
 
     fn gui_highlight(&mut self, x: f32, y: f32) {
         let mut some_active = false;
-        for l in 0..self.text.lines.len() {
-            if x > self.text.line_x[l + 1]
-                && x < self.text.line_x[l + 1] + self.text.line_width[l + 1]
-                && y > self.text.line_y[l + 1]
-                && y < self.text.line_y[l + 1] + self.text.line_height
+        for l in 0..self.gui.lines.len() {
+            if x > self.gui.line_x[l]
+                && x < self.gui.line_x[l] + self.gui.line_width[l]
+                && y > self.gui.line_y[l]
+                && y < self.gui.line_y[l] + self.gui.line_height
             {
-                self.text.act_no = l + 1;
+                self.gui.act_no = l + 1;
+                self.gui.line_active[l] = 1;
                 some_active = true
             }
         }
 
         if !some_active {
-            self.text.act_no = 0;
+            self.gui.act_no = 0;
+        }
+    }
+
+    fn gui_control(&mut self) {
+        if self.gui.act_no == 4 && self.input_state.mouse.left {
+            window::quit()
+        }
+        if self.gui.act_no == 3 && self.input_state.mouse.left {
+            self.gui.show = false
         }
     }
 }
@@ -230,7 +293,11 @@ impl EventHandler for Stage {
     fn update(&mut self) {
         self.frame_time();
         self.show_data();
-        self.gui_highlight(self.input_state.mouse.x, self.input_state.mouse.y);
+
+        if self.gui.show {
+            self.show_gui();
+            self.gui_control();
+        }
 
         if self.input_state.keys.f && !self.settings.full_screen {
             miniquad::window::set_fullscreen(true);
@@ -238,14 +305,9 @@ impl EventHandler for Stage {
             self.settings.full_screen = true;
             self.settings.screen_change(screen.0, screen.1);
         }
-        if self.input_state.keys.l {
-            self.settings.light_dist += 1.0
-        }
-        if self.input_state.keys.k && self.settings.light_dist > 0.0 {
-            self.settings.light_dist -= 1.0
-        }
+
         if self.input_state.keys.esc {
-            miniquad::window::quit()
+            self.gui.show = true
         }
 
         self.player.read_key(&self.input_state);
@@ -259,71 +321,56 @@ impl EventHandler for Stage {
         );
 
         if true {
-            for b in 0..self.bindings_main.vertex_buffers.len() {
-                self.ctx.delete_buffer(self.bindings_main.vertex_buffers[b]);
+            for j in 0..self.bindings.len() {
+                for b in 0..self.bindings[j].vertex_buffers.len() {
+                    self.ctx.delete_buffer(self.bindings[j].vertex_buffers[b]);
+                }
+                self.ctx.delete_buffer(self.bindings[j].index_buffer);
             }
-            self.ctx.delete_buffer(self.bindings_main.index_buffer);
-
-            for b in 0..self.bindings_text.vertex_buffers.len() {
-                self.ctx.delete_buffer(self.bindings_text.vertex_buffers[b]);
-            }
-            self.ctx.delete_buffer(self.bindings_text.index_buffer);
-
+            
             camera::find_visible_tiles(&mut self.game_map, &self.player, &self.settings);
             self.depth_buffer =
                 camera::DepthBuffer::generate(&self.game_map, &self.player, &self.settings);
 
-            self.mesh_main = mesh::Mesh::new_main(&self.depth_buffer, &self.player);
-            self.mesh_text = mesh::Mesh::new_text(
-                &self.text,
+            self.mesh[0] = mesh::Mesh::new_main(&self.depth_buffer, &self.player);
+            self.mesh[1] = mesh::Mesh::new_overlay(
+                &self.overlay,
                 1.0 / self.settings.screen_width_f,
                 1.0 / self.settings.screen_height_f,
                 self.input_state.mouse.left
             );
-
-            let vertex_buffer_main = self.ctx.new_buffer(
-                BufferType::VertexBuffer,
-                BufferUsage::Immutable,
-                BufferSource::slice(&self.mesh_main.vertices),
+            self.mesh[2] = mesh::Mesh::new_gui(
+                &self.gui,
+                1.0 / self.settings.screen_width_f,
+                1.0 / self.settings.screen_height_f,
             );
 
-            let vertex_buffer_text = self.ctx.new_buffer(
-                BufferType::VertexBuffer,
-                BufferUsage::Immutable,
-                BufferSource::slice(&self.mesh_text.vertices),
-            );
-
-            let index_buffer_main = self.ctx.new_buffer(
-                BufferType::IndexBuffer,
-                BufferUsage::Immutable,
-                BufferSource::slice(&self.mesh_main.indices),
-            );
-
-            let index_buffer_text = self.ctx.new_buffer(
-                BufferType::IndexBuffer,
-                BufferUsage::Immutable,
-                BufferSource::slice(&self.mesh_text.indices),
-            );
-
-            self.bindings_main.vertex_buffers = vec![vertex_buffer_main];
-
-            self.bindings_main.index_buffer = index_buffer_main;
-
-            self.bindings_text.vertex_buffers = vec![vertex_buffer_text];
-
-            self.bindings_text.index_buffer = index_buffer_text;
+            for j in 0..self.bindings.len() {
+                let vertex_buffer = self.ctx.new_buffer(
+                    BufferType::VertexBuffer,
+                    BufferUsage::Immutable,
+                    BufferSource::slice(&self.mesh[j].vertices),
+                );
+                let index_buffer = self.ctx.new_buffer(
+                    BufferType::IndexBuffer,
+                    BufferUsage::Immutable,
+                    BufferSource::slice(&self.mesh[j].indices),
+                );
+                self.bindings[j].vertex_buffers = vec![vertex_buffer];
+                self.bindings[j].index_buffer = index_buffer;
+            }
         }
     }
 
     fn draw(&mut self) {
-        window::show_mouse(false);
-
+        window::show_mouse(self.gui.show);
+        
         self.ctx
             .begin_default_pass(miniquad::PassAction::clear_color(0., 0., 0., 1.0000000));
 
-        self.ctx.apply_pipeline(&self.pipeline_main);
+        self.ctx.apply_pipeline(&self.pipeline[0]);
 
-        self.ctx.apply_bindings(&self.bindings_main);
+        self.ctx.apply_bindings(&self.bindings[0]);
 
         let proj = Mat4::perspective_rh_gl(
             self.settings.fov_xy,
@@ -356,25 +403,33 @@ impl EventHandler for Stage {
                 ),
                 lightdist: self.settings.light_dist,
             }));
-        self.ctx.draw(0, self.mesh_main.num * 6, 1);
+        self.ctx.draw(0, self.mesh[0].num * 6, 1);
 
-        self.ctx.apply_pipeline(&self.pipeline_text);
+        self.ctx.apply_pipeline(&self.pipeline[1]);
 
-        self.ctx.apply_bindings(&self.bindings_text);
+        self.ctx.apply_bindings(&self.bindings[1]);
 
         self.ctx
-            .apply_uniforms(miniquad::UniformsSource::table(&shaders::UniformsText {
-                fontcolor: self.text.font_col,
-                actcolor: self.text.act_col,
-                activeline: (
-                    self.text.line_y[self.text.act_no] / self.settings.screen_height_f,
-                    (self.text.line_y[self.text.act_no] + self.text.line_height)
-                        / self.settings.screen_height_f,
-                ),
+            .apply_uniforms(miniquad::UniformsSource::table(&shaders::UniformsOverlay {
+                fontcolor: self.overlay.font_col,
             }));
 
-        self.ctx.draw(0, self.mesh_text.num * 6, 1);
+        self.ctx.draw(0, self.mesh[1].num * 6, 1);
 
+        if self.gui.show {
+            self.ctx.apply_pipeline(&self.pipeline[2]);
+
+            self.ctx.apply_bindings(&self.bindings[2]);
+    
+            self.ctx
+                .apply_uniforms(miniquad::UniformsSource::table(&shaders::UniformsGUI {
+                    fontcolor: self.gui.font_col,
+                    actcolor: self.gui.act_col,
+                }));
+    
+            self.ctx.draw(0, self.mesh[2].num * 6, 1);    
+        }
+        
         self.ctx.end_render_pass();
 
         self.ctx.commit_frame();
@@ -398,7 +453,6 @@ impl EventHandler for Stage {
         let moving_x;
         let moving_y;
         if dx.abs() < settings::TOLERANCE*self.settings.screen_width_f
-        //    || self.input_state.mouse.dx.abs() < settings::TOLERANCE
         {
             self.input_state.mouse.dx = 0.5 * settings::TOLERANCE;
             moving_x = false;
@@ -407,7 +461,6 @@ impl EventHandler for Stage {
             moving_x = true;
         }
         if dy.abs() < settings::TOLERANCE*self.settings.screen_width_f
-        //    || self.input_state.mouse.dy.abs() < settings::TOLERANCE
         {
             self.input_state.mouse.dy = 0.5 * settings::TOLERANCE;
             moving_y = false;
@@ -415,7 +468,11 @@ impl EventHandler for Stage {
             self.input_state.mouse.dy = 0.5 * dy / self.settings.screen_width_f;
             moving_y = true;
         }
-        self.input_state.mouse.moving = moving_x || moving_y
+        self.input_state.mouse.moving = moving_x || moving_y;
+        
+        if self.gui.show {
+            self.input_state.mouse.moving = false
+        }
     }
 
     fn mouse_motion_event(&mut self, x: f32, y: f32) {
@@ -468,6 +525,7 @@ pub struct KeysState {
     pub k: bool,
     pub l: bool,
     pub f: bool,
+    pub m: bool,
     pub esc: bool,
     pub left: bool,
     pub right: bool,
@@ -527,6 +585,9 @@ impl KeysState {
         if keycode == KeyCode::F {
             self.f = state
         }
+        if keycode == KeyCode::M {
+            self.m = state
+        }
     }
 }
 
@@ -558,6 +619,7 @@ impl InputState {
                 k: false,
                 l: false,
                 f: false,
+                m: false,
                 left: false,
                 right: false,
                 up: false,

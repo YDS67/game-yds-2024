@@ -4,6 +4,7 @@ use glam;
 pub const VERTEX_MAIN: &str = r#"#version 330 core
 in vec3 pos;
 in vec2 uv;
+in int act;
 
 uniform mat4 mvp;
 uniform vec3 playerpos;
@@ -39,29 +40,25 @@ void main() {
     FragColor = vec4(texture(tex, texcoord).xyz * cols.xyz, 1.0);
 }"#;
 
-pub const VERTEX_TEXT: &str = r#"#version 330 core
+pub const VERTEX_OVERLAY: &str = r#"#version 330 core
 in vec3 pos;
 in vec2 uv;
+in int act;
 
 out vec2 texcoord;
-out vec2 screenpos;
 
 void main() {
     gl_Position = vec4((pos.x-0.5)*2.0, (0.5-pos.y)*2.0, 0.0, 1.0);
     texcoord = uv;
-    screenpos = gl_Position.xy;
 }"#;
 
-pub const FRAGMENT_TEXT: &str = r#"#version 330 core
+pub const FRAGMENT_OVERLAY: &str = r#"#version 330 core
 in vec2 texcoord;
-in vec2 screenpos;
 
 out vec4 FragColor;
 
 uniform sampler2D tex;
 uniform vec4 fontcolor;
-uniform vec4 actcolor;
-uniform vec2 activeline;
 
 vec4 col;
 
@@ -71,18 +68,56 @@ void main() {
     if (col.x+col.y+col.z > 2.99) {
         discard;
     } else {
-        if (screenpos.y <= (0.5-activeline.x)*2.0 && screenpos.y >= (0.5-activeline.y)*2.0) {
-            FragColor = actcolor;
-        } else {
-            if (screenpos.x <= 0.1 && screenpos.x >= -0.1) {
-                FragColor = actcolor;
-            } else {
-                FragColor = fontcolor;
-            }   
-        }
+        FragColor = fontcolor;
         
     }
 }"#;
+
+pub const VERTEX_GUI: &str = r#"#version 330 core
+in vec3 pos;
+in vec2 uv;
+in int act;
+
+uniform vec4 fontcolor;
+uniform vec4 actcolor;
+
+out vec2 texcoord;
+out vec4 cols;
+
+void main() {
+    gl_Position = vec4((pos.x-0.5)*2.0, (0.5-pos.y)*2.0, 0.0, 1.0);
+    texcoord = uv;
+    if (act > 0) {
+        cols = actcolor;
+    } else {
+        cols = fontcolor;
+    }
+}"#;
+
+pub const FRAGMENT_GUI: &str = r#"#version 330 core
+in vec2 texcoord;
+in vec4 cols;
+
+out vec4 FragColor;
+
+uniform sampler2D tex;
+
+vec4 col;
+
+void main() {
+    col = texture(tex, texcoord);
+
+    if (col.x+col.y+col.z > 2.99) {
+        discard;
+    } else {
+        if (col.x+col.y+col.z < 0.01) {
+            FragColor = cols;
+        } else {
+            FragColor = col;
+        }
+    }
+}"#;
+
 
 pub fn meta_main() -> ShaderMeta {
     ShaderMeta {
@@ -97,14 +132,24 @@ pub fn meta_main() -> ShaderMeta {
     }
 }
 
-pub fn meta_text() -> ShaderMeta {
+pub fn meta_overlay() -> ShaderMeta {
+    ShaderMeta {
+        images: vec!["tex".to_string()],
+        uniforms: UniformBlockLayout {
+            uniforms: vec![
+                UniformDesc::new("fontcolor", UniformType::Float4),
+            ],
+        },
+    }
+}
+
+pub fn meta_gui() -> ShaderMeta {
     ShaderMeta {
         images: vec!["tex".to_string()],
         uniforms: UniformBlockLayout {
             uniforms: vec![
                 UniformDesc::new("fontcolor", UniformType::Float4),
                 UniformDesc::new("actcolor", UniformType::Float4),
-                UniformDesc::new("activeline", UniformType::Float2),
             ],
         },
     }
@@ -118,8 +163,12 @@ pub struct UniformsMain {
 }
 
 #[repr(C)]
-pub struct UniformsText {
+pub struct UniformsOverlay {
+    pub fontcolor: (f32, f32, f32, f32),
+}
+
+#[repr(C)]
+pub struct UniformsGUI {
     pub fontcolor: (f32, f32, f32, f32),
     pub actcolor: (f32, f32, f32, f32),
-    pub activeline: (f32, f32),
 }
