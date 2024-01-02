@@ -8,7 +8,6 @@ pub struct Ass {
     pub wall_image_bot: ImageBuffer<Rgba<u8>, Vec<u8>>,
     pub wall_image_top: ImageBuffer<Rgba<u8>, Vec<u8>>,
     pub font: ImageBuffer<Rgba<u8>, Vec<u8>>,
-    pub menu: ImageBuffer<Rgba<u8>, Vec<u8>>,
 }
 
 impl Ass {
@@ -30,9 +29,6 @@ impl Ass {
                 .unwrap()
                 .to_rgba8(),
             font: image::open(Path::new("resources/monospace.png"))
-                .unwrap()
-                .to_rgba8(),
-            menu: image::open(Path::new("resources/menu_bg.png"))
                 .unwrap()
                 .to_rgba8(),
         }

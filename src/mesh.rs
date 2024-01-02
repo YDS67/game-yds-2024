@@ -444,8 +444,8 @@ impl Mesh {
 
         let mut tex_uv = text::string_to_uv("|")[0];
 
-        let x = 0.5 * (1.0 + 1.2*gui.max_width*scalex);
-        let y = 0.5 * (1.0 - 2.0*(gui.lines.len() as f32) * gui.line_height * scaley);
+        let x = 0.5 * (1.0 + 1.5*gui.max_width*scalex);
+        let y = (gui.line_y[0] - 3.0*gui.line_height)* scaley;
         vertices.push(Vertex {
             pos: Vec3 { x, y, z: 0.0 },
             uv: Vec2 {
@@ -453,8 +453,8 @@ impl Mesh {
                 y: tex_uv.v1,
             }, act: 0,
         }); // top right
-        let x = 0.5 * (1.0 + 1.2*gui.max_width*scalex);
-        let y = 0.5 * (1.0 + 2.5*(gui.lines.len() as f32) * gui.line_height * scaley);
+        let x = 0.5 * (1.0 + 1.5*gui.max_width*scalex);
+        let y = (gui.line_y[gui.lines.len()-1] + 3.0*gui.line_height)* scaley;
         vertices.push(Vertex {
             pos: Vec3 { x, y, z: 0.0 },
             uv: Vec2 {
@@ -462,8 +462,8 @@ impl Mesh {
                 y: tex_uv.v2,
             }, act: 0,
         }); // bottom right
-        let x = 0.5 * (1.0 - 1.2*gui.max_width*scalex);
-        let y = 0.5 * (1.0 + 2.5*(gui.lines.len() as f32) * gui.line_height * scaley);
+        let x = 0.5 * (1.0 - 1.5*gui.max_width*scalex);
+        let y = (gui.line_y[gui.lines.len()-1] + 3.0*gui.line_height)* scaley;
         vertices.push(Vertex {
             pos: Vec3 { x, y, z: 0.0 },
             uv: Vec2 {
@@ -471,8 +471,8 @@ impl Mesh {
                 y: tex_uv.v2,
             }, act: 0,
         }); // bottom left
-        let x = 0.5 * (1.0 - 1.2*gui.max_width*scalex);
-        let y = 0.5 * (1.0 - 2.0*(gui.lines.len() as f32) * gui.line_height * scaley);
+        let x = 0.5 * (1.0 - 1.5*gui.max_width*scalex);
+        let y = (gui.line_y[0] - 3.0*gui.line_height)* scaley;
         vertices.push(Vertex {
             pos: Vec3 { x, y, z: 0.0 },
             uv: Vec2 {

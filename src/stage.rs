@@ -209,7 +209,8 @@ impl Stage {
             shader_gui,
         );
 
-        let gui = text::GUI::new_from(vec!["Text default"], settings.screen_width_f, settings.screen_height_f);
+        let mut gui = text::GUI::new_from(vec!["Text default"], settings.screen_width_f, settings.screen_height_f);
+        gui.show = false;
 
         Stage {
             ctx,
@@ -252,6 +253,9 @@ impl Stage {
     fn show_gui(&mut self) {
         self.gui = text::GUI::new_from(vec![
             &format!("Continue"),
+            &format!("Fullscreen"),
+            &format!("Lighter"),
+            &format!("Darker"),
             &format!("Quit game"),
         ], self.settings.screen_width_f, self.settings.screen_height_f);
 
@@ -284,6 +288,18 @@ impl Stage {
         if self.gui.act_no == 1 && self.input_state.mouse.left {
             self.gui.show = false
         }
+        if self.gui.act_no == 2 && self.input_state.mouse.left && !self.settings.full_screen {
+            miniquad::window::set_fullscreen(true);
+            let screen = miniquad::window::screen_size();
+            self.settings.full_screen = true;
+            self.settings.screen_change(screen.0, screen.1);
+        }
+        if self.gui.act_no == 3 && self.input_state.mouse.left {
+            self.settings.light_dist += 1.0*self.settings.player_speed;
+        }
+        if self.gui.act_no == 4 && self.input_state.mouse.left {
+            self.settings.light_dist -= 1.0*self.settings.player_speed;
+        }
     }
 }
 
@@ -295,13 +311,6 @@ impl EventHandler for Stage {
         if self.gui.show {
             self.show_gui();
             self.gui_control();
-        }
-
-        if self.input_state.keys.f && !self.settings.full_screen {
-            miniquad::window::set_fullscreen(true);
-            let screen = miniquad::window::screen_size();
-            self.settings.full_screen = true;
-            self.settings.screen_change(screen.0, screen.1);
         }
 
         if self.input_state.keys.esc {
