@@ -1,6 +1,12 @@
-# Raycasting 3D game
+# A simple 3D game
+
+Combining raycasting (to find which tiles to render) with ordinary GPU rendering.
 
 Texture source: https://little-martian.itch.io/retro-texture-pack
+
+Map generated using: https://www.mazegenerator.net/
+
+Font is a heavily edited version of https://datagoblin.itch.io/monogram
 
 # Screenshots
 ## January, 2nd, 2024
