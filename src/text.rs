@@ -10,6 +10,7 @@ const Y2: f32 = Y1+HEIGHT_CAP;
 const Y3: f32 = Y2+HEIGHT_CAP;
 const Y4: f32 = Y3+HEIGHT;
 const Y5: f32 = Y4+HEIGHT;
+const Y6: f32 = Y5+HEIGHT;
 const TEXWIDTH: f32 = 256.0;
 const TEXHEIGHT: f32 = 128.0;
 
@@ -137,7 +138,7 @@ pub fn string_to_uv(text: &str) -> Vec<TextureUV> {
         ('K', TextureUV{u1: X1+10.0*WIDTH, u2: X1+11.0*WIDTH, v1: Y1, v2: Y1+HEIGHT_CAP}),
         ('L', TextureUV{u1: X1+11.0*WIDTH, u2: X1+12.0*WIDTH, v1: Y1, v2: Y1+HEIGHT_CAP}),
         ('M', TextureUV{u1: X1+12.0*WIDTH, u2: X1+13.0*WIDTH, v1: Y1, v2: Y1+HEIGHT_CAP}),
-        ('=', TextureUV{u1: 171.0, u2: 171.0 + 42.0, v1: 2.0, v2: 2.0+42.0}),
+        ('=', TextureUV{u1: 171.0, u2: 171.0 + 56.0, v1: 2.0, v2: 2.0+56.0}),
         ('N', TextureUV{u1: X1+0.0*WIDTH, u2: X1+1.0*WIDTH, v1: Y2, v2: Y2+HEIGHT_CAP}),
         ('O', TextureUV{u1: X1+1.0*WIDTH, u2: X1+2.0*WIDTH, v1: Y2, v2: Y2+HEIGHT_CAP}),
         ('P', TextureUV{u1: X1+2.0*WIDTH, u2: X1+3.0*WIDTH, v1: Y2, v2: Y2+HEIGHT_CAP}),
@@ -164,10 +165,6 @@ pub fn string_to_uv(text: &str) -> Vec<TextureUV> {
         ('k', TextureUV{u1: X1+10.0*WIDTH, u2: X1+11.0*WIDTH, v1: Y3, v2: Y3+HEIGHT}),
         ('l', TextureUV{u1: X1+11.0*WIDTH, u2: X1+12.0*WIDTH, v1: Y3, v2: Y3+HEIGHT}),
         ('m', TextureUV{u1: X1+12.0*WIDTH, u2: X1+13.0*WIDTH, v1: Y3, v2: Y3+HEIGHT}),
-        ('+', TextureUV{u1: X1+13.0*WIDTH, u2: X1+14.0*WIDTH, v1: Y3, v2: Y3+HEIGHT}),
-        ('&', TextureUV{u1: X1+14.0*WIDTH, u2: X1+15.0*WIDTH, v1: Y3+2.0, v2: Y3+2.0+HEIGHT}),
-        ('#', TextureUV{u1: X1+15.0*WIDTH, u2: X1+16.0*WIDTH, v1: Y3+2.0, v2: Y3+2.0+HEIGHT}),
-        ('-', TextureUV{u1: X1+16.0*WIDTH, u2: X1+17.0*WIDTH, v1: Y3, v2: Y3+HEIGHT}),
         ('n', TextureUV{u1: X1+0.0*WIDTH, u2: X1+1.0*WIDTH, v1: Y4, v2: Y4+HEIGHT}),
         ('o', TextureUV{u1: X1+1.0*WIDTH, u2: X1+2.0*WIDTH, v1: Y4, v2: Y4+HEIGHT}),
         ('p', TextureUV{u1: X1+2.0*WIDTH, u2: X1+3.0*WIDTH, v1: Y4, v2: Y4+HEIGHT}),
@@ -186,6 +183,7 @@ pub fn string_to_uv(text: &str) -> Vec<TextureUV> {
         ('”', TextureUV{u1: X1+15.0*WIDTH, u2: X1+16.0*WIDTH, v1: Y4, v2: Y4+HEIGHT}),
         ('!', TextureUV{u1: X1+16.0*WIDTH, u2: X1+17.0*WIDTH, v1: Y4, v2: Y4+HEIGHT}),
         ('’', TextureUV{u1: X1+17.0*WIDTH, u2: X1+18.0*WIDTH, v1: Y4, v2: Y4+HEIGHT}),
+        ('●', TextureUV{u1: X1+18.0*WIDTH, u2: X1+19.0*WIDTH, v1: Y4, v2: Y4+HEIGHT}),
         ('1', TextureUV{u1: X1+0.0*WIDTH, u2: X1+1.0*WIDTH, v1: Y5, v2: Y5+HEIGHT}),
         ('2', TextureUV{u1: X1+1.0*WIDTH, u2: X1+2.0*WIDTH, v1: Y5, v2: Y5+HEIGHT}),
         ('3', TextureUV{u1: X1+2.0*WIDTH, u2: X1+3.0*WIDTH, v1: Y5, v2: Y5+HEIGHT}),
@@ -204,6 +202,13 @@ pub fn string_to_uv(text: &str) -> Vec<TextureUV> {
         ('(', TextureUV{u1: X1+15.0*WIDTH, u2: X1+16.0*WIDTH, v1: Y5, v2: Y5+HEIGHT}),
         (')', TextureUV{u1: X1+16.0*WIDTH, u2: X1+17.0*WIDTH, v1: Y5, v2: Y5+HEIGHT}),
         (';', TextureUV{u1: X1+17.0*WIDTH, u2: X1+18.0*WIDTH, v1: Y5, v2: Y5+HEIGHT}),
+        ('■', TextureUV{u1: X1+18.0*WIDTH, u2: X1+19.0*WIDTH, v1: Y5, v2: Y5+HEIGHT}),
+        ('+', TextureUV{u1: X1+13.0*WIDTH, u2: X1+14.0*WIDTH, v1: Y6, v2: Y6+HEIGHT}),
+        ('&', TextureUV{u1: X1+14.0*WIDTH, u2: X1+15.0*WIDTH, v1: Y6, v2: Y6+HEIGHT}),
+        ('#', TextureUV{u1: X1+15.0*WIDTH, u2: X1+16.0*WIDTH, v1: Y6, v2: Y6+HEIGHT}),
+        ('-', TextureUV{u1: X1+16.0*WIDTH, u2: X1+17.0*WIDTH, v1: Y6, v2: Y6+HEIGHT}),
+        ('>', TextureUV{u1: X1+17.0*WIDTH, u2: X1+18.0*WIDTH, v1: Y6, v2: Y6+HEIGHT}),
+        ('<', TextureUV{u1: X1+18.0*WIDTH, u2: X1+19.0*WIDTH, v1: Y6, v2: Y6+HEIGHT}),
     ]);
 
     let mut coords = Vec::new();

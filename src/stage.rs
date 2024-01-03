@@ -253,11 +253,11 @@ impl Stage {
     fn show_gui(&mut self) {
         self.gui = text::GUI::new_from(vec![
             &format!("Continue"),
-            &format!(""),
+            &format!("●"),
             &format!("Fullscreen"),
-            &format!("Light ++"),
-            &format!("Light --"),
-            &format!(""),
+            &format!("Light >"),
+            &format!("Light <"),
+            &format!("■"),
             &format!("Quit game"),
         ], self.settings.screen_width_f, self.settings.screen_height_f);
 
