@@ -4,7 +4,7 @@ use glam;
 pub const VERTEX_MAIN: &str = r#"#version 330 core
 in vec3 pos;
 in vec2 uv;
-in int act;
+in float act;
 
 uniform mat4 mvp;
 uniform vec3 playerpos;
@@ -43,7 +43,7 @@ void main() {
 pub const VERTEX_OVERLAY: &str = r#"#version 330 core
 in vec3 pos;
 in vec2 uv;
-in int act;
+in float act;
 
 out vec2 texcoord;
 
@@ -76,7 +76,7 @@ void main() {
 pub const VERTEX_GUI: &str = r#"#version 330 core
 in vec3 pos;
 in vec2 uv;
-in int act;
+in float act;
 
 uniform vec4 fontcolor;
 uniform vec4 actcolor;
@@ -87,7 +87,7 @@ out vec4 cols;
 void main() {
     gl_Position = vec4((pos.x-0.5)*2.0, (0.5-pos.y)*2.0, 0.0, 1.0);
     texcoord = uv;
-    if (act > 0) {
+    if (act > 0.0) {
         cols = actcolor;
     } else {
         cols = fontcolor;
@@ -115,6 +115,50 @@ void main() {
         } else {
             FragColor = col;
         }
+    }
+}"#;
+
+pub const VERTEX_MAP: &str = r#"#version 330 core
+in vec3 pos;
+in vec2 uv;
+in float act;
+
+uniform vec4 fontcolor;
+uniform vec4 actcolor;
+
+out vec2 texcoord;
+out vec4 cols;
+
+void main() {
+    gl_Position = vec4((pos.x-0.5)*2.0, (0.5-pos.y)*2.0, 0.0, 1.0);
+    texcoord = uv;
+    cols = fontcolor;
+    if (act > 0.9 && act <= 1.1) {
+        cols = actcolor;
+    }
+    if (act > 1.9 && act <= 2.1) {
+        cols = vec4(0.0, 0.0, 0.0, 1.0);
+    }
+}"#;
+
+pub const FRAGMENT_MAP: &str = r#"#version 330 core
+in vec2 texcoord;
+in vec4 cols;
+
+out vec4 FragColor;
+
+uniform sampler2D tex;
+
+vec4 col;
+
+void main() {
+    col = texture(tex, texcoord);
+
+    if (col.x+col.y+col.z > 2.99) {
+        discard;
+    } else {
+        FragColor = cols;
+        
     }
 }"#;
 
@@ -155,6 +199,18 @@ pub fn meta_gui() -> ShaderMeta {
     }
 }
 
+pub fn meta_map() -> ShaderMeta {
+    ShaderMeta {
+        images: vec!["tex".to_string()],
+        uniforms: UniformBlockLayout {
+            uniforms: vec![
+                UniformDesc::new("fontcolor", UniformType::Float4),
+                UniformDesc::new("actcolor", UniformType::Float4),
+            ],
+        },
+    }
+}
+
 #[repr(C)]
 pub struct UniformsMain {
     pub mvp: glam::Mat4,
@@ -169,6 +225,12 @@ pub struct UniformsOverlay {
 
 #[repr(C)]
 pub struct UniformsGUI {
+    pub fontcolor: (f32, f32, f32, f32),
+    pub actcolor: (f32, f32, f32, f32),
+}
+
+#[repr(C)]
+pub struct UniformsMap {
     pub fontcolor: (f32, f32, f32, f32),
     pub actcolor: (f32, f32, f32, f32),
 }

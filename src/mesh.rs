@@ -43,7 +43,7 @@ impl TextureUV {
 pub struct Vertex {
     pos: Vec3,
     uv: Vec2,
-    act: i32,
+    act: f32,
 }
 
 pub struct Mesh {
@@ -78,7 +78,7 @@ impl Mesh {
                     uv: Vec2 {
                         x: tex_uv.u2,
                         y: tex_uv.v1,
-                    }, act: 0,
+                    }, act: 0.0,
                 }); // top right
                 let x = depth_buffer.faces[l].bottom_right_x as f32;
                 let y = depth_buffer.faces[l].bottom_right_y as f32;
@@ -87,7 +87,7 @@ impl Mesh {
                     uv: Vec2 {
                         x: tex_uv.u2,
                         y: tex_uv.v2,
-                    }, act: 0,
+                    }, act: 0.0,
                 }); // bottom right
                 let x = depth_buffer.faces[l].bottom_left_x as f32;
                 let y = depth_buffer.faces[l].bottom_left_y as f32;
@@ -96,7 +96,7 @@ impl Mesh {
                     uv: Vec2 {
                         x: tex_uv.u1,
                         y: tex_uv.v2,
-                    }, act: 0,
+                    }, act: 0.0,
                 }); // bottom left
                 let x = depth_buffer.faces[l].top_left_x as f32;
                 let y = depth_buffer.faces[l].top_left_y as f32;
@@ -105,7 +105,7 @@ impl Mesh {
                     uv: Vec2 {
                         x: tex_uv.u1,
                         y: tex_uv.v1,
-                    }, act: 0,
+                    }, act: 0.0,
                 }); // top left
 
                 indices.push(4 * idx);
@@ -134,7 +134,7 @@ impl Mesh {
                     uv: Vec2 {
                         x: tex_uv.u2,
                         y: tex_uv.v1,
-                    }, act: 0,
+                    }, act: 0.0,
                 }); // top right
                 let x = depth_buffer.faces[l].bottom_right_x as f32;
                 let y = depth_buffer.faces[l].bottom_right_y as f32;
@@ -143,7 +143,7 @@ impl Mesh {
                     uv: Vec2 {
                         x: tex_uv.u2,
                         y: tex_uv.v2,
-                    }, act: 0,
+                    }, act: 0.0,
                 }); // bottom right
                 let x = depth_buffer.faces[l].bottom_left_x as f32;
                 let y = depth_buffer.faces[l].bottom_left_y as f32;
@@ -152,7 +152,7 @@ impl Mesh {
                     uv: Vec2 {
                         x: tex_uv.u1,
                         y: tex_uv.v2,
-                    }, act: 0,
+                    }, act: 0.0,
                 }); // bottom left
                 let x = depth_buffer.faces[l].top_left_x as f32;
                 let y = depth_buffer.faces[l].top_left_y as f32;
@@ -161,7 +161,7 @@ impl Mesh {
                     uv: Vec2 {
                         x: tex_uv.u1,
                         y: tex_uv.v1,
-                    }, act: 0,
+                    }, act: 0.0,
                 }); // top left
 
                 indices.push(4 * idx);
@@ -221,7 +221,7 @@ impl Mesh {
                     uv: Vec2 {
                         x: tex_uv_1.u2,
                         y: tex_uv_1.v1,
-                    }, act: 0,
+                    }, act: 0.0,
                 }); // top right
                 let x = depth_buffer.faces[l].bottom_right_x as f32;
                 let y = depth_buffer.faces[l].bottom_right_y as f32;
@@ -230,7 +230,7 @@ impl Mesh {
                     uv: Vec2 {
                         x: tex_uv_1.u2,
                         y: tex_uv_1.v2,
-                    }, act: 0,
+                    }, act: 0.0,
                 }); // bottom right
                 let x = depth_buffer.faces[l].bottom_left_x as f32;
                 let y = depth_buffer.faces[l].bottom_left_y as f32;
@@ -239,7 +239,7 @@ impl Mesh {
                     uv: Vec2 {
                         x: tex_uv_1.u1,
                         y: tex_uv_1.v2,
-                    }, act: 0,
+                    }, act: 0.0,
                 }); // bottom left
                 let x = depth_buffer.faces[l].top_left_x as f32;
                 let y = depth_buffer.faces[l].top_left_y as f32;
@@ -248,7 +248,7 @@ impl Mesh {
                     uv: Vec2 {
                         x: tex_uv_1.u1,
                         y: tex_uv_1.v1,
-                    }, act: 0,
+                    }, act: 0.0,
                 }); // top left
 
                 indices.push(4 * idx);
@@ -267,7 +267,7 @@ impl Mesh {
                     uv: Vec2 {
                         x: tex_uv_2.u2,
                         y: tex_uv_2.v1,
-                    }, act: 0,
+                    }, act: 0.0,
                 }); // top right
                 let x = depth_buffer.faces[l].bottom_right_x as f32;
                 let y = depth_buffer.faces[l].bottom_right_y as f32;
@@ -276,7 +276,7 @@ impl Mesh {
                     uv: Vec2 {
                         x: tex_uv_2.u2,
                         y: tex_uv_2.v2,
-                    }, act: 0,
+                    }, act: 0.0,
                 }); // bottom right
                 let x = depth_buffer.faces[l].bottom_left_x as f32;
                 let y = depth_buffer.faces[l].bottom_left_y as f32;
@@ -285,7 +285,7 @@ impl Mesh {
                     uv: Vec2 {
                         x: tex_uv_2.u1,
                         y: tex_uv_2.v2,
-                    }, act: 0,
+                    }, act: 0.0,
                 }); // bottom left
                 let x = depth_buffer.faces[l].top_left_x as f32;
                 let y = depth_buffer.faces[l].top_left_y as f32;
@@ -294,7 +294,7 @@ impl Mesh {
                     uv: Vec2 {
                         x: tex_uv_2.u1,
                         y: tex_uv_2.v1,
-                    }, act: 0,
+                    }, act: 0.0,
                 }); // top left
 
                 indices.push(4 * idx);
@@ -335,7 +335,7 @@ impl Mesh {
             uv: Vec2 {
                 x: tex_uv.u2,
                 y: tex_uv.v1,
-            }, act: 0,
+            }, act: 0.0,
         }); // top right
         let x = 0.5+text::WIDTH*overlay.scale*scalex;
         let y = 0.5+text::HEIGHT*overlay.scale*scaley;
@@ -344,7 +344,7 @@ impl Mesh {
             uv: Vec2 {
                 x: tex_uv.u2,
                 y: tex_uv.v2,
-            }, act: 0,
+            }, act: 0.0,
         }); // bottom right
         let x = 0.5-text::WIDTH*overlay.scale*scalex;
         let y = 0.5+text::HEIGHT*overlay.scale*scaley;
@@ -353,7 +353,7 @@ impl Mesh {
             uv: Vec2 {
                 x: tex_uv.u1,
                 y: tex_uv.v2,
-            }, act: 0,
+            }, act: 0.0,
         }); // bottom left
         let x = 0.5-text::WIDTH*overlay.scale*scalex;
         let y = 0.5-text::HEIGHT*overlay.scale*scaley;
@@ -362,7 +362,7 @@ impl Mesh {
             uv: Vec2 {
                 x: tex_uv.u1,
                 y: tex_uv.v1,
-            }, act: 0,
+            }, act: 0.0,
         }); // top left
 
         indices.push(4 * idx);
@@ -389,7 +389,7 @@ impl Mesh {
                     uv: Vec2 {
                         x: tex_uv.u2,
                         y: tex_uv.v1,
-                    }, act: 0,
+                    }, act: 0.0,
                 }); // top right
                 let x = (overlay.line_x[s] + (lf+1.0)*text::WIDTH*overlay.scale)*scalex;
                 let y = (overlay.line_y[s]+overlay.line_height)*scaley;
@@ -398,7 +398,7 @@ impl Mesh {
                     uv: Vec2 {
                         x: tex_uv.u2,
                         y: tex_uv.v2,
-                    }, act: 0,
+                    }, act: 0.0,
                 }); // bottom right
                 let x = (overlay.line_x[s] + lf*text::WIDTH*overlay.scale)*scalex;
                 let y = (overlay.line_y[s]+overlay.line_height)*scaley;
@@ -407,7 +407,7 @@ impl Mesh {
                     uv: Vec2 {
                         x: tex_uv.u1,
                         y: tex_uv.v2,
-                    }, act: 0,
+                    }, act: 0.0,
                 }); // bottom left
                 let x = (overlay.line_x[s] + lf*text::WIDTH*overlay.scale)*scalex;
                 let y = (overlay.line_y[s])*scaley;
@@ -416,7 +416,7 @@ impl Mesh {
                     uv: Vec2 {
                         x: tex_uv.u1,
                         y: tex_uv.v1,
-                    }, act: 0,
+                    }, act: 0.0,
                 }); // top left
 
                 indices.push(4 * idx);
@@ -451,7 +451,7 @@ impl Mesh {
             uv: Vec2 {
                 x: tex_uv.u2,
                 y: tex_uv.v1,
-            }, act: 0,
+            }, act: 0.0,
         }); // top right
         let x = 0.5 * (1.0 + 1.5*gui.max_width*scalex);
         let y = (gui.line_y[gui.lines.len()-1] + 2.0*gui.line_height)* scaley;
@@ -460,7 +460,7 @@ impl Mesh {
             uv: Vec2 {
                 x: tex_uv.u2,
                 y: tex_uv.v2,
-            }, act: 0,
+            }, act: 0.0,
         }); // bottom right
         let x = 0.5 * (1.0 - 1.5*gui.max_width*scalex);
         let y = (gui.line_y[gui.lines.len()-1] + 2.0*gui.line_height)* scaley;
@@ -469,7 +469,7 @@ impl Mesh {
             uv: Vec2 {
                 x: tex_uv.u1,
                 y: tex_uv.v2,
-            }, act: 0,
+            }, act: 0.0,
         }); // bottom left
         let x = 0.5 * (1.0 - 1.5*gui.max_width*scalex);
         let y = (gui.line_y[0] - 1.0*gui.line_height)* scaley;
@@ -478,7 +478,7 @@ impl Mesh {
             uv: Vec2 {
                 x: tex_uv.u1,
                 y: tex_uv.v1,
-            }, act: 0,
+            }, act: 0.0,
         }); // top left
 
         indices.push(4 * idx);
@@ -505,7 +505,7 @@ impl Mesh {
                     uv: Vec2 {
                         x: tex_uv.u2,
                         y: tex_uv.v1,
-                    }, act: gui.line_active[s],
+                    }, act: gui.line_active[s] as f32,
                 }); // top right
                 let x = (gui.line_x[s] + (lf+1.0)*text::WIDTH*gui.scale)*scalex;
                 let y = (gui.line_y[s]+gui.line_height)*scaley;
@@ -514,7 +514,7 @@ impl Mesh {
                     uv: Vec2 {
                         x: tex_uv.u2,
                         y: tex_uv.v2,
-                    }, act: gui.line_active[s],
+                    }, act: gui.line_active[s] as f32,
                 }); // bottom right
                 let x = (gui.line_x[s] + lf*text::WIDTH*gui.scale)*scalex;
                 let y = (gui.line_y[s]+gui.line_height)*scaley;
@@ -523,7 +523,7 @@ impl Mesh {
                     uv: Vec2 {
                         x: tex_uv.u1,
                         y: tex_uv.v2,
-                    }, act: gui.line_active[s],
+                    }, act: gui.line_active[s] as f32,
                 }); // bottom left
                 let x = (gui.line_x[s] + lf*text::WIDTH*gui.scale)*scalex;
                 let y = (gui.line_y[s])*scaley;
@@ -532,7 +532,7 @@ impl Mesh {
                     uv: Vec2 {
                         x: tex_uv.u1,
                         y: tex_uv.v1,
-                    }, act: gui.line_active[s],
+                    }, act: gui.line_active[s] as f32,
                 }); // top left
 
                 indices.push(4 * idx);
@@ -544,6 +544,137 @@ impl Mesh {
 
                 idx = idx + 1;
             }
+        }
+
+        Mesh {
+            vertices,
+            indices,
+            num: idx as i32,
+        }
+    }
+
+    pub fn new_map(depth_buffer: &camera::DepthBuffer, scalex: f32, scaley: f32) -> Mesh {
+        let mut vertices: Vec<Vertex> = Vec::new();
+        let mut indices: Vec<i16> = Vec::new();
+
+        let mut idx = 0;
+
+        let mut tex_uv = text::string_to_uv("=")[0];
+
+        let x_offset = 20.0;
+        let y_offset = 20.0;
+        let width = 256.0;
+        let height = 256.0;
+
+        let x = 1.0 - (x_offset)*scalex;
+        let y = 1.0 - (y_offset + height) * scaley;
+        vertices.push(Vertex {
+            pos: Vec3 { x, y, z: 0.0 },
+            uv: Vec2 {
+                x: tex_uv.u2,
+                y: tex_uv.v1,
+            }, act: 0.0,
+        }); // top right
+        let x = 1.0 - (x_offset)*scalex;
+        let y = 1.0 - (y_offset) * scaley;
+        vertices.push(Vertex {
+            pos: Vec3 { x, y, z: 0.0 },
+            uv: Vec2 {
+                x: tex_uv.u2,
+                y: tex_uv.v2,
+            }, act: 0.0,
+        }); // bottom right
+        let x = 1.0 - (x_offset + width)*scalex;
+        let y = 1.0 - (y_offset) * scaley;
+        vertices.push(Vertex {
+            pos: Vec3 { x, y, z: 0.0 },
+            uv: Vec2 {
+                x: tex_uv.u1,
+                y: tex_uv.v2,
+            }, act: 0.0,
+        }); // bottom left
+        let x = 1.0 - (x_offset + width)*scalex;
+        let y = 1.0 - (y_offset + height) * scaley;
+        vertices.push(Vertex {
+            pos: Vec3 { x, y, z: 0.0 },
+            uv: Vec2 {
+                x: tex_uv.u1,
+                y: tex_uv.v1,
+            }, act: 0.0,
+        }); // top left
+
+        indices.push(4 * idx);
+        indices.push(4 * idx + 1);
+        indices.push(4 * idx + 3);
+        indices.push(4 * idx + 1);
+        indices.push(4 * idx + 2);
+        indices.push(4 * idx + 3);
+
+        idx = idx + 1;
+
+        // VISIBLE TILES
+
+        tex_uv = text::string_to_uv("■")[0];
+
+        let t_size = 1.0;
+
+        for l in 0..depth_buffer.len {
+            let act;
+            if depth_buffer.faces[l].is_wall {
+                act = 2.0;
+            } else {
+                act = 1.0;
+            }
+            
+            let xt = x_offset + width - depth_buffer.faces[l].bottom_right_x as f32;
+            let yt = y_offset + depth_buffer.faces[l].bottom_right_y as f32;
+
+            // visible walls
+            let x = 1.0 - (xt)*scalex;
+            let y = 1.0 - (yt + t_size) * scaley;
+            vertices.push(Vertex {
+                pos: Vec3 { x, y, z: 0.0 },
+                uv: Vec2 {
+                    x: tex_uv.u2,
+                    y: tex_uv.v1,
+                }, act,
+            }); // top right
+            let x = 1.0 - (xt)*scalex;
+            let y = 1.0 - (yt) * scaley;
+            vertices.push(Vertex {
+                pos: Vec3 { x, y, z: 0.0 },
+                uv: Vec2 {
+                    x: tex_uv.u2,
+                    y: tex_uv.v2,
+                }, act,
+            }); // bottom right
+            let x = 1.0 - (xt + t_size)*scalex;
+            let y = 1.0 - (yt) * scaley;
+            vertices.push(Vertex {
+                pos: Vec3 { x, y, z: 0.0 },
+                uv: Vec2 {
+                    x: tex_uv.u1,
+                    y: tex_uv.v2,
+                }, act,
+            }); // bottom left
+            let x = 1.0 - (xt + t_size)*scalex;
+            let y = 1.0 - (yt + t_size) * scaley;
+            vertices.push(Vertex {
+                pos: Vec3 { x, y, z: 0.0 },
+                uv: Vec2 {
+                    x: tex_uv.u1,
+                    y: tex_uv.v1,
+                }, act,
+            }); // top left
+
+            indices.push(4 * idx);
+            indices.push(4 * idx + 1);
+            indices.push(4 * idx + 3);
+            indices.push(4 * idx + 1);
+            indices.push(4 * idx + 2);
+            indices.push(4 * idx + 3);
+
+            idx = idx + 1;
         }
 
         Mesh {

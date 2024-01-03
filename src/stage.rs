@@ -61,6 +61,11 @@ impl Stage {
             1.0 / settings.screen_width_f,
             1.0 / settings.screen_height_f,
         );
+        let mesh_map = mesh::Mesh::new_map(
+            &depth_buffer,
+            1.0 / settings.screen_width_f,
+            1.0 / settings.screen_height_f,
+        );
 
         let vertex_buffer_main = ctx.new_buffer(
             BufferType::VertexBuffer,
@@ -80,6 +85,12 @@ impl Stage {
             BufferSource::slice(&mesh_gui.vertices),
         );
 
+        let vertex_buffer_map = ctx.new_buffer(
+            BufferType::VertexBuffer,
+            BufferUsage::Immutable,
+            BufferSource::slice(&mesh_map.vertices),
+        );
+
         let index_buffer_main = ctx.new_buffer(
             BufferType::IndexBuffer,
             BufferUsage::Immutable,
@@ -96,6 +107,12 @@ impl Stage {
             BufferType::IndexBuffer,
             BufferUsage::Immutable,
             BufferSource::slice(&mesh_gui.indices),
+        );
+
+        let index_buffer_map = ctx.new_buffer(
+            BufferType::IndexBuffer,
+            BufferUsage::Immutable,
+            BufferSource::slice(&mesh_map.indices),
         );
 
         let pixels: ImageBuffer<Rgba<u8>, Vec<u8>> = ass.tile_atlas;
@@ -149,6 +166,12 @@ impl Stage {
             images: vec![texture_overlay],
         };
 
+        let bindings_map = Bindings {
+            vertex_buffers: vec![vertex_buffer_map],
+            index_buffer: index_buffer_map,
+            images: vec![texture_overlay],
+        };
+
         let shader_main = ctx
             .new_shader(
                 miniquad::ShaderSource::Glsl {
@@ -179,12 +202,22 @@ impl Stage {
             )
             .unwrap();
 
+        let shader_map = ctx
+            .new_shader(
+                miniquad::ShaderSource::Glsl {
+                    vertex: shaders::VERTEX_MAP,
+                    fragment: shaders::FRAGMENT_MAP,
+                },
+                shaders::meta_map(),
+            )
+            .unwrap();
+
         let pipeline_main = ctx.new_pipeline(
             &[BufferLayout::default()],
             &[
                 VertexAttribute::new("pos", VertexFormat::Float3),
                 VertexAttribute::new("uv", VertexFormat::Float2),
-                VertexAttribute::new("act", VertexFormat::Int1),
+                VertexAttribute::new("act", VertexFormat::Float1),
             ],
             shader_main,
         );
@@ -194,7 +227,7 @@ impl Stage {
             &[
                 VertexAttribute::new("pos", VertexFormat::Float3),
                 VertexAttribute::new("uv", VertexFormat::Float2),
-                VertexAttribute::new("act", VertexFormat::Int1),
+                VertexAttribute::new("act", VertexFormat::Float1),
             ],
             shader_overlay,
         );
@@ -204,9 +237,19 @@ impl Stage {
             &[
                 VertexAttribute::new("pos", VertexFormat::Float3),
                 VertexAttribute::new("uv", VertexFormat::Float2),
-                VertexAttribute::new("act", VertexFormat::Int1),
+                VertexAttribute::new("act", VertexFormat::Float1),
             ],
             shader_gui,
+        );
+
+        let pipeline_map = ctx.new_pipeline(
+            &[BufferLayout::default()],
+            &[
+                VertexAttribute::new("pos", VertexFormat::Float3),
+                VertexAttribute::new("uv", VertexFormat::Float2),
+                VertexAttribute::new("act", VertexFormat::Float1),
+            ],
+            shader_map,
         );
 
         let gui = text::GUI::new_from(vec!["Text default"], settings.screen_width_f, settings.screen_height_f);
@@ -221,9 +264,9 @@ impl Stage {
             depth_buffer,
             overlay: text::Overlay::new_from(vec!["Text default"]),
             gui,
-            pipeline: vec![pipeline_main, pipeline_overlay, pipeline_gui],
-            bindings: vec![bindings_main, bindings_overlay, bindings_gui],
-            mesh: vec![mesh_main, mesh_overlay, mesh_gui],
+            pipeline: vec![pipeline_main, pipeline_overlay, pipeline_gui, pipeline_map],
+            bindings: vec![bindings_main, bindings_overlay, bindings_gui, bindings_map],
+            mesh: vec![mesh_main, mesh_overlay, mesh_gui, mesh_map],
             time_state: TimeState::init(),
             input_state: InputState::init(),
         }
@@ -253,11 +296,11 @@ impl Stage {
     fn show_gui(&mut self) {
         self.gui = text::GUI::new_from(vec![
             &format!("Continue"),
-            &format!("●"),
+            &format!("-"),
             &format!("Fullscreen"),
             &format!("Light >"),
             &format!("Light <"),
-            &format!("■"),
+            &format!("-"),
             &format!("Quit game"),
         ], self.settings.screen_width_f, self.settings.screen_height_f);
 
@@ -353,6 +396,11 @@ impl EventHandler for Stage {
                 1.0 / self.settings.screen_width_f,
                 1.0 / self.settings.screen_height_f,
             );
+            self.mesh[3] = mesh::Mesh::new_map(
+                &self.depth_buffer,
+                1.0 / self.settings.screen_width_f,
+                1.0 / self.settings.screen_height_f,
+            );
 
             for j in 0..self.bindings.len() {
                 let vertex_buffer = self.ctx.new_buffer(
@@ -424,6 +472,18 @@ impl EventHandler for Stage {
             }));
 
         self.ctx.draw(0, self.mesh[1].num * 6, 1);
+
+        self.ctx.apply_pipeline(&self.pipeline[3]);
+
+        self.ctx.apply_bindings(&self.bindings[3]);
+
+        self.ctx
+            .apply_uniforms(miniquad::UniformsSource::table(&shaders::UniformsMap {
+                fontcolor: (0.1843137, 0.2666667, 0.4627451, 1.0),
+                actcolor: (1.0, 0.0, 0.0, 1.0),
+            }));
+
+        self.ctx.draw(0, self.mesh[3].num * 6, 1);
 
         if self.gui.show {
             self.ctx.apply_pipeline(&self.pipeline[2]);
