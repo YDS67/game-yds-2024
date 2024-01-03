@@ -14,7 +14,7 @@ mod text;
 
 fn window_conf() -> Conf {
     let mut conf = Conf {
-        window_title: "Raycasting + GPU rendering".to_owned(),
+        window_title: "Game".to_owned(),
         window_width: settings::WIDTH0,
         window_height: settings::HEIGHT0,
         platform: Platform::default(),
