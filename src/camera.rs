@@ -181,7 +181,7 @@ pub fn find_visible_tiles(game_map: &mut map::GameMap, player: &player::Player, 
         let mut yr = 0.0;
         let mut break_soon = 0;
         for _l in 0..settings.draw_max_dist*settings.draw_steps {
-            if break_soon >= 3 {break}
+            if break_soon >= 100 {break}
             xr += cphi / settings.draw_steps as f32;
             yr += sphi / settings.draw_steps as f32;
             let x = player.position.x + xr;
@@ -193,14 +193,14 @@ pub fn find_visible_tiles(game_map: &mut map::GameMap, player: &player::Player, 
                 if game_map.wall_bot_array[i][j] < 255 {
                     game_map.wall_visible[i][j] = true;
                     game_map.wall_dist[i][j] = d;
-                    for ii in (i-2)..(i+3) {
-                        for jj in (j-2)..(j+3) {
-                            if ii as i32 > 0 && ii < settings::MAPSIZE-1 && jj as i32 > 0 && jj < settings::MAPSIZE-1 {
-                            game_map.floor_visible[ii][jj] = true;
-                            game_map.floor_dist[ii][jj] = d;
-                            }
-                        }
-                    }
+                    // for ii in (i-2)..(i+3) {
+                    //     for jj in (j-2)..(j+3) {
+                    //         if ii as i32 > 0 && ii < settings::MAPSIZE-1 && jj as i32 > 0 && jj < settings::MAPSIZE-1 {
+                    //         game_map.floor_visible[ii][jj] = true;
+                    //         game_map.floor_dist[ii][jj] = d;
+                    //         }
+                    //     }
+                    // }
                     break_soon += 1;
                 } else {
                     game_map.floor_visible[i][j] = true;

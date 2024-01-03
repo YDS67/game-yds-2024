@@ -128,9 +128,11 @@ uniform vec4 actcolor;
 
 out vec2 texcoord;
 out vec4 cols;
+out vec2 spos;
 
 void main() {
     gl_Position = vec4((pos.x-0.5)*2.0, (0.5-pos.y)*2.0, 0.0, 1.0);
+    spos = pos.xy;
     texcoord = uv;
     cols = fontcolor;
     if (act > 0.9 && act <= 1.1) {
@@ -139,22 +141,27 @@ void main() {
     if (act > 1.9 && act <= 2.1) {
         cols = vec4(0.0, 0.0, 0.0, 1.0);
     }
+    if (act > 2.9 && act <= 3.1) {
+        cols = vec4(0.8, 0.0, 0.2, 1.0);
+    }
 }"#;
 
 pub const FRAGMENT_MAP: &str = r#"#version 330 core
 in vec2 texcoord;
 in vec4 cols;
+in vec2 spos;
 
 out vec4 FragColor;
 
 uniform sampler2D tex;
+uniform vec4 cent;
 
 vec4 col;
 
 void main() {
     col = texture(tex, texcoord);
 
-    if (col.x+col.y+col.z > 2.99) {
+    if (col.x+col.y+col.z > 2.99 || length((spos.xy-cent.xy)/cent.zw) > 1.0) {
         discard;
     } else {
         FragColor = cols;
@@ -206,6 +213,7 @@ pub fn meta_map() -> ShaderMeta {
             uniforms: vec![
                 UniformDesc::new("fontcolor", UniformType::Float4),
                 UniformDesc::new("actcolor", UniformType::Float4),
+                UniformDesc::new("cent", UniformType::Float4),
             ],
         },
     }
@@ -233,4 +241,5 @@ pub struct UniformsGUI {
 pub struct UniformsMap {
     pub fontcolor: (f32, f32, f32, f32),
     pub actcolor: (f32, f32, f32, f32),
+    pub cent: (f32, f32, f32, f32)
 }

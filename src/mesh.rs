@@ -553,7 +553,7 @@ impl Mesh {
         }
     }
 
-    pub fn new_map(depth_buffer: &camera::DepthBuffer, scalex: f32, scaley: f32) -> Mesh {
+    pub fn new_map(depth_buffer: &camera::DepthBuffer, player: &player::Player, scalex: f32, scaley: f32) -> Mesh {
         let mut vertices: Vec<Vertex> = Vec::new();
         let mut indices: Vec<i16> = Vec::new();
 
@@ -561,10 +561,12 @@ impl Mesh {
 
         let mut tex_uv = text::string_to_uv("=")[0];
 
+        let mut t_size = 2.0;
+
         let x_offset = 20.0;
         let y_offset = 20.0;
-        let width = 256.0;
-        let height = 256.0;
+        let width = 256.0*t_size;
+        let height = 256.0*t_size;
 
         let x = 1.0 - (x_offset)*scalex;
         let y = 1.0 - (y_offset + height) * scaley;
@@ -616,8 +618,6 @@ impl Mesh {
 
         tex_uv = text::string_to_uv("■")[0];
 
-        let t_size = 1.0;
-
         for l in 0..depth_buffer.len {
             let act;
             if depth_buffer.faces[l].is_wall {
@@ -626,10 +626,10 @@ impl Mesh {
                 act = 1.0;
             }
             
-            let xt = x_offset + width - depth_buffer.faces[l].bottom_right_x as f32;
-            let yt = y_offset + depth_buffer.faces[l].bottom_right_y as f32;
+            let xt = x_offset + 0.5*width - t_size*(depth_buffer.faces[l].bottom_right_x as f32 - player.position.x);
+            let yt = y_offset + 0.5*height + t_size*(depth_buffer.faces[l].bottom_right_y as f32 - player.position.y);
 
-            // visible walls
+            // visible walls and floor
             let x = 1.0 - (xt)*scalex;
             let y = 1.0 - (yt + t_size) * scaley;
             vertices.push(Vertex {
@@ -676,6 +676,60 @@ impl Mesh {
 
             idx = idx + 1;
         }
+
+        tex_uv = text::string_to_uv("●")[0];
+
+        t_size = 15.0;
+
+        let xt = x_offset + 0.5*width - 0.5*t_size;
+        let yt = y_offset + 0.5*height - 0.5*t_size;
+
+        // player
+        let x = 1.0 - (xt)*scalex;
+        let y = 1.0 - (yt + t_size) * scaley;
+        vertices.push(Vertex {
+            pos: Vec3 { x, y, z: 0.0 },
+            uv: Vec2 {
+                x: tex_uv.u2,
+                y: tex_uv.v1,
+            }, act: 3.0,
+        }); // top right
+        let x = 1.0 - (xt)*scalex;
+        let y = 1.0 - (yt) * scaley;
+        vertices.push(Vertex {
+            pos: Vec3 { x, y, z: 0.0 },
+            uv: Vec2 {
+                x: tex_uv.u2,
+                y: tex_uv.v2,
+            }, act: 3.0,
+        }); // bottom right
+        let x = 1.0 - (xt + t_size)*scalex;
+        let y = 1.0 - (yt) * scaley;
+        vertices.push(Vertex {
+            pos: Vec3 { x, y, z: 0.0 },
+            uv: Vec2 {
+                x: tex_uv.u1,
+                y: tex_uv.v2,
+            }, act: 3.0,
+        }); // bottom left
+        let x = 1.0 - (xt + t_size)*scalex;
+        let y = 1.0 - (yt + t_size) * scaley;
+        vertices.push(Vertex {
+            pos: Vec3 { x, y, z: 0.0 },
+            uv: Vec2 {
+                x: tex_uv.u1,
+                y: tex_uv.v1,
+            }, act: 3.0,
+        }); // top left
+
+        indices.push(4 * idx);
+        indices.push(4 * idx + 1);
+        indices.push(4 * idx + 3);
+        indices.push(4 * idx + 1);
+        indices.push(4 * idx + 2);
+        indices.push(4 * idx + 3);
+
+        idx = idx + 1;
 
         Mesh {
             vertices,

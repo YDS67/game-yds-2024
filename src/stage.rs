@@ -63,6 +63,7 @@ impl Stage {
         );
         let mesh_map = mesh::Mesh::new_map(
             &depth_buffer,
+            &player,
             1.0 / settings.screen_width_f,
             1.0 / settings.screen_height_f,
         );
@@ -290,6 +291,7 @@ impl Stage {
         self.overlay = text::Overlay::new_from(vec![
             &format!("FPS: {}", self.time_state.fps + 1),
             &format!("Press (Esc) for menu."),
+            &format!("Visible tiles: {}", self.depth_buffer.len),
         ]);
     }
 
@@ -398,6 +400,7 @@ impl EventHandler for Stage {
             );
             self.mesh[3] = mesh::Mesh::new_map(
                 &self.depth_buffer,
+                &self.player,
                 1.0 / self.settings.screen_width_f,
                 1.0 / self.settings.screen_height_f,
             );
@@ -477,10 +480,24 @@ impl EventHandler for Stage {
 
         self.ctx.apply_bindings(&self.bindings[3]);
 
+        let t_size = 2.0;
+
+        let x_offset = 20.0;
+        let y_offset = 20.0;
+        let mwidth = 256.0*t_size;
+        let mheight = 256.0*t_size;
+        let xp = x_offset + 0.5*mwidth;
+        let yp = y_offset + 0.5*mheight;
+        let x = 1.0 - xp / self.settings.screen_width_f;
+        let y = 1.0 - yp / self.settings.screen_height_f;
+        let a = mwidth / self.settings.screen_width_f / 2.0;
+        let b = mwidth / self.settings.screen_height_f / 2.0;
+
         self.ctx
             .apply_uniforms(miniquad::UniformsSource::table(&shaders::UniformsMap {
-                fontcolor: (0.1843137, 0.2666667, 0.4627451, 1.0),
-                actcolor: (1.0, 0.0, 0.0, 1.0),
+                fontcolor: (0.5, 0.5, 0.5, 1.0),
+                actcolor: (0.1843137, 0.2666667, 0.4627451, 1.0),
+                cent: (x, y, a, b),
             }));
 
         self.ctx.draw(0, self.mesh[3].num * 6, 1);
