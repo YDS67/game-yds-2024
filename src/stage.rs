@@ -124,49 +124,49 @@ impl Stage {
         let vertex_buffer_main = ctx.new_buffer(
             BufferType::VertexBuffer,
             BufferUsage::Stream,
-            BufferSource::slice(&mesh_main.vertices),
+            BufferSource::empty::<mesh::Vertex>(settings::MAX_VERTICES_MAIN),
         );
 
         let vertex_buffer_overlay = ctx.new_buffer(
             BufferType::VertexBuffer,
             BufferUsage::Stream,
-            BufferSource::slice(&mesh_overlay.vertices),
+            BufferSource::empty::<mesh::Vertex>(settings::MAX_VERTICES_MAIN),
         );
 
         let vertex_buffer_gui = ctx.new_buffer(
             BufferType::VertexBuffer,
             BufferUsage::Stream,
-            BufferSource::slice(&mesh_gui.vertices),
+            BufferSource::empty::<mesh::Vertex>(settings::MAX_VERTICES_MAIN),
         );
 
         let vertex_buffer_map = ctx.new_buffer(
             BufferType::VertexBuffer,
             BufferUsage::Stream,
-            BufferSource::slice(&mesh_map.vertices),
+            BufferSource::empty::<mesh::Vertex>(settings::MAX_VERTICES_MAIN),
         );
 
         let index_buffer_main = ctx.new_buffer(
             BufferType::IndexBuffer,
             BufferUsage::Stream,
-            BufferSource::slice(&mesh_main.indices),
+            BufferSource::empty::<i16>(2*settings::MAX_INDICES_MAIN),
         );
 
         let index_buffer_overlay = ctx.new_buffer(
             BufferType::IndexBuffer,
             BufferUsage::Stream,
-            BufferSource::slice(&mesh_overlay.indices),
+            BufferSource::empty::<i16>(2*settings::MAX_INDICES_MAIN),
         );
 
         let index_buffer_gui = ctx.new_buffer(
             BufferType::IndexBuffer,
             BufferUsage::Stream,
-            BufferSource::slice(&mesh_gui.indices),
+            BufferSource::empty::<i16>(2*settings::MAX_INDICES_MAIN),
         );
 
         let index_buffer_map = ctx.new_buffer(
             BufferType::IndexBuffer,
             BufferUsage::Stream,
-            BufferSource::slice(&mesh_map.indices),
+            BufferSource::empty::<i16>(2*settings::MAX_INDICES_MAIN),
         );
 
         let pixels: ImageBuffer<Rgba<u8>, Vec<u8>> = ass.tile_atlas;
@@ -240,15 +240,6 @@ impl Stage {
             index_buffer: index_buffer_map,
             images: vec![texture_map],
         };
-
-        ctx.delete_buffer(vertex_buffer_main);
-        ctx.delete_buffer(index_buffer_main);
-        ctx.delete_buffer(vertex_buffer_overlay);
-        ctx.delete_buffer(index_buffer_overlay);
-        ctx.delete_buffer(vertex_buffer_gui);
-        ctx.delete_buffer(index_buffer_gui);
-        ctx.delete_buffer(vertex_buffer_map);
-        ctx.delete_buffer(index_buffer_map);
 
         let shader_main = ctx
             .new_shader(
@@ -438,7 +429,7 @@ impl EventHandler for Stage {
     fn draw(&mut self) {
         window::show_mouse(self.gui.show);
 
-        unsafe {miniquad::gl::glFlush()}
+        //unsafe {miniquad::gl::glFlush()}
         
         self.ctx
             .begin_default_pass(miniquad::PassAction::default());
@@ -446,21 +437,8 @@ impl EventHandler for Stage {
         self.ctx.clear(Some((0.0, 0.0, 0.0, 1.0)), None, None);
 
         for j in 0..self.bindings.len() {
-            for b in 0..self.bindings[j].vertex_buffers.len() {
-                self.ctx.delete_buffer(self.bindings[j].vertex_buffers[b]);
-            }
-            self.ctx.delete_buffer(self.bindings[j].index_buffer);
-
-            self.bindings[j].vertex_buffers[0] = self.ctx.new_buffer(
-                BufferType::VertexBuffer,
-                BufferUsage::Stream,
-                BufferSource::slice(&self.mesh[j].vertices),
-            );
-            self.bindings[j].index_buffer = self.ctx.new_buffer(
-                BufferType::IndexBuffer,
-                BufferUsage::Stream,
-                BufferSource::slice(&self.mesh[j].indices),
-            );
+            self.ctx.buffer_update(self.bindings[j].vertex_buffers[0], BufferSource::slice(&self.mesh[j].vertices));
+            self.ctx.buffer_update(self.bindings[j].index_buffer, BufferSource::slice(&self.mesh[j].indices));
         }
 
         self.ctx.apply_pipeline(&self.pipeline[0]);

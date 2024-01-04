@@ -4,6 +4,9 @@ pub const WIDTH0: i32 = 1280;
 pub const HEIGHT0: i32 = 800;
 pub const TOLERANCE: f32 = 1e-3;
 pub const FT_DESIRED: f32 = 0.01666666666667;
+pub const MAX_FACES_MAIN: usize = 50000;
+pub const MAX_VERTICES_MAIN: usize = MAX_FACES_MAIN*4;
+pub const MAX_INDICES_MAIN: usize = MAX_FACES_MAIN*6;
 
 pub struct Settings {
     pub screen_width: i32,
