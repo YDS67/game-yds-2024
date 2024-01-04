@@ -1,5 +1,6 @@
 use crate::camera;
 use crate::player;
+use crate::settings;
 use crate::text;
 
 #[repr(C)]
@@ -553,20 +554,27 @@ impl Mesh {
         }
     }
 
-    pub fn new_map(depth_buffer: &camera::DepthBuffer, player: &player::Player, scalex: f32, scaley: f32) -> Mesh {
+    pub fn new_map(depth_buffer: &camera::DepthBuffer, player: &player::Player, settings: &settings::Settings, scalex: f32, scaley: f32) -> Mesh {
         let mut vertices: Vec<Vertex> = Vec::new();
         let mut indices: Vec<i16> = Vec::new();
 
         let mut idx = 0;
 
-        let mut tex_uv = text::string_to_uv("=")[0];
+        let mut t_size = 4.0;
 
-        let mut t_size = 2.0;
+        let mut tex_uv = TextureUV {
+            u1: player.position.x - settings.draw_max_dist as f32,
+            u2: player.position.x + settings.draw_max_dist as f32,
+            v1: settings::MAPSIZE as f32 - player.position.y - settings.draw_max_dist as f32,
+            v2: settings::MAPSIZE as f32 - player.position.y + settings.draw_max_dist as f32,
+        };
+        
+        tex_uv.normalize(settings::MAPSIZE as f32, settings::MAPSIZE as f32);
 
         let x_offset = 20.0;
         let y_offset = 20.0;
-        let width = 256.0*t_size;
-        let height = 256.0*t_size;
+        let width = 2.0*settings.draw_max_dist as f32 * t_size;
+        let height = 2.0*settings.draw_max_dist as f32 * t_size;
 
         let x = 1.0 - (x_offset)*scalex;
         let y = 1.0 - (y_offset + height) * scaley;
@@ -614,9 +622,14 @@ impl Mesh {
 
         idx = idx + 1;
 
-        // VISIBLE TILES
+        tex_uv = TextureUV {
+            u1: 0.0,
+            u2: 4.0/256.0,
+            v1: 0.0,
+            v2: 4.0/256.0,
+        };
 
-        tex_uv = text::string_to_uv("■")[0];
+        // VISIBLE TILES
 
         for l in 0..depth_buffer.len {
             let act;
@@ -677,9 +690,7 @@ impl Mesh {
             idx = idx + 1;
         }
 
-        tex_uv = text::string_to_uv("●")[0];
-
-        t_size = 15.0;
+        t_size = 5.0*t_size;
 
         let xt = x_offset + 0.5*width - 0.5*t_size;
         let yt = y_offset + 0.5*height - 0.5*t_size;

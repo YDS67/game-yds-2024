@@ -139,7 +139,7 @@ void main() {
         cols = actcolor;
     }
     if (act > 1.9 && act <= 2.1) {
-        cols = vec4(0.0, 0.0, 0.0, 1.0);
+        cols = actcolor;
     }
     if (act > 2.9 && act <= 3.1) {
         cols = vec4(0.8, 0.0, 0.2, 1.0);
@@ -161,11 +161,14 @@ vec4 col;
 void main() {
     col = texture(tex, texcoord);
 
-    if (col.x+col.y+col.z > 2.99 || length((spos.xy-cent.xy)/cent.zw) > 1.0) {
+    if (length((spos.xy-cent.xy)/cent.zw) > 1.0) {
         discard;
     } else {
-        FragColor = cols;
-        
+        if (col.x+col.y+col.z > 2.99) {
+            FragColor = col;
+        } else {
+            FragColor = cols;
+        }
     }
 }"#;
 

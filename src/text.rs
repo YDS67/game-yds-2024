@@ -12,7 +12,7 @@ const Y4: f32 = Y3+HEIGHT;
 const Y5: f32 = Y4+HEIGHT;
 const Y6: f32 = Y5+HEIGHT;
 const TEXWIDTH: f32 = 256.0;
-const TEXHEIGHT: f32 = 128.0;
+const TEXHEIGHT: f32 = 256.0;
 
 pub struct Overlay {
     pub lines: Vec<String>,
@@ -138,7 +138,7 @@ pub fn string_to_uv(text: &str) -> Vec<TextureUV> {
         ('K', TextureUV{u1: X1+10.0*WIDTH, u2: X1+11.0*WIDTH, v1: Y1, v2: Y1+HEIGHT_CAP}),
         ('L', TextureUV{u1: X1+11.0*WIDTH, u2: X1+12.0*WIDTH, v1: Y1, v2: Y1+HEIGHT_CAP}),
         ('M', TextureUV{u1: X1+12.0*WIDTH, u2: X1+13.0*WIDTH, v1: Y1, v2: Y1+HEIGHT_CAP}),
-        ('=', TextureUV{u1: 171.0, u2: 171.0 + 56.0, v1: 2.0, v2: 2.0+56.0}),
+        ('=', TextureUV{u1: 0.0, u2: 128.0, v1: 128.0, v2: 256.0}),
         ('N', TextureUV{u1: X1+0.0*WIDTH, u2: X1+1.0*WIDTH, v1: Y2, v2: Y2+HEIGHT_CAP}),
         ('O', TextureUV{u1: X1+1.0*WIDTH, u2: X1+2.0*WIDTH, v1: Y2, v2: Y2+HEIGHT_CAP}),
         ('P', TextureUV{u1: X1+2.0*WIDTH, u2: X1+3.0*WIDTH, v1: Y2, v2: Y2+HEIGHT_CAP}),

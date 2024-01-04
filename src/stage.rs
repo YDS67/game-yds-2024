@@ -64,6 +64,7 @@ impl Stage {
         let mesh_map = mesh::Mesh::new_map(
             &depth_buffer,
             &player,
+            &settings,
             1.0 / settings.screen_width_f,
             1.0 / settings.screen_height_f,
         );
@@ -149,6 +150,21 @@ impl Stage {
         };
         let texture_overlay = ctx.new_texture_from_data_and_format(pixels.as_bytes(), params);
 
+        let pixels: ImageBuffer<Rgba<u8>, Vec<u8>> = ass.wall_image_bot;
+        let dims = pixels.dimensions();
+        let params = TextureParams {
+            kind: TextureKind::Texture2D,
+            format: TextureFormat::RGBA8,
+            wrap: TextureWrap::Clamp,
+            min_filter: FilterMode::Nearest,
+            mag_filter: FilterMode::Nearest,
+            mipmap_filter: MipmapFilterMode::None,
+            width: dims.0,
+            height: dims.1,
+            allocate_mipmaps: false,
+        };
+        let texture_map = ctx.new_texture_from_data_and_format(pixels.as_bytes(), params);
+
         let bindings_main = Bindings {
             vertex_buffers: vec![vertex_buffer_main],
             index_buffer: index_buffer_main,
@@ -170,7 +186,7 @@ impl Stage {
         let bindings_map = Bindings {
             vertex_buffers: vec![vertex_buffer_map],
             index_buffer: index_buffer_map,
-            images: vec![texture_overlay],
+            images: vec![texture_map],
         };
 
         let shader_main = ctx
@@ -401,6 +417,7 @@ impl EventHandler for Stage {
             self.mesh[3] = mesh::Mesh::new_map(
                 &self.depth_buffer,
                 &self.player,
+                &self.settings,
                 1.0 / self.settings.screen_width_f,
                 1.0 / self.settings.screen_height_f,
             );
@@ -480,12 +497,12 @@ impl EventHandler for Stage {
 
         self.ctx.apply_bindings(&self.bindings[3]);
 
-        let t_size = 2.0;
+        let t_size = 4.0;
 
         let x_offset = 20.0;
         let y_offset = 20.0;
-        let mwidth = 256.0*t_size;
-        let mheight = 256.0*t_size;
+        let mwidth = 2.0*(self.settings.draw_max_dist as f32)*t_size;
+        let mheight = 2.0*(self.settings.draw_max_dist as f32)*t_size;
         let xp = x_offset + 0.5*mwidth;
         let yp = y_offset + 0.5*mheight;
         let x = 1.0 - xp / self.settings.screen_width_f;
@@ -495,7 +512,7 @@ impl EventHandler for Stage {
 
         self.ctx
             .apply_uniforms(miniquad::UniformsSource::table(&shaders::UniformsMap {
-                fontcolor: (0.5, 0.5, 0.5, 1.0),
+                fontcolor: (0.0, 0.0, 0.0, 1.0),
                 actcolor: (0.1843137, 0.2666667, 0.4627451, 1.0),
                 cent: (x, y, a, b),
             }));
