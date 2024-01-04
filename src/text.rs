@@ -1,4 +1,4 @@
-use crate::mesh::TextureUV;
+use crate::{mesh::TextureUV, input, settings};
 use std::collections::HashMap;
 
 pub const WIDTH: f32 = 12.0;
@@ -115,10 +115,50 @@ impl GUI {
         gui
     }
 
-    pub fn center(&mut self) {
+    fn center(&mut self) {
         self.x0 = self.x0 - 0.5*self.max_width;
         for l in 0..self.lines.len() {
             self.line_x[l] = self.x0 + 0.5*self.max_width - 0.5*self.line_width[l]
+        }
+    }
+
+    pub fn gui_control(&mut self, input_state: &input::InputState, settings: &mut settings::Settings) {
+        if self.act_no == self.lines.len() && input_state.mouse.left {
+            miniquad::window::quit()
+        }
+        if self.act_no == 1 && input_state.mouse.left {
+            self.show = false
+        }
+        if self.act_no == 3 && input_state.mouse.left && !settings.full_screen {
+            miniquad::window::set_fullscreen(true);
+            let screen = miniquad::window::screen_size();
+            settings.full_screen = true;
+            settings.screen_change(screen.0, screen.1);
+        }
+        if self.act_no == 4 && input_state.mouse.left {
+            settings.light_dist += 1.0*settings.player_speed;
+        }
+        if self.act_no == 5 && input_state.mouse.left {
+            settings.light_dist -= 1.0*settings.player_speed;
+        }
+    }
+
+    pub fn gui_highlight(&mut self, x: f32, y: f32) {
+        let mut some_active = false;
+        for l in 0..self.lines.len() {
+            if x > self.line_x[l]
+                && x < self.line_x[l] + self.line_width[l]
+                && y > self.line_y[l]
+                && y < self.line_y[l] + self.line_height
+            {
+                self.act_no = l + 1;
+                self.line_active[l] = 1;
+                some_active = true
+            }
+        }
+
+        if !some_active {
+            self.act_no = 0;
         }
     }
 }

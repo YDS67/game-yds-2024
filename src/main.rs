@@ -11,6 +11,7 @@ mod settings;
 mod shaders;
 mod stage;
 mod text;
+mod input;
 
 fn window_conf() -> Conf {
     let mut conf = Conf {
@@ -26,4 +27,5 @@ fn window_conf() -> Conf {
 
 fn main() {
     miniquad::start(window_conf(), move || Box::new(stage::Stage::new()));
+    
 }

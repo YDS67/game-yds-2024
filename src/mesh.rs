@@ -560,8 +560,6 @@ impl Mesh {
 
         let mut idx = 0;
 
-        let t_size = 4.0;
-
         let mut tex_uv = TextureUV {
             u1: player.position.x - settings.draw_max_dist as f32,
             u2: player.position.x + settings.draw_max_dist as f32,
@@ -573,8 +571,8 @@ impl Mesh {
 
         let x_offset = 20.0;
         let y_offset = 20.0;
-        let width = 2.0*settings.draw_max_dist as f32 * t_size;
-        let height = 2.0*settings.draw_max_dist as f32 * t_size;
+        let width = 2.0*settings.draw_max_dist as f32 * settings.tile_screen_size;
+        let height = 2.0*settings.draw_max_dist as f32 * settings.tile_screen_size;
 
         let x = 1.0 - (x_offset)*scalex;
         let y = 1.0 - (y_offset + height) * scaley;
@@ -639,12 +637,12 @@ impl Mesh {
                 act = 1.0;
             }
             
-            let xt = x_offset + 0.5*width - t_size*(depth_buffer.faces[l].bottom_right_x as f32 - player.position.x);
-            let yt = y_offset + 0.5*height + t_size*(depth_buffer.faces[l].bottom_right_y as f32 - player.position.y);
+            let xt = x_offset + 0.5*width - settings.tile_screen_size*(depth_buffer.faces[l].bottom_right_x as f32 - player.position.x);
+            let yt = y_offset + 0.5*height + settings.tile_screen_size*(depth_buffer.faces[l].bottom_right_y as f32 - player.position.y);
 
             // visible walls and floor
             let x = 1.0 - (xt)*scalex;
-            let y = 1.0 - (yt + t_size) * scaley;
+            let y = 1.0 - (yt + settings.tile_screen_size) * scaley;
             vertices.push(Vertex {
                 pos: Vec3 { x, y, z: 0.0 },
                 uv: Vec2 {
@@ -661,7 +659,7 @@ impl Mesh {
                     y: tex_uv.v2,
                 }, act,
             }); // bottom right
-            let x = 1.0 - (xt + t_size)*scalex;
+            let x = 1.0 - (xt + settings.tile_screen_size)*scalex;
             let y = 1.0 - (yt) * scaley;
             vertices.push(Vertex {
                 pos: Vec3 { x, y, z: 0.0 },
@@ -670,8 +668,8 @@ impl Mesh {
                     y: tex_uv.v2,
                 }, act,
             }); // bottom left
-            let x = 1.0 - (xt + t_size)*scalex;
-            let y = 1.0 - (yt + t_size) * scaley;
+            let x = 1.0 - (xt + settings.tile_screen_size)*scalex;
+            let y = 1.0 - (yt + settings.tile_screen_size) * scaley;
             vertices.push(Vertex {
                 pos: Vec3 { x, y, z: 0.0 },
                 uv: Vec2 {

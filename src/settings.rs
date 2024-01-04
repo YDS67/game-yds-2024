@@ -3,6 +3,7 @@ pub const MAPSIZE: usize = 256;
 pub const WIDTH0: i32 = 1280;
 pub const HEIGHT0: i32 = 800;
 pub const TOLERANCE: f32 = 1e-3;
+pub const FT_DESIRED: f32 = 0.01666666666667;
 
 pub struct Settings {
     pub screen_width: i32,
@@ -45,7 +46,7 @@ impl Settings {
         let screen_height_f = screen_height as f32;
         let screen_aspect = screen_width_f/screen_height_f;
         let player_height = 0.5;
-        let tile_screen_size = 1.5;
+        let tile_screen_size = 2.0;
         let map_offset_x = 20.0;
         let map_offset_y = screen_height_f - tile_screen_size * (MAPSIZE as f32) - 20.0;
         let player_x0 = MAPSIZE as f32 / 2.0;

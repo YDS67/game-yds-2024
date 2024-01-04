@@ -2,11 +2,6 @@ use glam::{vec3, Mat4};
 use image::{self, EncodableLayout, ImageBuffer, Rgba};
 use miniquad::*;
 
-use std::thread::sleep;
-use std::time::Duration;
-
-const FT_DESIRED: f32 = 0.01666666666667;
-
 use crate::assets;
 use crate::camera;
 use crate::map;
@@ -15,6 +10,62 @@ use crate::player;
 use crate::settings;
 use crate::shaders;
 use crate::text;
+use crate::input::{TimeState, InputState};
+
+struct Proj {
+    proj: Mat4,
+    view: Mat4,
+    mvp: Mat4,
+}
+
+impl Proj {
+    fn new(player: &player::Player, settings: &settings::Settings) -> Proj {
+        let proj = Mat4::perspective_rh_gl(
+            settings.fov_xy,
+            settings.screen_aspect,
+            0.01,
+            settings::MAPSIZE as f32,
+        );
+        let view = Mat4::look_to_rh(
+            vec3(
+                player.position.x,
+                player.position.y,
+                player.position.z,
+            ),
+            vec3(
+                player.position.ax * player.position.bxy,
+                player.position.ay * player.position.bxy,
+                player.position.bz,
+            ),
+            vec3(0.0, 0.0, 1.0),
+        );
+        let mvp = proj * view;
+        Proj { proj, view, mvp }
+    }
+
+    fn update(&mut self, player: &player::Player, settings: &settings::Settings) {
+        self.proj = Mat4::perspective_rh_gl(
+            settings.fov_xy,
+            settings.screen_aspect,
+            0.01,
+            settings::MAPSIZE as f32,
+        );
+        self.view = Mat4::look_to_rh(
+            vec3(
+                player.position.x,
+                player.position.y,
+                player.position.z,
+            ),
+            vec3(
+                player.position.ax * player.position.bxy,
+                player.position.ay * player.position.bxy,
+                player.position.bz,
+            ),
+            vec3(0.0, 0.0, 1.0),
+        );
+        self.mvp = self.proj * self.view;
+    }
+}
 
 pub struct Stage {
     ctx: Box<dyn RenderingBackend>,
@@ -28,6 +79,7 @@ pub struct Stage {
     mesh: Vec<mesh::Mesh>,
     pipeline: Vec<Pipeline>,
     bindings: Vec<Bindings>,
+    proj: Proj,
 
     time_state: TimeState,
     input_state: InputState,
@@ -272,6 +324,8 @@ impl Stage {
         let gui = text::GUI::new_from(vec!["Text default"], settings.screen_width_f, settings.screen_height_f);
         //gui.show = false;
 
+        let proj = Proj::new(&player, &settings);
+
         Stage {
             ctx,
 
@@ -284,23 +338,11 @@ impl Stage {
             pipeline: vec![pipeline_main, pipeline_overlay, pipeline_gui, pipeline_map],
             bindings: vec![bindings_main, bindings_overlay, bindings_gui, bindings_map],
             mesh: vec![mesh_main, mesh_overlay, mesh_gui, mesh_map],
+            proj,
+
             time_state: TimeState::init(),
             input_state: InputState::init(),
         }
-    }
-
-    fn frame_time(&mut self) {
-        self.time_state.frame_time = self.time_state.last_frame.elapsed().as_secs_f32();
-        if self.time_state.frame_time < FT_DESIRED {
-            sleep(Duration::from_secs_f32(
-                FT_DESIRED - self.time_state.frame_time,
-            ));
-        }
-        self.time_state.frame_time = self.time_state.last_frame.elapsed().as_secs_f32();
-        self.settings.delta_time = self.time_state.frame_time;
-        self.time_state.fps = (1. / self.time_state.frame_time).floor() as i32;
-
-        self.settings.player_speed = 12.0 * self.settings.delta_time;
     }
 
     fn show_data(&mut self) {
@@ -322,58 +364,23 @@ impl Stage {
             &format!("Quit game"),
         ], self.settings.screen_width_f, self.settings.screen_height_f);
 
-        self.gui_highlight(self.input_state.mouse.x, self.input_state.mouse.y);
-    }
-
-    fn gui_highlight(&mut self, x: f32, y: f32) {
-        let mut some_active = false;
-        for l in 0..self.gui.lines.len() {
-            if x > self.gui.line_x[l]
-                && x < self.gui.line_x[l] + self.gui.line_width[l]
-                && y > self.gui.line_y[l]
-                && y < self.gui.line_y[l] + self.gui.line_height
-            {
-                self.gui.act_no = l + 1;
-                self.gui.line_active[l] = 1;
-                some_active = true
-            }
-        }
-
-        if !some_active {
-            self.gui.act_no = 0;
-        }
-    }
-
-    fn gui_control(&mut self) {
-        if self.gui.act_no == self.gui.lines.len() && self.input_state.mouse.left {
-            window::quit()
-        }
-        if self.gui.act_no == 1 && self.input_state.mouse.left {
-            self.gui.show = false
-        }
-        if self.gui.act_no == 3 && self.input_state.mouse.left && !self.settings.full_screen {
-            miniquad::window::set_fullscreen(true);
-            let screen = miniquad::window::screen_size();
-            self.settings.full_screen = true;
-            self.settings.screen_change(screen.0, screen.1);
-        }
-        if self.gui.act_no == 4 && self.input_state.mouse.left {
-            self.settings.light_dist += 1.0*self.settings.player_speed;
-        }
-        if self.gui.act_no == 5 && self.input_state.mouse.left {
-            self.settings.light_dist -= 1.0*self.settings.player_speed;
-        }
+        self.gui.gui_highlight(self.input_state.mouse.x, self.input_state.mouse.y);
     }
 }
 
 impl EventHandler for Stage {
+
+    // ============================
+    // UPDATE
+    // ============================
+
     fn update(&mut self) {
-        self.frame_time();
+        self.time_state.frame_time(&mut self.settings);
         self.show_data();
 
         if self.gui.show {
             self.show_gui();
-            self.gui_control();
+            self.gui.gui_control(&self.input_state, &mut self.settings);
         }
 
         if self.input_state.keys.esc {
@@ -439,40 +446,27 @@ impl EventHandler for Stage {
         }
     }
 
+    // ============================
+    // DRAW
+    // ============================
+
     fn draw(&mut self) {
         window::show_mouse(self.gui.show);
+
+        self.ctx.clear(Some((0.0, 0.0, 0.0, 1.0)), None, None);
         
         self.ctx
-            .begin_default_pass(miniquad::PassAction::clear_color(0., 0., 0., 1.0000000));
+            .begin_default_pass(miniquad::PassAction::default());
 
         self.ctx.apply_pipeline(&self.pipeline[0]);
 
         self.ctx.apply_bindings(&self.bindings[0]);
 
-        let proj = Mat4::perspective_rh_gl(
-            self.settings.fov_xy,
-            self.settings.screen_aspect,
-            0.01,
-            settings::MAPSIZE as f32,
-        );
-        let view = Mat4::look_to_rh(
-            vec3(
-                self.player.position.x,
-                self.player.position.y,
-                self.player.position.z,
-            ),
-            vec3(
-                self.player.position.ax * self.player.position.bxy,
-                self.player.position.ay * self.player.position.bxy,
-                self.player.position.bz,
-            ),
-            vec3(0.0, 0.0, 1.0),
-        );
-        let mvp = proj * view;
+        self.proj.update(&self.player, &self.settings);
 
         self.ctx
             .apply_uniforms(miniquad::UniformsSource::table(&shaders::UniformsMain {
-                mvp,
+                mvp: self.proj.mvp,
                 playerpos: (
                     self.player.position.x,
                     self.player.position.y,
@@ -497,12 +491,10 @@ impl EventHandler for Stage {
 
         self.ctx.apply_bindings(&self.bindings[3]);
 
-        let t_size = 4.0;
-
         let x_offset = 20.0;
         let y_offset = 20.0;
-        let mwidth = 2.0*(self.settings.draw_max_dist as f32)*t_size;
-        let mheight = 2.0*(self.settings.draw_max_dist as f32)*t_size;
+        let mwidth = 2.0*(self.settings.draw_max_dist as f32)*self.settings.tile_screen_size;
+        let mheight = 2.0*(self.settings.draw_max_dist as f32)*self.settings.tile_screen_size;
         let xp = x_offset + 0.5*mwidth;
         let yp = y_offset + 0.5*mheight;
         let x = 1.0 - xp / self.settings.screen_width_f;
@@ -512,7 +504,7 @@ impl EventHandler for Stage {
 
         self.ctx
             .apply_uniforms(miniquad::UniformsSource::table(&shaders::UniformsMap {
-                fontcolor: (0.0, 0.0, 0.0, 1.0),
+                fontcolor: (0.14117647, 0.07843137, 0.13333333, 1.0),
                 actcolor: (0.1843137, 0.2666667, 0.4627451, 1.0),
                 cent: (x, y, a, b),
             }));
@@ -540,6 +532,10 @@ impl EventHandler for Stage {
         self.time_state.last_frame = Some(std::time::Instant::now()).unwrap();
     }
 
+    // ============================
+    // INPUT HANDLING
+    // ============================
+
     fn key_down_event(&mut self, keycode: KeyCode, _keymods: KeyMods, _repeat: bool) {
         self.input_state.keys.read_key(keycode, true)
     }
@@ -553,25 +549,7 @@ impl EventHandler for Stage {
     }
 
     fn raw_mouse_motion(&mut self, dx: f32, dy: f32) {
-        let moving_x;
-        let moving_y;
-        if dx.abs() < settings::TOLERANCE*self.settings.screen_width_f
-        {
-            self.input_state.mouse.dx = 0.5 * settings::TOLERANCE;
-            moving_x = false;
-        } else {
-            self.input_state.mouse.dx = 0.5 * dx / self.settings.screen_width_f;
-            moving_x = true;
-        }
-        if dy.abs() < settings::TOLERANCE*self.settings.screen_width_f
-        {
-            self.input_state.mouse.dy = 0.5 * settings::TOLERANCE;
-            moving_y = false;
-        } else {
-            self.input_state.mouse.dy = 0.5 * dy / self.settings.screen_width_f;
-            moving_y = true;
-        }
-        self.input_state.mouse.moving = moving_x || moving_y;
+        self.input_state.mouse_motion(&self.settings, dx, dy);
         
         if self.gui.show {
             self.input_state.mouse.moving = false
@@ -598,148 +576,6 @@ impl EventHandler for Stage {
         }
         if button == MouseButton::Right {
             self.input_state.mouse.right = false;
-        }
-    }
-}
-
-struct TimeState {
-    last_frame: std::time::Instant,
-    frame_time: f32,
-    fps: i32,
-}
-
-impl TimeState {
-    fn init() -> TimeState {
-        TimeState {
-            last_frame: Some(std::time::Instant::now()).unwrap(),
-            frame_time: 1.0 / 60.0,
-            fps: 60,
-        }
-    }
-}
-
-pub struct KeysState {
-    pub w: bool,
-    pub a: bool,
-    pub s: bool,
-    pub d: bool,
-    pub q: bool,
-    pub e: bool,
-    pub k: bool,
-    pub l: bool,
-    pub f: bool,
-    pub m: bool,
-    pub esc: bool,
-    pub left: bool,
-    pub right: bool,
-    pub up: bool,
-    pub down: bool,
-    pub space: bool,
-    pub enter: bool,
-}
-
-impl KeysState {
-    fn read_key(&mut self, keycode: KeyCode, state: bool) {
-        if keycode == KeyCode::W {
-            self.w = state
-        }
-        if keycode == KeyCode::S {
-            self.s = state
-        }
-        if keycode == KeyCode::Left {
-            self.left = state
-        }
-        if keycode == KeyCode::Right {
-            self.right = state
-        }
-        if keycode == KeyCode::A {
-            self.a = state
-        }
-        if keycode == KeyCode::D {
-            self.d = state
-        }
-        if keycode == KeyCode::Down {
-            self.down = state
-        }
-        if keycode == KeyCode::Up {
-            self.up = state
-        }
-        if keycode == KeyCode::Space {
-            self.space = state
-        }
-        if keycode == KeyCode::Escape {
-            self.esc = state
-        }
-        if keycode == KeyCode::Enter {
-            self.enter = state
-        }
-        if keycode == KeyCode::K {
-            self.k = state
-        }
-        if keycode == KeyCode::L {
-            self.l = state
-        }
-        if keycode == KeyCode::Q {
-            self.q = state
-        }
-        if keycode == KeyCode::E {
-            self.e = state
-        }
-        if keycode == KeyCode::F {
-            self.f = state
-        }
-        if keycode == KeyCode::M {
-            self.m = state
-        }
-    }
-}
-
-pub struct MouseState {
-    pub left: bool,
-    pub right: bool,
-    pub moving: bool,
-    pub x: f32,
-    pub y: f32,
-    pub dx: f32,
-    pub dy: f32,
-}
-
-pub struct InputState {
-    pub keys: KeysState,
-    pub mouse: MouseState,
-}
-
-impl InputState {
-    fn init() -> InputState {
-        InputState {
-            keys: KeysState {
-                w: false,
-                a: false,
-                s: false,
-                d: false,
-                q: false,
-                e: false,
-                k: false,
-                l: false,
-                f: false,
-                m: false,
-                left: false,
-                right: false,
-                up: false,
-                down: false,
-                space: false,
-                enter: false,
-                esc: false,
-            },
-            mouse: MouseState {
-                left: false,
-                right: false,
-                moving: false,
-                x: 0.0,
-                y: 0.0,
-                dx: 0.5 * settings::TOLERANCE,
-                dy: 0.5 * settings::TOLERANCE,
-            },
         }
     }
 }

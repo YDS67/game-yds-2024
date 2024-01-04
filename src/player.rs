@@ -1,6 +1,6 @@
 use crate::map;
 use crate::settings;
-use crate::stage;
+use crate::input;
 
 pub struct PlayerPos {
     pub x: f32,
@@ -196,7 +196,7 @@ impl Player {
         }
     }
 
-    pub fn read_key(&mut self, input: &stage::InputState) {
+    pub fn read_key(&mut self, input: &input::InputState) {
         self.movement.dir.f = input.keys.w;
         self.movement.dir.b = input.keys.s;
         self.movement.dir.l = input.keys.a;
