@@ -181,7 +181,7 @@ pub fn find_visible_tiles(game_map: &mut map::GameMap, player: &player::Player, 
         let mut yr = 0.0;
         let mut break_soon = 0;
         for _l in 0..settings.draw_max_dist*settings.draw_steps {
-            if break_soon >= 1 {break}
+            if break_soon >= 5 {break}
             xr += cphi / settings.draw_steps as f32;
             yr += sphi / settings.draw_steps as f32;
             let x = player.position.x + xr;

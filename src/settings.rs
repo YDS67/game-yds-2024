@@ -59,7 +59,7 @@ impl Settings {
         let player_radius = 0.5;
         let draw_max_dist = 100;
         let draw_steps = 10;
-        let draw_min_dist = 5*5;
+        let draw_min_dist = 3*3;
         let light_dist = 10.0;
         let draw_rays_num = 750;
         let mouse_sensitivity = 10.0;

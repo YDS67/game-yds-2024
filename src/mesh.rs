@@ -560,7 +560,7 @@ impl Mesh {
 
         let mut idx = 0;
 
-        let mut t_size = 4.0;
+        let t_size = 4.0;
 
         let mut tex_uv = TextureUV {
             u1: player.position.x - settings.draw_max_dist as f32,
@@ -689,58 +689,6 @@ impl Mesh {
 
             idx = idx + 1;
         }
-
-        t_size = 5.0*t_size;
-
-        let xt = x_offset + 0.5*width - 0.5*t_size;
-        let yt = y_offset + 0.5*height - 0.5*t_size;
-
-        // player
-        let x = 1.0 - (xt)*scalex;
-        let y = 1.0 - (yt + t_size) * scaley;
-        vertices.push(Vertex {
-            pos: Vec3 { x, y, z: 0.0 },
-            uv: Vec2 {
-                x: tex_uv.u2,
-                y: tex_uv.v1,
-            }, act: 3.0,
-        }); // top right
-        let x = 1.0 - (xt)*scalex;
-        let y = 1.0 - (yt) * scaley;
-        vertices.push(Vertex {
-            pos: Vec3 { x, y, z: 0.0 },
-            uv: Vec2 {
-                x: tex_uv.u2,
-                y: tex_uv.v2,
-            }, act: 3.0,
-        }); // bottom right
-        let x = 1.0 - (xt + t_size)*scalex;
-        let y = 1.0 - (yt) * scaley;
-        vertices.push(Vertex {
-            pos: Vec3 { x, y, z: 0.0 },
-            uv: Vec2 {
-                x: tex_uv.u1,
-                y: tex_uv.v2,
-            }, act: 3.0,
-        }); // bottom left
-        let x = 1.0 - (xt + t_size)*scalex;
-        let y = 1.0 - (yt + t_size) * scaley;
-        vertices.push(Vertex {
-            pos: Vec3 { x, y, z: 0.0 },
-            uv: Vec2 {
-                x: tex_uv.u1,
-                y: tex_uv.v1,
-            }, act: 3.0,
-        }); // top left
-
-        indices.push(4 * idx);
-        indices.push(4 * idx + 1);
-        indices.push(4 * idx + 3);
-        indices.push(4 * idx + 1);
-        indices.push(4 * idx + 2);
-        indices.push(4 * idx + 3);
-
-        idx = idx + 1;
 
         Mesh {
             vertices,

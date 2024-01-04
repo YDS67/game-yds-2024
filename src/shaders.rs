@@ -161,13 +161,17 @@ vec4 col;
 void main() {
     col = texture(tex, texcoord);
 
-    if (length((spos.xy-cent.xy)/cent.zw) > 1.0) {
-        discard;
+    if (length((spos.xy-cent.xy)/cent.zw) < 0.04) {
+        FragColor = vec4(0.8, 0.0, 0.2, 1.0);
     } else {
-        if (col.x+col.y+col.z > 2.99) {
-            FragColor = col;
+        if (length((spos.xy-cent.xy)/cent.zw) > 1.0) {
+            discard;
         } else {
-            FragColor = cols;
+            if (col.x+col.y+col.z > 2.99) {
+                FragColor = col;
+            } else {
+                FragColor = cols;
+            }
         }
     }
 }"#;
