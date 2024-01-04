@@ -123,49 +123,49 @@ impl Stage {
 
         let vertex_buffer_main = ctx.new_buffer(
             BufferType::VertexBuffer,
-            BufferUsage::Immutable,
+            BufferUsage::Stream,
             BufferSource::slice(&mesh_main.vertices),
         );
 
         let vertex_buffer_overlay = ctx.new_buffer(
             BufferType::VertexBuffer,
-            BufferUsage::Immutable,
+            BufferUsage::Stream,
             BufferSource::slice(&mesh_overlay.vertices),
         );
 
         let vertex_buffer_gui = ctx.new_buffer(
             BufferType::VertexBuffer,
-            BufferUsage::Immutable,
+            BufferUsage::Stream,
             BufferSource::slice(&mesh_gui.vertices),
         );
 
         let vertex_buffer_map = ctx.new_buffer(
             BufferType::VertexBuffer,
-            BufferUsage::Immutable,
+            BufferUsage::Stream,
             BufferSource::slice(&mesh_map.vertices),
         );
 
         let index_buffer_main = ctx.new_buffer(
             BufferType::IndexBuffer,
-            BufferUsage::Immutable,
+            BufferUsage::Stream,
             BufferSource::slice(&mesh_main.indices),
         );
 
         let index_buffer_overlay = ctx.new_buffer(
             BufferType::IndexBuffer,
-            BufferUsage::Immutable,
+            BufferUsage::Stream,
             BufferSource::slice(&mesh_overlay.indices),
         );
 
         let index_buffer_gui = ctx.new_buffer(
             BufferType::IndexBuffer,
-            BufferUsage::Immutable,
+            BufferUsage::Stream,
             BufferSource::slice(&mesh_gui.indices),
         );
 
         let index_buffer_map = ctx.new_buffer(
             BufferType::IndexBuffer,
-            BufferUsage::Immutable,
+            BufferUsage::Stream,
             BufferSource::slice(&mesh_map.indices),
         );
 
@@ -240,6 +240,15 @@ impl Stage {
             index_buffer: index_buffer_map,
             images: vec![texture_map],
         };
+
+        ctx.delete_buffer(vertex_buffer_main);
+        ctx.delete_buffer(index_buffer_main);
+        ctx.delete_buffer(vertex_buffer_overlay);
+        ctx.delete_buffer(index_buffer_overlay);
+        ctx.delete_buffer(vertex_buffer_gui);
+        ctx.delete_buffer(index_buffer_gui);
+        ctx.delete_buffer(vertex_buffer_map);
+        ctx.delete_buffer(index_buffer_map);
 
         let shader_main = ctx
             .new_shader(
@@ -396,54 +405,30 @@ impl EventHandler for Stage {
             self.input_state.mouse.dy,
             self.input_state.mouse.moving,
         );
+        
+        camera::find_visible_tiles(&mut self.game_map, &self.player, &self.settings);
+        self.depth_buffer =
+            camera::DepthBuffer::generate(&self.game_map, &self.player, &self.settings);
 
-        if true {
-            for j in 0..self.bindings.len() {
-                for b in 0..self.bindings[j].vertex_buffers.len() {
-                    self.ctx.delete_buffer(self.bindings[j].vertex_buffers[b]);
-                }
-                self.ctx.delete_buffer(self.bindings[j].index_buffer);
-            }
-            
-            camera::find_visible_tiles(&mut self.game_map, &self.player, &self.settings);
-            self.depth_buffer =
-                camera::DepthBuffer::generate(&self.game_map, &self.player, &self.settings);
-
-            self.mesh[0] = mesh::Mesh::new_main(&self.depth_buffer, &self.player);
-            self.mesh[1] = mesh::Mesh::new_overlay(
-                &self.overlay,
-                1.0 / self.settings.screen_width_f,
-                1.0 / self.settings.screen_height_f,
-                self.input_state.mouse.left
-            );
-            self.mesh[2] = mesh::Mesh::new_gui(
-                &self.gui,
-                1.0 / self.settings.screen_width_f,
-                1.0 / self.settings.screen_height_f,
-            );
-            self.mesh[3] = mesh::Mesh::new_map(
-                &self.depth_buffer,
-                &self.player,
-                &self.settings,
-                1.0 / self.settings.screen_width_f,
-                1.0 / self.settings.screen_height_f,
-            );
-
-            for j in 0..self.bindings.len() {
-                let vertex_buffer = self.ctx.new_buffer(
-                    BufferType::VertexBuffer,
-                    BufferUsage::Immutable,
-                    BufferSource::slice(&self.mesh[j].vertices),
-                );
-                let index_buffer = self.ctx.new_buffer(
-                    BufferType::IndexBuffer,
-                    BufferUsage::Immutable,
-                    BufferSource::slice(&self.mesh[j].indices),
-                );
-                self.bindings[j].vertex_buffers = vec![vertex_buffer];
-                self.bindings[j].index_buffer = index_buffer;
-            }
-        }
+        self.mesh[0] = mesh::Mesh::new_main(&self.depth_buffer, &self.player);
+        self.mesh[1] = mesh::Mesh::new_overlay(
+            &self.overlay,
+            1.0 / self.settings.screen_width_f,
+            1.0 / self.settings.screen_height_f,
+            self.input_state.mouse.left
+        );
+        self.mesh[2] = mesh::Mesh::new_gui(
+            &self.gui,
+            1.0 / self.settings.screen_width_f,
+            1.0 / self.settings.screen_height_f,
+        );
+        self.mesh[3] = mesh::Mesh::new_map(
+            &self.depth_buffer,
+            &self.player,
+            &self.settings,
+            1.0 / self.settings.screen_width_f,
+            1.0 / self.settings.screen_height_f,
+        );
     }
 
     // ============================
@@ -453,10 +438,30 @@ impl EventHandler for Stage {
     fn draw(&mut self) {
         window::show_mouse(self.gui.show);
 
-        self.ctx.clear(Some((0.0, 0.0, 0.0, 1.0)), None, None);
+        unsafe {miniquad::gl::glFlush()}
         
         self.ctx
             .begin_default_pass(miniquad::PassAction::default());
+
+        self.ctx.clear(Some((0.0, 0.0, 0.0, 1.0)), None, None);
+
+        for j in 0..self.bindings.len() {
+            for b in 0..self.bindings[j].vertex_buffers.len() {
+                self.ctx.delete_buffer(self.bindings[j].vertex_buffers[b]);
+            }
+            self.ctx.delete_buffer(self.bindings[j].index_buffer);
+
+            self.bindings[j].vertex_buffers[0] = self.ctx.new_buffer(
+                BufferType::VertexBuffer,
+                BufferUsage::Stream,
+                BufferSource::slice(&self.mesh[j].vertices),
+            );
+            self.bindings[j].index_buffer = self.ctx.new_buffer(
+                BufferType::IndexBuffer,
+                BufferUsage::Stream,
+                BufferSource::slice(&self.mesh[j].indices),
+            );
+        }
 
         self.ctx.apply_pipeline(&self.pipeline[0]);
 
