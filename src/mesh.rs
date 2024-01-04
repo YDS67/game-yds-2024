@@ -624,9 +624,9 @@ impl Mesh {
 
         tex_uv = TextureUV {
             u1: 0.0,
-            u2: 4.0/256.0,
+            u2: 1.0/256.0,
             v1: 0.0,
-            v2: 4.0/256.0,
+            v2: 1.0/256.0,
         };
 
         // VISIBLE TILES
