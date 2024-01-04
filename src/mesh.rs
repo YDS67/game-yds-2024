@@ -634,61 +634,116 @@ impl Mesh {
 
         for l in 0..depth_buffer.len {
             let act;
-            if depth_buffer.faces[l].is_wall {
-                act = 2.0;
-            } else {
-                act = 1.0;
+            act = 1.0;
+            if depth_buffer.faces[l].is_wall || depth_buffer.faces[l].dist > 0.7*(settings.draw_max_dist as f32) {
+                let xt = x_offset + 0.5*width - settings.tile_screen_size*(depth_buffer.faces[l].bottom_right_x as f32 - player.position.x);
+                let yt = y_offset + 0.5*height + settings.tile_screen_size*(depth_buffer.faces[l].bottom_right_y as f32 - player.position.y);
+
+                let x1 = 1.0 - (xt - settings.tile_screen_size)*scalex;
+                let y1 = 1.0 - (yt + settings.tile_screen_size) * scaley;
+                let x2 = 1.0 - (xt + settings.tile_screen_size)*scalex;
+                let y2 = 1.0 - (yt - settings.tile_screen_size) * scaley;
+                let x3 = 1.0 - (x_offset + 0.5*width + settings.tile_screen_size)*scalex;
+                let y3 = 1.0 - (y_offset + 0.5*height - settings.tile_screen_size) * scaley;
+                let x4 = 1.0 - (x_offset + 0.5*width - settings.tile_screen_size)*scalex;
+                let y4 = 1.0 - (y_offset + 0.5*height + settings.tile_screen_size) * scaley;
+
+                // visible walls and floor
+                vertices.push(Vertex {
+                    pos: Vec3 { x: x1, y: y1, z: 0.0 },
+                    uv: Vec2 {
+                        x: tex_uv.u2,
+                        y: tex_uv.v1,
+                    }, act,
+                }); // top right
+                vertices.push(Vertex {
+                    pos: Vec3 { x: x2, y: y2, z: 0.0 },
+                    uv: Vec2 {
+                        x: tex_uv.u2,
+                        y: tex_uv.v2,
+                    }, act,
+                }); // bottom right
+                vertices.push(Vertex {
+                    pos: Vec3 { x: x3, y: y3, z: 0.0 },
+                    uv: Vec2 {
+                        x: tex_uv.u1,
+                        y: tex_uv.v2,
+                    }, act,
+                }); // bottom left
+                vertices.push(Vertex {
+                    pos: Vec3 { x: x4, y: y4, z: 0.0 },
+                    uv: Vec2 {
+                        x: tex_uv.u1,
+                        y: tex_uv.v1,
+                    }, act,
+                }); // top left
+
+                indices.push(4 * idx);
+                indices.push(4 * idx + 1);
+                indices.push(4 * idx + 3);
+                indices.push(4 * idx + 1);
+                indices.push(4 * idx + 2);
+                indices.push(4 * idx + 3);
+
+                idx = idx + 1;
             }
-            
-            let xt = x_offset + 0.5*width - settings.tile_screen_size*(depth_buffer.faces[l].bottom_right_x as f32 - player.position.x);
-            let yt = y_offset + 0.5*height + settings.tile_screen_size*(depth_buffer.faces[l].bottom_right_y as f32 - player.position.y);
+        }
 
-            // visible walls and floor
-            let x = 1.0 - (xt)*scalex;
-            let y = 1.0 - (yt + settings.tile_screen_size) * scaley;
-            vertices.push(Vertex {
-                pos: Vec3 { x, y, z: 0.0 },
-                uv: Vec2 {
-                    x: tex_uv.u2,
-                    y: tex_uv.v1,
-                }, act,
-            }); // top right
-            let x = 1.0 - (xt)*scalex;
-            let y = 1.0 - (yt) * scaley;
-            vertices.push(Vertex {
-                pos: Vec3 { x, y, z: 0.0 },
-                uv: Vec2 {
-                    x: tex_uv.u2,
-                    y: tex_uv.v2,
-                }, act,
-            }); // bottom right
-            let x = 1.0 - (xt + settings.tile_screen_size)*scalex;
-            let y = 1.0 - (yt) * scaley;
-            vertices.push(Vertex {
-                pos: Vec3 { x, y, z: 0.0 },
-                uv: Vec2 {
-                    x: tex_uv.u1,
-                    y: tex_uv.v2,
-                }, act,
-            }); // bottom left
-            let x = 1.0 - (xt + settings.tile_screen_size)*scalex;
-            let y = 1.0 - (yt + settings.tile_screen_size) * scaley;
-            vertices.push(Vertex {
-                pos: Vec3 { x, y, z: 0.0 },
-                uv: Vec2 {
-                    x: tex_uv.u1,
-                    y: tex_uv.v1,
-                }, act,
-            }); // top left
+        for l in 0..depth_buffer.len {
+            let act;
+            act = 1.0;
+            if depth_buffer.faces[l].is_wall || depth_buffer.faces[l].dist > 0.7*(settings.draw_max_dist as f32) {
+                let xt = x_offset + 0.5*width - settings.tile_screen_size*(depth_buffer.faces[l].bottom_right_x as f32 - player.position.x);
+                let yt = y_offset + 0.5*height + settings.tile_screen_size*(depth_buffer.faces[l].bottom_right_y as f32 - player.position.y);
 
-            indices.push(4 * idx);
-            indices.push(4 * idx + 1);
-            indices.push(4 * idx + 3);
-            indices.push(4 * idx + 1);
-            indices.push(4 * idx + 2);
-            indices.push(4 * idx + 3);
+                let x1 = 1.0 - (xt + settings.tile_screen_size)*scalex;
+                let y1 = 1.0 - (yt + settings.tile_screen_size) * scaley;
+                let x2 = 1.0 - (xt - settings.tile_screen_size)*scalex;
+                let y2 = 1.0 - (yt - settings.tile_screen_size) * scaley;
+                let x3 = 1.0 - (x_offset + 0.5*width + settings.tile_screen_size)*scalex;
+                let y3 = 1.0 - (y_offset + 0.5*height - settings.tile_screen_size) * scaley;
+                let x4 = 1.0 - (x_offset + 0.5*width - settings.tile_screen_size)*scalex;
+                let y4 = 1.0 - (y_offset + 0.5*height + settings.tile_screen_size) * scaley;
 
-            idx = idx + 1;
+                // visible walls and floor
+                vertices.push(Vertex {
+                    pos: Vec3 { x: x1, y: y1, z: 0.0 },
+                    uv: Vec2 {
+                        x: tex_uv.u2,
+                        y: tex_uv.v1,
+                    }, act,
+                }); // top right
+                vertices.push(Vertex {
+                    pos: Vec3 { x: x2, y: y2, z: 0.0 },
+                    uv: Vec2 {
+                        x: tex_uv.u2,
+                        y: tex_uv.v2,
+                    }, act,
+                }); // bottom right
+                vertices.push(Vertex {
+                    pos: Vec3 { x: x3, y: y3, z: 0.0 },
+                    uv: Vec2 {
+                        x: tex_uv.u1,
+                        y: tex_uv.v2,
+                    }, act,
+                }); // bottom left
+                vertices.push(Vertex {
+                    pos: Vec3 { x: x4, y: y4, z: 0.0 },
+                    uv: Vec2 {
+                        x: tex_uv.u1,
+                        y: tex_uv.v1,
+                    }, act,
+                }); // top left
+
+                indices.push(4 * idx);
+                indices.push(4 * idx + 1);
+                indices.push(4 * idx + 3);
+                indices.push(4 * idx + 1);
+                indices.push(4 * idx + 2);
+                indices.push(4 * idx + 3);
+
+                idx = idx + 1;
+            }
         }
 
         Mesh {
