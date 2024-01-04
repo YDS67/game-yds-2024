@@ -13,7 +13,7 @@ pub struct Ass {
 impl Ass {
     pub fn load() -> Ass {
         Ass {
-            tile_atlas: image::open(Path::new("resources/texture_atlas.png"))
+            tile_atlas: image::open(Path::new("resources/textures_altras.png"))
                 .unwrap()
                 .to_rgba8(),
             floor_image: image::open(Path::new("resources/floor_map.png"))

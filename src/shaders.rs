@@ -36,8 +36,11 @@ out vec4 FragColor;
 
 uniform sampler2D tex;
 
+vec4 col;
+
 void main() {
-    FragColor = vec4(texture(tex, texcoord).xyz * cols.xyz, 1.0);
+    col = texture(tex, texcoord);
+    FragColor = vec4(col.xyz * cols.xyz, 1.0);
 }"#;
 
 pub const VERTEX_OVERLAY: &str = r#"#version 330 core

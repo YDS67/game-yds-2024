@@ -175,7 +175,7 @@ impl Stage {
         let params = TextureParams {
             kind: TextureKind::Texture2D,
             format: TextureFormat::RGBA8,
-            wrap: TextureWrap::Clamp,
+            wrap: TextureWrap::Repeat,
             min_filter: FilterMode::Nearest,
             mag_filter: FilterMode::Nearest,
             mipmap_filter: MipmapFilterMode::Linear,
