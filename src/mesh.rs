@@ -60,19 +60,19 @@ impl Mesh {
 
         let mut idx = 0;
 
-        let du = 64.0/1024.0;
+        let du = 3.0*64.0/1024.0;
         let uw = 64.0/1024.0;
 
         for l in 0..depth_buffer.len {
             if depth_buffer.faces[l].is_wall {
-                let texture_u = depth_buffer.faces[l].texture_top.overflowing_rem(25).0 as f32;
-                let texture_v = depth_buffer.faces[l].texture_top.overflowing_div(25).0 as f32;
+                let texture_u = 2.0;
+                let texture_v = 1.0;
 
                 let tex_uv = TextureUV {
-                    u1: texture_u * (uw + du),
-                    u2: texture_u * (uw + du) + uw,
-                    v1: texture_v * (uw + du),
-                    v2: texture_v * (uw + du) + uw,
+                    u1: texture_u * du - 2.0*uw,
+                    u2: texture_u * du - uw,
+                    v1: texture_v * du - 2.0*uw,
+                    v2: texture_v * du - uw,
                 };
 
                 let x = depth_buffer.faces[l].top_right_x as f32;
@@ -121,14 +121,14 @@ impl Mesh {
 
                 idx = idx + 1;
 
-                let texture_u = depth_buffer.faces[l].texture_bot.overflowing_rem(25).0 as f32;
-                let texture_v = depth_buffer.faces[l].texture_bot.overflowing_div(25).0 as f32;
+                let texture_u = 1.0;
+                let texture_v = 1.0;
 
                 let tex_uv = TextureUV {
-                    u1: texture_u * (uw + du),
-                    u2: texture_u * (uw + du) + uw,
-                    v1: texture_v * (uw + du),
-                    v2: texture_v * (uw + du) + uw,
+                    u1: texture_u * du - 2.0*uw,
+                    u2: texture_u * du - uw,
+                    v1: texture_v * du - 2.0*uw,
+                    v2: texture_v * du - uw,
                 };
 
                 let x = depth_buffer.faces[l].top_right_x as f32;
@@ -181,24 +181,24 @@ impl Mesh {
                 let mut z1: f32 = 2.0;
                 let mut z2: f32 = 0.0;
 
-                let texture1_u = depth_buffer.faces[l].texture_top.overflowing_rem(25).0 as f32;
-                let texture1_v = depth_buffer.faces[l].texture_top.overflowing_div(25).0 as f32;
+                let texture1_u = 2.0;
+                let texture1_v = 2.0;
 
                 let mut tex_uv_1 = TextureUV {
-                    u1: texture1_u * (uw + du),
-                    u2: texture1_u * (uw + du) + uw,
-                    v1: texture1_v * (uw + du),
-                    v2: texture1_v * (uw + du) + uw,
+                    u1: texture1_u * du - 2.0*uw,
+                    u2: texture1_u * du - uw,
+                    v1: texture1_v * du - 2.0*uw,
+                    v2: texture1_v * du - uw,
                 };
 
-                let texture2_u = depth_buffer.faces[l].texture_bot.overflowing_rem(25).0 as f32;
-                let texture2_v = depth_buffer.faces[l].texture_bot.overflowing_div(25).0 as f32;
+                let texture2_u = 1.0;
+                let texture2_v = 2.0;
 
                 let mut tex_uv_2 = TextureUV {
-                    u1: texture2_u * (uw + du),
-                    u2: texture2_u * (uw + du) + uw,
-                    v1: texture2_v * (uw + du),
-                    v2: texture2_v * (uw + du) + uw,
+                    u1: texture2_u * du - 2.0*uw,
+                    u2: texture2_u * du - uw,
+                    v1: texture2_v * du - 2.0*uw,
+                    v2: texture2_v * du - uw,
                 };
 
 
@@ -206,16 +206,16 @@ impl Mesh {
                     z1 = 0.0;
                     z2 = 2.0;
                     tex_uv_1 = TextureUV {
-                        u1: texture2_u * (uw + du),
-                        u2: texture2_u * (uw + du) + uw,
-                        v1: texture2_v * (uw + du),
-                        v2: texture2_v * (uw + du) + uw,
+                        u1: texture2_u * du - 2.0*uw,
+                        u2: texture2_u * du - uw,
+                        v1: texture2_v * du - 2.0*uw,
+                        v2: texture2_v * du - uw,
                     };
                     tex_uv_2 = TextureUV {
-                        u1: texture1_u * (uw + du),
-                        u2: texture1_u * (uw + du) + uw,
-                        v1: texture1_v * (uw + du),
-                        v2: texture1_v * (uw + du) + uw,
+                        u1: texture1_u * du - 2.0*uw,
+                        u2: texture1_u * du - uw,
+                        v1: texture1_v * du - 2.0*uw,
+                        v2: texture1_v * du - uw,
                     };
                 }
                 let x = depth_buffer.faces[l].top_right_x as f32;
