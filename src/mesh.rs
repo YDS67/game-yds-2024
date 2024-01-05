@@ -54,7 +54,7 @@ pub struct Mesh {
 }
 
 impl Mesh {
-    pub fn new_main(depth_buffer: &camera::DepthBuffer, player: &player::Player) -> Mesh {
+    pub fn new_main(depth_buffer: &camera::DepthBuffer) -> Mesh {
         let mut vertices: Vec<Vertex> = Vec::new();
         let mut indices: Vec<i16> = Vec::new();
 
@@ -65,8 +65,8 @@ impl Mesh {
 
         for l in 0..depth_buffer.len {
             if depth_buffer.faces_dist[l].is_wall {
-                let texture_u = 2.0;
-                let texture_v = 1.0;
+                let texture_u = 1.0 + depth_buffer.faces_dist[l].texture_top.overflowing_rem(50).0 as f32 / 10.0;
+                let texture_v = 1.0 + depth_buffer.faces_dist[l].texture_top.overflowing_div(50).0 as f32;
 
                 let tex_uv = TextureUV {
                     u1: texture_u * du - 2.0*uw,
@@ -121,8 +121,8 @@ impl Mesh {
 
                 idx = idx + 1;
 
-                let texture_u = 1.0;
-                let texture_v = 1.0;
+                let texture_u = 1.0 + depth_buffer.faces_dist[l].texture_bot.overflowing_rem(50).0 as f32 / 10.0;
+                let texture_v = 1.0 + depth_buffer.faces_dist[l].texture_bot.overflowing_div(50).0 as f32;
 
                 let tex_uv = TextureUV {
                     u1: texture_u * du - 2.0*uw,
@@ -178,46 +178,29 @@ impl Mesh {
                 idx = idx + 1;
             } else {
                 //ceiling and floor
-                let mut z1: f32 = 2.0;
-                let mut z2: f32 = 0.0;
+                let z1: f32 = 2.0;
+                let z2: f32 = 0.0;
 
-                let texture1_u = 2.0;
-                let texture1_v = 2.0;
+                let texture1_u = 1.0 + depth_buffer.faces_dist[l].texture_top.overflowing_rem(50).0 as f32 / 10.0;
+                let texture1_v = 1.0 + depth_buffer.faces_dist[l].texture_top.overflowing_div(50).0 as f32;
 
-                let mut tex_uv_1 = TextureUV {
+                let tex_uv_1 = TextureUV {
                     u1: texture1_u * du - 2.0*uw,
                     u2: texture1_u * du - uw,
                     v1: texture1_v * du - 2.0*uw,
                     v2: texture1_v * du - uw,
                 };
 
-                let texture2_u = 1.0;
-                let texture2_v = 2.0;
+                let texture2_u = 1.0 + depth_buffer.faces_dist[l].texture_bot.overflowing_rem(50).0 as f32 / 10.0;
+                let texture2_v = 1.0 + depth_buffer.faces_dist[l].texture_bot.overflowing_div(50).0 as f32;
 
-                let mut tex_uv_2 = TextureUV {
+                let tex_uv_2 = TextureUV {
                     u1: texture2_u * du - 2.0*uw,
                     u2: texture2_u * du - uw,
                     v1: texture2_v * du - 2.0*uw,
                     v2: texture2_v * du - uw,
                 };
 
-
-                if player.position.z > 1.0 && player.position.b > 0.0 {
-                    z1 = 0.0;
-                    z2 = 2.0;
-                    tex_uv_1 = TextureUV {
-                        u1: texture2_u * du - 2.0*uw,
-                        u2: texture2_u * du - uw,
-                        v1: texture2_v * du - 2.0*uw,
-                        v2: texture2_v * du - uw,
-                    };
-                    tex_uv_2 = TextureUV {
-                        u1: texture1_u * du - 2.0*uw,
-                        u2: texture1_u * du - uw,
-                        v1: texture1_v * du - 2.0*uw,
-                        v2: texture1_v * du - uw,
-                    };
-                }
                 let x = depth_buffer.faces_dist[l].top_right_x as f32;
                 let y = depth_buffer.faces_dist[l].top_right_y as f32;
                 vertices.push(Vertex {

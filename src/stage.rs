@@ -101,7 +101,7 @@ impl Stage {
         let overlay = text::Overlay::new_from(vec!["Text default"]);
         let gui = text::GUI::new_from(vec!["Text default"], settings.screen_width_f, settings.screen_height_f);
 
-        let mesh_main = mesh::Mesh::new_main(&depth_buffer, &player);
+        let mesh_main = mesh::Mesh::new_main(&depth_buffer);
         let mesh_overlay = mesh::Mesh::new_overlay(
             &overlay,
             1.0 / settings.screen_width_f,
@@ -406,7 +406,7 @@ impl EventHandler for Stage {
         self.depth_buffer =
             camera::DepthBuffer::generate(&self.game_map, &self.player, &self.settings);
 
-        self.mesh[0] = mesh::Mesh::new_main(&self.depth_buffer, &self.player);
+        self.mesh[0] = mesh::Mesh::new_main(&self.depth_buffer);
         self.mesh[1] = mesh::Mesh::new_overlay(
             &self.overlay,
             1.0 / self.settings.screen_width_f,
