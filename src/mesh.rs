@@ -562,18 +562,18 @@ impl Mesh {
         let mut indices: Vec<i16> = Vec::new();
 
         let mut tex_uv = TextureUV {
-            u1: player.position.x - settings.draw_max_dist as f32,
-            u2: player.position.x + settings.draw_max_dist as f32,
-            v1: settings::MAPSIZE as f32 - player.position.y - settings.draw_max_dist as f32,
-            v2: settings::MAPSIZE as f32 - player.position.y + settings.draw_max_dist as f32,
+            u1: player.position.x - settings.draw_max_dist,
+            u2: player.position.x + settings.draw_max_dist,
+            v1: settings::MAPSIZE as f32 - player.position.y - settings.draw_max_dist,
+            v2: settings::MAPSIZE as f32 - player.position.y + settings.draw_max_dist,
         };
         
         tex_uv.normalize(settings::MAPSIZE as f32, settings::MAPSIZE as f32);
 
+        let width = 2.0*settings.draw_max_dist * settings.tile_screen_size;
+        let height = 2.0*settings.draw_max_dist * settings.tile_screen_size;
         let x_offset = 20.0;
-        let y_offset = 20.0;
-        let width = 2.0*settings.draw_max_dist as f32 * settings.tile_screen_size;
-        let height = 2.0*settings.draw_max_dist as f32 * settings.tile_screen_size;
+        let y_offset = settings.screen_height_f - height - 20.0;
 
         let x = 1.0 - (x_offset)*scalex;
         let y = 1.0 - (y_offset + height) * scaley;

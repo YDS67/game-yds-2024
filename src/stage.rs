@@ -476,10 +476,10 @@ impl EventHandler for Stage {
 
         self.ctx.apply_bindings(&self.bindings[3]);
 
+        let mwidth = 2.0*(self.settings.draw_max_dist)*self.settings.tile_screen_size;
+        let mheight = 2.0*(self.settings.draw_max_dist)*self.settings.tile_screen_size;
         let x_offset = 20.0;
-        let y_offset = 20.0;
-        let mwidth = 2.0*(self.settings.draw_max_dist as f32)*self.settings.tile_screen_size;
-        let mheight = 2.0*(self.settings.draw_max_dist as f32)*self.settings.tile_screen_size;
+        let y_offset = self.settings.screen_height_f - mheight - 20.0;
         let xp = x_offset + 0.5*mwidth;
         let yp = y_offset + 0.5*mheight;
         let x = 1.0 - xp / self.settings.screen_width_f;

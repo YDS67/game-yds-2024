@@ -229,7 +229,7 @@ pub fn ray_cast(game_map: &mut map::GameMap, player: &player::Player, settings: 
         let (mut i_hor, mut j_hor): (usize, usize) = (0, 0);
         let (mut i_vert, mut j_vert): (usize, usize) = (0, 0);
 
-        while dist_hor < settings.draw_max_dist as f32 && !check {
+        while dist_hor < settings.draw_max_dist && !check {
             (i_hor, j_hor) = (x_hor.floor() as usize, y_hor.floor() as usize);
 
             if i_hor as i32 >= 0 && i_hor < settings::MAPSIZE && j_hor as i32 >= 0 && j_hor < settings::MAPSIZE {
@@ -265,7 +265,7 @@ pub fn ray_cast(game_map: &mut map::GameMap, player: &player::Player, settings: 
 
         let mut check = false;
 
-        while dist_vert < settings.draw_max_dist as f32 && !check {
+        while dist_vert < settings.draw_max_dist && !check {
             (i_vert, j_vert) = (x_vert.floor() as usize, y_vert.floor() as usize);
 
             if i_vert as i32 >= 0 && i_vert < settings::MAPSIZE && j_vert as i32 >= 0 && j_vert < settings::MAPSIZE {
@@ -290,24 +290,24 @@ pub fn ray_cast(game_map: &mut map::GameMap, player: &player::Player, settings: 
 
         // compare distances
         if dist_vert > dist_hor {
-            ray.distance = dist_hor * delta_a.cos();
+            ray.distance = dist_hor;
             if game_map.wall_bot_array[i_hor][j_hor] < 255 {
                 game_map.wall_visible[i_hor][j_hor] = true;
             }
             ray.i = i_hor;
             ray.j = j_hor;
-            ray.x = x_hor;
-            ray.y = y_hor;
+            ray.x = xp + (dist_hor+1.0)*cos_a;
+            ray.y = yp + (dist_hor+1.0)*sin_a;
         } 
         else {
-            ray.distance = dist_vert * delta_a.cos();
+            ray.distance = dist_vert;
             if game_map.wall_bot_array[i_vert][j_vert] < 255 {
                 game_map.wall_visible[i_vert][j_vert] = true;
             }
             ray.i = i_vert;
             ray.j = j_vert;
-            ray.x = x_vert;
-            ray.y = y_vert;
+            ray.x = xp + (dist_vert+1.0)*cos_a;
+            ray.y = yp + (dist_vert+1.0)*sin_a;
         };
 
         rays.push(ray);
