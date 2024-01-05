@@ -64,7 +64,7 @@ impl Mesh {
         let uw = 64.0/1024.0;
 
         for l in 0..depth_buffer.len {
-            if depth_buffer.faces[l].is_wall {
+            if depth_buffer.faces_dist[l].is_wall {
                 let texture_u = 2.0;
                 let texture_v = 1.0;
 
@@ -75,8 +75,8 @@ impl Mesh {
                     v2: texture_v * du - uw,
                 };
 
-                let x = depth_buffer.faces[l].top_right_x as f32;
-                let y = depth_buffer.faces[l].top_right_y as f32;
+                let x = depth_buffer.faces_dist[l].top_right_x as f32;
+                let y = depth_buffer.faces_dist[l].top_right_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: 2.0 },
                     uv: Vec2 {
@@ -84,8 +84,8 @@ impl Mesh {
                         y: tex_uv.v1,
                     }, act: 0.0,
                 }); // top right
-                let x = depth_buffer.faces[l].bottom_right_x as f32;
-                let y = depth_buffer.faces[l].bottom_right_y as f32;
+                let x = depth_buffer.faces_dist[l].bottom_right_x as f32;
+                let y = depth_buffer.faces_dist[l].bottom_right_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: 1.0 },
                     uv: Vec2 {
@@ -93,8 +93,8 @@ impl Mesh {
                         y: tex_uv.v2,
                     }, act: 0.0,
                 }); // bottom right
-                let x = depth_buffer.faces[l].bottom_left_x as f32;
-                let y = depth_buffer.faces[l].bottom_left_y as f32;
+                let x = depth_buffer.faces_dist[l].bottom_left_x as f32;
+                let y = depth_buffer.faces_dist[l].bottom_left_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: 1.0 },
                     uv: Vec2 {
@@ -102,8 +102,8 @@ impl Mesh {
                         y: tex_uv.v2,
                     }, act: 0.0,
                 }); // bottom left
-                let x = depth_buffer.faces[l].top_left_x as f32;
-                let y = depth_buffer.faces[l].top_left_y as f32;
+                let x = depth_buffer.faces_dist[l].top_left_x as f32;
+                let y = depth_buffer.faces_dist[l].top_left_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: 2.0 },
                     uv: Vec2 {
@@ -131,8 +131,8 @@ impl Mesh {
                     v2: texture_v * du - uw,
                 };
 
-                let x = depth_buffer.faces[l].top_right_x as f32;
-                let y = depth_buffer.faces[l].top_right_y as f32;
+                let x = depth_buffer.faces_dist[l].top_right_x as f32;
+                let y = depth_buffer.faces_dist[l].top_right_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: 1.0 },
                     uv: Vec2 {
@@ -140,8 +140,8 @@ impl Mesh {
                         y: tex_uv.v1,
                     }, act: 0.0,
                 }); // top right
-                let x = depth_buffer.faces[l].bottom_right_x as f32;
-                let y = depth_buffer.faces[l].bottom_right_y as f32;
+                let x = depth_buffer.faces_dist[l].bottom_right_x as f32;
+                let y = depth_buffer.faces_dist[l].bottom_right_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: 0.0 },
                     uv: Vec2 {
@@ -149,8 +149,8 @@ impl Mesh {
                         y: tex_uv.v2,
                     }, act: 0.0,
                 }); // bottom right
-                let x = depth_buffer.faces[l].bottom_left_x as f32;
-                let y = depth_buffer.faces[l].bottom_left_y as f32;
+                let x = depth_buffer.faces_dist[l].bottom_left_x as f32;
+                let y = depth_buffer.faces_dist[l].bottom_left_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: 0.0 },
                     uv: Vec2 {
@@ -158,8 +158,8 @@ impl Mesh {
                         y: tex_uv.v2,
                     }, act: 0.0,
                 }); // bottom left
-                let x = depth_buffer.faces[l].top_left_x as f32;
-                let y = depth_buffer.faces[l].top_left_y as f32;
+                let x = depth_buffer.faces_dist[l].top_left_x as f32;
+                let y = depth_buffer.faces_dist[l].top_left_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: 1.0 },
                     uv: Vec2 {
@@ -218,8 +218,8 @@ impl Mesh {
                         v2: texture1_v * du - uw,
                     };
                 }
-                let x = depth_buffer.faces[l].top_right_x as f32;
-                let y = depth_buffer.faces[l].top_right_y as f32;
+                let x = depth_buffer.faces_dist[l].top_right_x as f32;
+                let y = depth_buffer.faces_dist[l].top_right_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: z1 },
                     uv: Vec2 {
@@ -227,8 +227,8 @@ impl Mesh {
                         y: tex_uv_1.v1,
                     }, act: 0.0,
                 }); // top right
-                let x = depth_buffer.faces[l].bottom_right_x as f32;
-                let y = depth_buffer.faces[l].bottom_right_y as f32;
+                let x = depth_buffer.faces_dist[l].bottom_right_x as f32;
+                let y = depth_buffer.faces_dist[l].bottom_right_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: z1 },
                     uv: Vec2 {
@@ -236,8 +236,8 @@ impl Mesh {
                         y: tex_uv_1.v2,
                     }, act: 0.0,
                 }); // bottom right
-                let x = depth_buffer.faces[l].bottom_left_x as f32;
-                let y = depth_buffer.faces[l].bottom_left_y as f32;
+                let x = depth_buffer.faces_dist[l].bottom_left_x as f32;
+                let y = depth_buffer.faces_dist[l].bottom_left_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: z1 },
                     uv: Vec2 {
@@ -245,8 +245,8 @@ impl Mesh {
                         y: tex_uv_1.v2,
                     }, act: 0.0,
                 }); // bottom left
-                let x = depth_buffer.faces[l].top_left_x as f32;
-                let y = depth_buffer.faces[l].top_left_y as f32;
+                let x = depth_buffer.faces_dist[l].top_left_x as f32;
+                let y = depth_buffer.faces_dist[l].top_left_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: z1 },
                     uv: Vec2 {
@@ -264,8 +264,8 @@ impl Mesh {
 
                 idx = idx + 1;
 
-                let x = depth_buffer.faces[l].top_right_x as f32;
-                let y = depth_buffer.faces[l].top_right_y as f32;
+                let x = depth_buffer.faces_dist[l].top_right_x as f32;
+                let y = depth_buffer.faces_dist[l].top_right_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: z2 },
                     uv: Vec2 {
@@ -273,8 +273,8 @@ impl Mesh {
                         y: tex_uv_2.v1,
                     }, act: 0.0,
                 }); // top right
-                let x = depth_buffer.faces[l].bottom_right_x as f32;
-                let y = depth_buffer.faces[l].bottom_right_y as f32;
+                let x = depth_buffer.faces_dist[l].bottom_right_x as f32;
+                let y = depth_buffer.faces_dist[l].bottom_right_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: z2 },
                     uv: Vec2 {
@@ -282,8 +282,8 @@ impl Mesh {
                         y: tex_uv_2.v2,
                     }, act: 0.0,
                 }); // bottom right
-                let x = depth_buffer.faces[l].bottom_left_x as f32;
-                let y = depth_buffer.faces[l].bottom_left_y as f32;
+                let x = depth_buffer.faces_dist[l].bottom_left_x as f32;
+                let y = depth_buffer.faces_dist[l].bottom_left_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: z2 },
                     uv: Vec2 {
@@ -291,8 +291,8 @@ impl Mesh {
                         y: tex_uv_2.v2,
                     }, act: 0.0,
                 }); // bottom left
-                let x = depth_buffer.faces[l].top_left_x as f32;
-                let y = depth_buffer.faces[l].top_left_y as f32;
+                let x = depth_buffer.faces_dist[l].top_left_x as f32;
+                let y = depth_buffer.faces_dist[l].top_left_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: z2 },
                     uv: Vec2 {
@@ -561,8 +561,6 @@ impl Mesh {
         let mut vertices: Vec<Vertex> = Vec::new();
         let mut indices: Vec<i16> = Vec::new();
 
-        let mut idx = 0;
-
         let mut tex_uv = TextureUV {
             u1: player.position.x - settings.draw_max_dist as f32,
             u2: player.position.x + settings.draw_max_dist as f32,
@@ -614,14 +612,12 @@ impl Mesh {
             }, act: 0.0,
         }); // top left
 
-        indices.push(4 * idx);
-        indices.push(4 * idx + 1);
-        indices.push(4 * idx + 3);
-        indices.push(4 * idx + 1);
-        indices.push(4 * idx + 2);
-        indices.push(4 * idx + 3);
-
-        idx = idx + 1;
+        indices.push(0);
+        indices.push(1);
+        indices.push(3);
+        indices.push(1);
+        indices.push(2);
+        indices.push(3);
 
         tex_uv = TextureUV {
             u1: 0.0,
@@ -631,120 +627,49 @@ impl Mesh {
         };
 
         // VISIBLE TILES
+        let act = 1.0;
 
-        for l in 0..depth_buffer.len {
-            let act;
-            act = 1.0;
-            if depth_buffer.faces[l].is_wall || depth_buffer.faces[l].dist > 0.7*(settings.draw_max_dist as f32) {
-                let xt = x_offset + 0.5*width - settings.tile_screen_size*(depth_buffer.faces[l].bottom_right_x as f32 - player.position.x);
-                let yt = y_offset + 0.5*height + settings.tile_screen_size*(depth_buffer.faces[l].bottom_right_y as f32 - player.position.y);
+        // player position vertex
+        let xp = 1.0 - (x_offset + 0.5*width)*scalex;
+        let yp = 1.0 - (y_offset + 0.5*height)*scaley;
 
-                let x1 = 1.0 - (xt - settings.tile_screen_size)*scalex;
-                let y1 = 1.0 - (yt + settings.tile_screen_size) * scaley;
-                let x2 = 1.0 - (xt + settings.tile_screen_size)*scalex;
-                let y2 = 1.0 - (yt - settings.tile_screen_size) * scaley;
-                let x3 = 1.0 - (x_offset + 0.5*width + settings.tile_screen_size)*scalex;
-                let y3 = 1.0 - (y_offset + 0.5*height - settings.tile_screen_size) * scaley;
-                let x4 = 1.0 - (x_offset + 0.5*width - settings.tile_screen_size)*scalex;
-                let y4 = 1.0 - (y_offset + 0.5*height + settings.tile_screen_size) * scaley;
+        vertices.push(Vertex {
+            pos: Vec3 { x: xp, y: yp, z: 0.0 },
+            uv: Vec2 {
+                x: tex_uv.u1,
+                y: tex_uv.v1,
+            }, act,
+        });
 
-                // visible walls and floor
-                vertices.push(Vertex {
-                    pos: Vec3 { x: x1, y: y1, z: 0.0 },
-                    uv: Vec2 {
-                        x: tex_uv.u2,
-                        y: tex_uv.v1,
-                    }, act,
-                }); // top right
-                vertices.push(Vertex {
-                    pos: Vec3 { x: x2, y: y2, z: 0.0 },
-                    uv: Vec2 {
-                        x: tex_uv.u2,
-                        y: tex_uv.v2,
-                    }, act,
-                }); // bottom right
-                vertices.push(Vertex {
-                    pos: Vec3 { x: x3, y: y3, z: 0.0 },
-                    uv: Vec2 {
-                        x: tex_uv.u1,
-                        y: tex_uv.v2,
-                    }, act,
-                }); // bottom left
-                vertices.push(Vertex {
-                    pos: Vec3 { x: x4, y: y4, z: 0.0 },
-                    uv: Vec2 {
-                        x: tex_uv.u1,
-                        y: tex_uv.v1,
-                    }, act,
-                }); // top left
+        let mut idx = 0;
 
-                indices.push(4 * idx);
-                indices.push(4 * idx + 1);
-                indices.push(4 * idx + 3);
-                indices.push(4 * idx + 1);
-                indices.push(4 * idx + 2);
-                indices.push(4 * idx + 3);
+        // for l in 0..depth_buffer.faces_angle.len() {
+        //     if true
+        //     {
+        //         let xt = x_offset + 0.5*width - settings.tile_screen_size*(depth_buffer.faces_angle[l].center_x - player.position.x);
+        //         let yt = y_offset + 0.5*height + settings.tile_screen_size*(depth_buffer.faces_angle[l].center_y - player.position.y);
 
-                idx = idx + 1;
-            }
-        }
+        //         let x1 = 1.0 - xt*scalex;
+        //         let y1 = 1.0 - yt*scaley;
 
-        for l in 0..depth_buffer.len {
-            let act;
-            act = 1.0;
-            if depth_buffer.faces[l].is_wall || depth_buffer.faces[l].dist > 0.7*(settings.draw_max_dist as f32) {
-                let xt = x_offset + 0.5*width - settings.tile_screen_size*(depth_buffer.faces[l].bottom_right_x as f32 - player.position.x);
-                let yt = y_offset + 0.5*height + settings.tile_screen_size*(depth_buffer.faces[l].bottom_right_y as f32 - player.position.y);
+        //         // visible walls and floor
+        //         vertices.push(Vertex {
+        //             pos: Vec3 { x: x1, y: y1, z: 0.0 },
+        //             uv: Vec2 {
+        //                 x: tex_uv.u1,
+        //                 y: tex_uv.v1,
+        //             }, act,
+        //         });
 
-                let x1 = 1.0 - (xt + settings.tile_screen_size)*scalex;
-                let y1 = 1.0 - (yt + settings.tile_screen_size) * scaley;
-                let x2 = 1.0 - (xt - settings.tile_screen_size)*scalex;
-                let y2 = 1.0 - (yt - settings.tile_screen_size) * scaley;
-                let x3 = 1.0 - (x_offset + 0.5*width + settings.tile_screen_size)*scalex;
-                let y3 = 1.0 - (y_offset + 0.5*height - settings.tile_screen_size) * scaley;
-                let x4 = 1.0 - (x_offset + 0.5*width - settings.tile_screen_size)*scalex;
-                let y4 = 1.0 - (y_offset + 0.5*height + settings.tile_screen_size) * scaley;
+        //         idx = idx + 1;
+        //     }
+        // }
 
-                // visible walls and floor
-                vertices.push(Vertex {
-                    pos: Vec3 { x: x1, y: y1, z: 0.0 },
-                    uv: Vec2 {
-                        x: tex_uv.u2,
-                        y: tex_uv.v1,
-                    }, act,
-                }); // top right
-                vertices.push(Vertex {
-                    pos: Vec3 { x: x2, y: y2, z: 0.0 },
-                    uv: Vec2 {
-                        x: tex_uv.u2,
-                        y: tex_uv.v2,
-                    }, act,
-                }); // bottom right
-                vertices.push(Vertex {
-                    pos: Vec3 { x: x3, y: y3, z: 0.0 },
-                    uv: Vec2 {
-                        x: tex_uv.u1,
-                        y: tex_uv.v2,
-                    }, act,
-                }); // bottom left
-                vertices.push(Vertex {
-                    pos: Vec3 { x: x4, y: y4, z: 0.0 },
-                    uv: Vec2 {
-                        x: tex_uv.u1,
-                        y: tex_uv.v1,
-                    }, act,
-                }); // top left
-
-                indices.push(4 * idx);
-                indices.push(4 * idx + 1);
-                indices.push(4 * idx + 3);
-                indices.push(4 * idx + 1);
-                indices.push(4 * idx + 2);
-                indices.push(4 * idx + 3);
-
-                idx = idx + 1;
-            }
-        }
+        // for i in 0..(idx-2) {
+        //     indices.push(4);
+        //     indices.push(i+5);
+        //     indices.push(i+6);
+        // }
 
         Mesh {
             vertices,

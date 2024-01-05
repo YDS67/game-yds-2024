@@ -26,21 +26,26 @@ pub struct FaceData {
     pub top_left_y: usize,
     pub bottom_left_x: usize,
     pub bottom_left_y: usize,
+    pub center_x: f32,
+    pub center_y: f32,
     pub is_wall: bool,
     pub texture_bot: u8,
     pub texture_top: u8,
     pub dist: f32,
+    pub angle: usize,
 }
 
 pub struct DepthBuffer {
-    pub faces: Vec<FaceData>,
+    pub faces_dist: Vec<FaceData>,
+    pub faces_angle: Vec<FaceData>,
     pub len: usize,
     pub dmax: f32,
 }
 
 impl DepthBuffer {
     pub fn generate(game_map: &map::GameMap, player: &player::Player, settings: &settings::Settings) -> DepthBuffer {
-        let mut faces: Vec<FaceData> = Vec::new();
+        let mut faces_dist: Vec<FaceData> = Vec::new();
+        let mut faces_angle: Vec<FaceData> = Vec::new();
         let mut len = 0;
         let xp = player.position.x;
         let yp = player.position.y;
@@ -59,7 +64,7 @@ impl DepthBuffer {
                 if game_map.wall_visible[i][j] {
                 
                     let dist = (xi-xp).powi(2)+(yj+2.0/4.0-yp).powi(2);
-                    faces.push(FaceData { // face 1
+                    faces_dist.push(FaceData { // face 1
                         top_right_x: i,
                         top_right_y: j,
                         bottom_right_x: i,
@@ -68,15 +73,18 @@ impl DepthBuffer {
                         bottom_left_y: j+1,
                         top_left_x: i,
                         top_left_y: j+1,
+                        center_x: (4*i) as f32 / 4.0,
+                        center_y: (4*j+2) as f32 / 4.0,
                         is_wall: true,
                         texture_bot: game_map.wall_bot_array[i][j],
                         texture_top: game_map.wall_top_array[i][j],
                         dist,
+                        angle: game_map.wall_angle[i][j],
                     });
                     len += 1;
 
                     let dist = (xi+2.0/4.0-xp).powi(2)+(yj+4.0/4.0-yp).powi(2);
-                    faces.push(FaceData { // face 2
+                    faces_dist.push(FaceData { // face 2
                         top_right_x: i,
                         top_right_y: j+1,
                         bottom_right_x: i,
@@ -85,15 +93,18 @@ impl DepthBuffer {
                         bottom_left_y: j+1,
                         top_left_x: i+1,
                         top_left_y: j+1,
+                        center_x: (4*i+2) as f32 / 4.0,
+                        center_y: (4*j+4) as f32 / 4.0,
                         is_wall: true,
                         texture_bot: game_map.wall_bot_array[i][j],
                         texture_top: game_map.wall_top_array[i][j],
                         dist,
+                        angle: game_map.wall_angle[i][j],
                     });
                     len += 1;
 
                     let dist = (xi+4.0/4.0-xp).powi(2)+(yj+2.0/4.0-yp).powi(2);
-                    faces.push(FaceData { // face 3
+                    faces_dist.push(FaceData { // face 3
                         top_right_x: i+1,
                         top_right_y: j+1,
                         bottom_right_x: i+1,
@@ -102,15 +113,18 @@ impl DepthBuffer {
                         bottom_left_y: j,
                         top_left_x: i+1,
                         top_left_y: j,
+                        center_x: (4*i+4) as f32 / 4.0,
+                        center_y: (4*j+2) as f32 / 4.0,
                         is_wall: true,
                         texture_bot: game_map.wall_bot_array[i][j],
                         texture_top: game_map.wall_top_array[i][j],
                         dist,
+                        angle: game_map.wall_angle[i][j],
                     });
                     len += 1;
 
                     let dist = (xi+2.0/4.0-xp).powi(2)+(yj-yp).powi(2);
-                    faces.push(FaceData { // face 4
+                    faces_dist.push(FaceData { // face 4
                         top_right_x: i+1,
                         top_right_y: j,
                         bottom_right_x: i+1,
@@ -119,17 +133,17 @@ impl DepthBuffer {
                         bottom_left_y: j,
                         top_left_x: i,
                         top_left_y: j,
+                        center_x: (4*i+2) as f32 / 4.0,
+                        center_y: (4*j) as f32 / 4.0,
                         is_wall: true,
                         texture_bot: game_map.wall_bot_array[i][j],
                         texture_top: game_map.wall_top_array[i][j],
                         dist,
+                        angle: game_map.wall_angle[i][j],
                     });
                     len += 1;
-
-                } 
-                if game_map.floor_visible[i][j] {
-                    let dist = (xi+2.0/4.0-xp).powi(2)+(yj+2.0/4.0-yp).powi(2);
-                    faces.push(FaceData {
+                    // for the minimap
+                    faces_angle.push(FaceData {
                         top_right_x: i+1,
                         top_right_y: j+1,
                         bottom_right_x: i+1,
@@ -138,20 +152,46 @@ impl DepthBuffer {
                         bottom_left_y: j,
                         top_left_x: i,
                         top_left_y: j+1,
+                        center_x: (4*i+2) as f32 / 4.0,
+                        center_y: (4*j+2) as f32 / 4.0,
                         is_wall: false,
                         texture_bot: game_map.floor_array[i][j],
                         texture_top: game_map.ceil_array[i][j],
                         dist,
+                        angle: game_map.wall_angle[i][j],
+                    });
+
+                } 
+                if game_map.floor_visible[i][j] {
+                    let dist = (xi+2.0/4.0-xp).powi(2)+(yj+2.0/4.0-yp).powi(2);
+                    faces_dist.push(FaceData {
+                        top_right_x: i+1,
+                        top_right_y: j+1,
+                        bottom_right_x: i+1,
+                        bottom_right_y: j,
+                        bottom_left_x: i,
+                        bottom_left_y: j,
+                        top_left_x: i,
+                        top_left_y: j+1,
+                        center_x: (4*i+2) as f32 / 4.0,
+                        center_y: (4*j+2) as f32 / 4.0,
+                        is_wall: false,
+                        texture_bot: game_map.floor_array[i][j],
+                        texture_top: game_map.ceil_array[i][j],
+                        dist,
+                        angle: game_map.wall_angle[i][j],
                     });
                     len += 1;
                 }
             }
         }
 
-        faces.sort_by(cmp_depth);
+        faces_dist.sort_by(cmp_dist);
+        faces_angle.sort_by(cmp_angle);
 
         DepthBuffer {
-            faces,
+            faces_dist,
+            faces_angle,
             len,
             dmax: settings.light_dist,
         }
@@ -161,6 +201,7 @@ impl DepthBuffer {
 pub fn find_visible_tiles(game_map: &mut map::GameMap, player: &player::Player, settings: &settings::Settings) {
     game_map.wall_visible = vec![vec![false; settings::MAPSIZE]; settings::MAPSIZE];
     game_map.floor_visible = vec![vec![false; settings::MAPSIZE]; settings::MAPSIZE];
+    game_map.wall_angle = vec![vec![0; settings::MAPSIZE]; settings::MAPSIZE];
     let ip = player.position.x.floor() as usize;
     let jp = player.position.y.floor() as usize;
     for i in 0..settings::MAPSIZE {
@@ -193,6 +234,9 @@ pub fn find_visible_tiles(game_map: &mut map::GameMap, player: &player::Player, 
                 if game_map.wall_bot_array[i][j] < 255 {
                     game_map.wall_visible[i][j] = true;
                     game_map.wall_dist[i][j] = d;
+                    if game_map.wall_angle[i][j] == 0 {
+                        game_map.wall_angle[i][j] = k;
+                    }
                     // for ii in (i-2)..(i+3) {
                     //     for jj in (j-2)..(j+3) {
                     //         if ii as i32 > 0 && ii < settings::MAPSIZE-1 && jj as i32 > 0 && jj < settings::MAPSIZE-1 {
@@ -205,6 +249,9 @@ pub fn find_visible_tiles(game_map: &mut map::GameMap, player: &player::Player, 
                 } else {
                     game_map.floor_visible[i][j] = true;
                     game_map.floor_dist[i][j] = d;
+                    if game_map.wall_angle[i][j] == 0 {
+                        game_map.wall_angle[i][j] = k;
+                    }
                     if break_soon > 0 {break_soon += 1}
                 }
             }
@@ -212,10 +259,19 @@ pub fn find_visible_tiles(game_map: &mut map::GameMap, player: &player::Player, 
     }
 }
 
-fn cmp_depth(a: &FaceData, b: &FaceData) -> Ordering {
+fn cmp_dist(a: &FaceData, b: &FaceData) -> Ordering {
     if a.dist < b.dist {
         return Ordering::Greater;
     } else if a.dist > b.dist {
+        return Ordering::Less;
+    }
+    return Ordering::Equal;
+}
+
+fn cmp_angle(a: &FaceData, b: &FaceData) -> Ordering {
+    if a.angle < b.angle {
+        return Ordering::Greater;
+    } else if a.angle > b.angle {
         return Ordering::Less;
     }
     return Ordering::Equal;

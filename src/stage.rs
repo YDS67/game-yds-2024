@@ -468,7 +468,7 @@ impl EventHandler for Stage {
                 fontcolor: self.overlay.font_col,
             }));
 
-        self.ctx.draw(0, self.mesh[1].num * 6, 1);
+        self.ctx.draw(0, self.mesh[1].num * 6 + 6, 1);
 
         self.ctx.apply_pipeline(&self.pipeline[3]);
 
@@ -492,7 +492,7 @@ impl EventHandler for Stage {
                 cent: (x, y, a, b),
             }));
 
-        self.ctx.draw(0, self.mesh[3].num * 6, 1);
+        self.ctx.draw(0, self.mesh[3].num * 3 + 6, 1);
 
         if self.gui.show {
             self.ctx.apply_pipeline(&self.pipeline[2]);

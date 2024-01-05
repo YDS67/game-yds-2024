@@ -11,6 +11,7 @@ pub struct GameMap {
     pub floor_visible: Vec<Vec<bool>>,
     pub wall_dist: Vec<Vec<f32>>,
     pub floor_dist: Vec<Vec<f32>>,
+    pub wall_angle: Vec<Vec<usize>>,
 }
 
 impl GameMap {
@@ -52,6 +53,7 @@ impl GameMap {
             floor_visible,
             wall_dist,
             floor_dist,
+            wall_angle: vec![vec![0; settings::MAPSIZE]; settings::MAPSIZE],
         }
     }
 }

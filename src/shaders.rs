@@ -126,54 +126,47 @@ in vec3 pos;
 in vec2 uv;
 in float act;
 
-uniform vec4 fontcolor;
-uniform vec4 actcolor;
-
 out vec2 texcoord;
-out vec4 cols;
 out vec2 spos;
+out float acts;
 
 void main() {
     gl_Position = vec4((pos.x-0.5)*2.0, (0.5-pos.y)*2.0, 0.0, 1.0);
     spos = pos.xy;
     texcoord = uv;
-    cols = fontcolor;
-    if (act > 0.9 && act <= 1.1) {
-        cols = actcolor;
-    }
-    if (act > 1.9 && act <= 2.1) {
-        cols = actcolor;
-    }
-    if (act > 2.9 && act <= 3.1) {
-        cols = vec4(0.8, 0.0, 0.2, 1.0);
-    }
+    acts = act;
 }"#;
 
 pub const FRAGMENT_MAP: &str = r#"#version 330 core
 in vec2 texcoord;
-in vec4 cols;
 in vec2 spos;
+in float acts;
 
 out vec4 FragColor;
 
 uniform sampler2D tex;
 uniform vec4 cent;
+uniform vec4 fontcolor;
+uniform vec4 actcolor;
 
 vec4 col;
 
 void main() {
-    col = texture(tex, texcoord);
-
     if (length((spos.xy-cent.xy)/cent.zw) < 0.04) {
         FragColor = vec4(0.8, 0.0, 0.2, 1.0);
     } else {
         if (length((spos.xy-cent.xy)/cent.zw) > 1.0) {
             discard;
         } else {
-            if (col.x+col.y+col.z > 2.99) {
-                FragColor = col;
+            if (acts > 0.1) {
+                FragColor = actcolor;
             } else {
-                FragColor = cols;
+                col = texture(tex, texcoord);
+                if (col.x+col.y+col.z > 2.99) {
+                    FragColor = col;
+                } else {
+                    FragColor = fontcolor;
+                }
             }
         }
     }
