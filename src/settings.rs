@@ -63,7 +63,7 @@ impl Settings {
         let draw_max_dist = 100.0;
         let draw_min_dist = 3*3;
         let light_dist = 10.0;
-        let draw_rays_num = 750;
+        let draw_rays_num = 1920;
         let mouse_sensitivity = 10.0;
         Settings {
             screen_width,
