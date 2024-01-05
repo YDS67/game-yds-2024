@@ -198,7 +198,6 @@ pub fn ray_cast(game_map: &mut map::GameMap, player: &player::Player, settings: 
             let d = (ip-i).pow(2)+(jp-j).pow(2);
             if d < settings.draw_min_dist {
                 game_map.floor_visible[i][j] = true;
-                game_map.floor_dist[i][j] = d as f32;
             }
         }
     }

@@ -9,9 +9,6 @@ pub struct GameMap {
     pub ceil_array: Vec<Vec<u8>>,
     pub wall_visible: Vec<Vec<bool>>,
     pub floor_visible: Vec<Vec<bool>>,
-    pub wall_dist: Vec<Vec<f32>>,
-    pub floor_dist: Vec<Vec<f32>>,
-    pub wall_angle: Vec<Vec<usize>>,
 }
 
 impl GameMap {
@@ -41,9 +38,6 @@ impl GameMap {
         let wall_visible = vec![vec![false; settings::MAPSIZE]; settings::MAPSIZE];
         let floor_visible = vec![vec![false; settings::MAPSIZE]; settings::MAPSIZE];
 
-        let wall_dist = vec![vec![1.0; settings::MAPSIZE]; settings::MAPSIZE];
-        let floor_dist = vec![vec![1.0; settings::MAPSIZE]; settings::MAPSIZE];
-
         GameMap {
             wall_top_array,
             wall_bot_array,
@@ -51,9 +45,6 @@ impl GameMap {
             ceil_array,
             wall_visible,
             floor_visible,
-            wall_dist,
-            floor_dist,
-            wall_angle: vec![vec![0; settings::MAPSIZE]; settings::MAPSIZE],
         }
     }
 }
