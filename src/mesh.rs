@@ -557,7 +557,7 @@ impl Mesh {
         }
     }
 
-    pub fn new_map(depth_buffer: &camera::DepthBuffer, player: &player::Player, settings: &settings::Settings, scalex: f32, scaley: f32) -> Mesh {
+    pub fn new_map(rays: &Vec<camera::Ray>, player: &player::Player, settings: &settings::Settings, scalex: f32, scaley: f32) -> Mesh {
         let mut vertices: Vec<Vertex> = Vec::new();
         let mut indices: Vec<i16> = Vec::new();
 
@@ -643,33 +643,33 @@ impl Mesh {
 
         let mut idx = 0;
 
-        // for l in 0..depth_buffer.faces_angle.len() {
-        //     if true
-        //     {
-        //         let xt = x_offset + 0.5*width - settings.tile_screen_size*(depth_buffer.faces_angle[l].center_x - player.position.x);
-        //         let yt = y_offset + 0.5*height + settings.tile_screen_size*(depth_buffer.faces_angle[l].center_y - player.position.y);
+        for l in 0..rays.len() {
+            if true
+            {
+                let xt = x_offset + 0.5*width - settings.tile_screen_size*(rays[l].x - player.position.x);
+                let yt = y_offset + 0.5*height + settings.tile_screen_size*(rays[l].y - player.position.y);
 
-        //         let x1 = 1.0 - xt*scalex;
-        //         let y1 = 1.0 - yt*scaley;
+                let x1 = 1.0 - xt*scalex;
+                let y1 = 1.0 - yt*scaley;
 
-        //         // visible walls and floor
-        //         vertices.push(Vertex {
-        //             pos: Vec3 { x: x1, y: y1, z: 0.0 },
-        //             uv: Vec2 {
-        //                 x: tex_uv.u1,
-        //                 y: tex_uv.v1,
-        //             }, act,
-        //         });
+                // visible walls and floor
+                vertices.push(Vertex {
+                    pos: Vec3 { x: x1, y: y1, z: 0.0 },
+                    uv: Vec2 {
+                        x: tex_uv.u1,
+                        y: tex_uv.v1,
+                    }, act,
+                });
 
-        //         idx = idx + 1;
-        //     }
-        // }
+                idx = idx + 1;
+            }
+        }
 
-        // for i in 0..(idx-2) {
-        //     indices.push(4);
-        //     indices.push(i+5);
-        //     indices.push(i+6);
-        // }
+        for i in 0..(idx-2) {
+            indices.push(4);
+            indices.push(i+5);
+            indices.push(i+6);
+        }
 
         Mesh {
             vertices,

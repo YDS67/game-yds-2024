@@ -95,7 +95,7 @@ impl Stage {
 
         let mut game_map = map::GameMap::new(&ass);
 
-        camera::find_visible_tiles(&mut game_map, &player, &settings);
+        let rays = camera::ray_cast(&mut game_map, &player, &settings);
         let depth_buffer = camera::DepthBuffer::generate(&game_map, &player, &settings);
 
         let overlay = text::Overlay::new_from(vec!["Text default"]);
@@ -114,7 +114,7 @@ impl Stage {
             1.0 / settings.screen_height_f,
         );
         let mesh_map = mesh::Mesh::new_map(
-            &depth_buffer,
+            &rays,
             &player,
             &settings,
             1.0 / settings.screen_width_f,
@@ -389,6 +389,8 @@ impl EventHandler for Stage {
 
         self.player.read_key(&self.input_state);
 
+        self.input_state.mouse.moving = false;
+
         self.player.walk(
             &self.game_map,
             &self.settings,
@@ -397,7 +399,7 @@ impl EventHandler for Stage {
             self.input_state.mouse.moving,
         );
         
-        camera::find_visible_tiles(&mut self.game_map, &self.player, &self.settings);
+        let rays = camera::ray_cast(&mut self.game_map, &self.player, &self.settings);
         self.depth_buffer =
             camera::DepthBuffer::generate(&self.game_map, &self.player, &self.settings);
 
@@ -414,7 +416,7 @@ impl EventHandler for Stage {
             1.0 / self.settings.screen_height_f,
         );
         self.mesh[3] = mesh::Mesh::new_map(
-            &self.depth_buffer,
+            &rays,
             &self.player,
             &self.settings,
             1.0 / self.settings.screen_width_f,

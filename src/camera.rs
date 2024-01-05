@@ -16,6 +16,28 @@ use crate::settings;
 // 3 = (i+1,j+1)
 // 4 = (i+1.j)
 
+pub struct Ray {
+    pub angle: f32,
+    pub distance: f32,
+    pub x: f32,
+    pub y: f32,
+    pub i: usize,
+    pub j: usize,
+}
+
+impl Ray {
+    pub fn new (angle: f32) -> Ray {
+        Ray {
+            angle,
+            distance: 0.0,
+            x: 0.0,
+            y: 0.0,
+            i: 0,
+            j: 0,
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct FaceData {
     pub top_right_x: usize,
@@ -26,18 +48,14 @@ pub struct FaceData {
     pub top_left_y: usize,
     pub bottom_left_x: usize,
     pub bottom_left_y: usize,
-    pub center_x: f32,
-    pub center_y: f32,
     pub is_wall: bool,
     pub texture_bot: u8,
     pub texture_top: u8,
     pub dist: f32,
-    pub angle: usize,
 }
 
 pub struct DepthBuffer {
     pub faces_dist: Vec<FaceData>,
-    pub faces_angle: Vec<FaceData>,
     pub len: usize,
     pub dmax: f32,
 }
@@ -45,7 +63,6 @@ pub struct DepthBuffer {
 impl DepthBuffer {
     pub fn generate(game_map: &map::GameMap, player: &player::Player, settings: &settings::Settings) -> DepthBuffer {
         let mut faces_dist: Vec<FaceData> = Vec::new();
-        let mut faces_angle: Vec<FaceData> = Vec::new();
         let mut len = 0;
         let xp = player.position.x;
         let yp = player.position.y;
@@ -73,13 +90,10 @@ impl DepthBuffer {
                         bottom_left_y: j+1,
                         top_left_x: i,
                         top_left_y: j+1,
-                        center_x: (4*i) as f32 / 4.0,
-                        center_y: (4*j+2) as f32 / 4.0,
                         is_wall: true,
                         texture_bot: game_map.wall_bot_array[i][j],
                         texture_top: game_map.wall_top_array[i][j],
                         dist,
-                        angle: game_map.wall_angle[i][j],
                     });
                     len += 1;
 
@@ -93,13 +107,10 @@ impl DepthBuffer {
                         bottom_left_y: j+1,
                         top_left_x: i+1,
                         top_left_y: j+1,
-                        center_x: (4*i+2) as f32 / 4.0,
-                        center_y: (4*j+4) as f32 / 4.0,
                         is_wall: true,
                         texture_bot: game_map.wall_bot_array[i][j],
                         texture_top: game_map.wall_top_array[i][j],
                         dist,
-                        angle: game_map.wall_angle[i][j],
                     });
                     len += 1;
 
@@ -113,13 +124,10 @@ impl DepthBuffer {
                         bottom_left_y: j,
                         top_left_x: i+1,
                         top_left_y: j,
-                        center_x: (4*i+4) as f32 / 4.0,
-                        center_y: (4*j+2) as f32 / 4.0,
                         is_wall: true,
                         texture_bot: game_map.wall_bot_array[i][j],
                         texture_top: game_map.wall_top_array[i][j],
                         dist,
-                        angle: game_map.wall_angle[i][j],
                     });
                     len += 1;
 
@@ -133,34 +141,12 @@ impl DepthBuffer {
                         bottom_left_y: j,
                         top_left_x: i,
                         top_left_y: j,
-                        center_x: (4*i+2) as f32 / 4.0,
-                        center_y: (4*j) as f32 / 4.0,
                         is_wall: true,
                         texture_bot: game_map.wall_bot_array[i][j],
                         texture_top: game_map.wall_top_array[i][j],
                         dist,
-                        angle: game_map.wall_angle[i][j],
                     });
                     len += 1;
-                    // for the minimap
-                    faces_angle.push(FaceData {
-                        top_right_x: i+1,
-                        top_right_y: j+1,
-                        bottom_right_x: i+1,
-                        bottom_right_y: j,
-                        bottom_left_x: i,
-                        bottom_left_y: j,
-                        top_left_x: i,
-                        top_left_y: j+1,
-                        center_x: (4*i+2) as f32 / 4.0,
-                        center_y: (4*j+2) as f32 / 4.0,
-                        is_wall: false,
-                        texture_bot: game_map.floor_array[i][j],
-                        texture_top: game_map.ceil_array[i][j],
-                        dist,
-                        angle: game_map.wall_angle[i][j],
-                    });
-
                 } 
                 if game_map.floor_visible[i][j] {
                     let dist = (xi+2.0/4.0-xp).powi(2)+(yj+2.0/4.0-yp).powi(2);
@@ -173,13 +159,10 @@ impl DepthBuffer {
                         bottom_left_y: j,
                         top_left_x: i,
                         top_left_y: j+1,
-                        center_x: (4*i+2) as f32 / 4.0,
-                        center_y: (4*j+2) as f32 / 4.0,
                         is_wall: false,
                         texture_bot: game_map.floor_array[i][j],
                         texture_top: game_map.ceil_array[i][j],
                         dist,
-                        angle: game_map.wall_angle[i][j],
                     });
                     len += 1;
                 }
@@ -187,23 +170,29 @@ impl DepthBuffer {
         }
 
         faces_dist.sort_by(cmp_dist);
-        faces_angle.sort_by(cmp_angle);
 
         DepthBuffer {
             faces_dist,
-            faces_angle,
             len,
             dmax: settings.light_dist,
         }
     }
 }
 
-pub fn find_visible_tiles(game_map: &mut map::GameMap, player: &player::Player, settings: &settings::Settings) {
+pub fn ray_cast(game_map: &mut map::GameMap, player: &player::Player, settings: &settings::Settings) -> Vec<Ray> {
+    let mut rays: Vec<Ray> = Vec::new();
+
     game_map.wall_visible = vec![vec![false; settings::MAPSIZE]; settings::MAPSIZE];
     game_map.floor_visible = vec![vec![false; settings::MAPSIZE]; settings::MAPSIZE];
-    game_map.wall_angle = vec![vec![0; settings::MAPSIZE]; settings::MAPSIZE];
-    let ip = player.position.x.floor() as usize;
-    let jp = player.position.y.floor() as usize;
+
+    let screen_dist: f32 = settings.screen_width_f / 2.0 / settings.fov_xy.tan();
+    let scale = settings.screen_width_f / (settings.draw_rays_num as f32);
+
+    let xp = player.position.x;
+    let yp = player.position.y;
+    let ip = xp.floor() as usize;
+    let jp = yp.floor() as usize;
+
     for i in 0..settings::MAPSIZE {
         for j in 0..settings::MAPSIZE {
             let d = (ip-i).pow(2)+(jp-j).pow(2);
@@ -213,65 +202,138 @@ pub fn find_visible_tiles(game_map: &mut map::GameMap, player: &player::Player, 
             }
         }
     }
-    for k in 0..=settings.draw_rays_num {
-        let phi =
-            player.position.a + settings.fov_xy * (1.0 - 2.0*(k as f32) / (settings.draw_rays_num as f32));
-        let cphi = phi.cos();
-        let sphi = phi.sin();
-        let mut xr = 0.0;
-        let mut yr = 0.0;
-        let mut break_soon = 0;
-        for _l in 0..settings.draw_max_dist*settings.draw_steps {
-            if break_soon >= 5 {break}
-            xr += cphi / settings.draw_steps as f32;
-            yr += sphi / settings.draw_steps as f32;
-            let x = player.position.x + xr;
-            let y = player.position.y + yr;
-            let d = xr * xr + yr * yr;
-            let i = x.floor() as usize;
-            let j = y.floor() as usize;
-            if i as i32 >= 0 && i < settings::MAPSIZE && j as i32 >= 0 && j < settings::MAPSIZE {
-                if game_map.wall_bot_array[i][j] < 255 {
-                    game_map.wall_visible[i][j] = true;
-                    game_map.wall_dist[i][j] = d;
-                    if game_map.wall_angle[i][j] == 0 {
-                        game_map.wall_angle[i][j] = k;
-                    }
-                    // for ii in (i-2)..(i+3) {
-                    //     for jj in (j-2)..(j+3) {
-                    //         if ii as i32 > 0 && ii < settings::MAPSIZE-1 && jj as i32 > 0 && jj < settings::MAPSIZE-1 {
-                    //         game_map.floor_visible[ii][jj] = true;
-                    //         game_map.floor_dist[ii][jj] = d;
-                    //         }
-                    //     }
-                    // }
-                    break_soon += 1;
+
+    let mut a = player.position.a - settings.fov_xy + settings::TOLERANCE;
+
+    for k in 0..settings.draw_rays_num {
+        let cos_a = a.cos();
+        let sin_a = a.sin();
+
+        let mut ray = Ray::new(a);
+
+        // horizontals
+        let (mut y_hor, dy) = if sin_a > 0.0 {
+            (jp as f32 + 1.0, 1.0)
+        } else {
+            (jp as f32 - settings::TOLERANCE, -1.0)
+        };
+
+        let mut dist_hor = (y_hor - yp) / sin_a;
+        let mut x_hor = xp + dist_hor * cos_a;
+
+        let d_dist = dy / sin_a;
+        let dx = d_dist * cos_a;
+
+        let mut check = false;
+
+        let (mut i_hor, mut j_hor): (usize, usize) = (0, 0);
+        let (mut i_vert, mut j_vert): (usize, usize) = (0, 0);
+
+        while dist_hor < settings.draw_max_dist as f32 && !check {
+            (i_hor, j_hor) = (x_hor.floor() as usize, y_hor.floor() as usize);
+
+            if i_hor as i32 >= 0 && i_hor < settings::MAPSIZE && j_hor as i32 >= 0 && j_hor < settings::MAPSIZE {
+                if game_map.wall_bot_array[i_hor][j_hor] < 255 {
+                    check = true;
                 } else {
-                    game_map.floor_visible[i][j] = true;
-                    game_map.floor_dist[i][j] = d;
-                    if game_map.wall_angle[i][j] == 0 {
-                        game_map.wall_angle[i][j] = k;
-                    }
-                    if break_soon > 0 {break_soon += 1}
+                    game_map.floor_visible[i_hor][j_hor] = true;
+                    x_hor += dx;
+                    y_hor += dy;
+                    dist_hor += d_dist
+                }
+            } else {
+                if !check {
+                    x_hor += dx;
+                    y_hor += dy;
+                    dist_hor += d_dist
                 }
             }
         }
+
+        // verticals
+        let (mut x_vert, dx) = if cos_a > 0.0 {
+            (ip as f32 + 1.0, 1.0)
+        } else {
+            (ip as f32 - settings::TOLERANCE, -1.0)
+        };
+
+        let mut dist_vert = (x_vert - xp) / cos_a;
+        let mut y_vert = yp + dist_vert * sin_a;
+
+        let d_dist = dx / cos_a;
+        let dy = d_dist * sin_a;
+
+        let mut check = false;
+
+        while dist_vert < settings.draw_max_dist as f32 && !check {
+            (i_vert, j_vert) = (x_vert.floor() as usize, y_vert.floor() as usize);
+
+            if i_vert as i32 >= 0 && i_vert < settings::MAPSIZE && j_vert as i32 >= 0 && j_vert < settings::MAPSIZE {
+                if game_map.wall_bot_array[i_vert][j_vert] < 255 {
+                    check = true;
+                } else {
+                    game_map.floor_visible[i_vert][j_vert] = true;
+                    x_vert += dx;
+                    y_vert += dy;
+                    dist_vert += d_dist
+                }
+            } else {
+                if !check {
+                    x_vert += dx;
+                    y_vert += dy;
+                    dist_vert += d_dist
+                }
+            }
+        }
+
+        let delta_a: f32 = player.position.a - a;
+
+        // compare distances
+        if dist_vert > dist_hor {
+            ray.distance = dist_hor * delta_a.cos();
+            if game_map.wall_bot_array[i_hor][j_hor] < 255 {
+                game_map.wall_visible[i_hor][j_hor] = true;
+            }
+            ray.i = i_hor;
+            ray.j = j_hor;
+            ray.x = x_hor;
+            ray.y = y_hor;
+        } 
+        else {
+            ray.distance = dist_vert * delta_a.cos();
+            if game_map.wall_bot_array[i_vert][j_vert] < 255 {
+                game_map.wall_visible[i_vert][j_vert] = true;
+            }
+            ray.i = i_vert;
+            ray.j = j_vert;
+            ray.x = x_vert;
+            ray.y = y_vert;
+        };
+
+        rays.push(ray);
+
+        let q = scale / screen_dist;
+
+        let da1 = q * delta_a.cos().powf(2.0);
+        let da2 = da1 / (1.0 + q * (2.0 * delta_a).sin().abs());
+
+        if k < settings.draw_rays_num / 2 {
+            a += da1
+        } else {
+            a += da2
+        }
+        
     }
+
+
+    rays
+    
 }
 
 fn cmp_dist(a: &FaceData, b: &FaceData) -> Ordering {
     if a.dist < b.dist {
         return Ordering::Greater;
     } else if a.dist > b.dist {
-        return Ordering::Less;
-    }
-    return Ordering::Equal;
-}
-
-fn cmp_angle(a: &FaceData, b: &FaceData) -> Ordering {
-    if a.angle < b.angle {
-        return Ordering::Greater;
-    } else if a.angle > b.angle {
         return Ordering::Less;
     }
     return Ordering::Equal;

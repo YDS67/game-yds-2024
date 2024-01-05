@@ -2,7 +2,7 @@ pub const PI: f32 = 3.1415926538;
 pub const MAPSIZE: usize = 256;
 pub const WIDTH0: i32 = 1280;
 pub const HEIGHT0: i32 = 800;
-pub const TOLERANCE: f32 = 1e-3;
+pub const TOLERANCE: f32 = 1e-4;
 pub const FT_DESIRED: f32 = 0.01666666666667;
 pub const MAX_FACES_MAIN: usize = 100000;
 pub const MAX_VERTICES_MAIN: usize = MAX_FACES_MAIN*4;
@@ -31,7 +31,6 @@ pub struct Settings {
     pub player_speed: f32,
     pub player_radius: f32,
     pub draw_max_dist: usize,
-    pub draw_steps: usize,
     pub draw_min_dist: usize,
     pub light_dist: f32,
     pub draw_rays_num: usize,
@@ -62,7 +61,6 @@ impl Settings {
         let player_speed = 12.0*delta_time;
         let player_radius = 0.5;
         let draw_max_dist = 100;
-        let draw_steps = 10;
         let draw_min_dist = 3*3;
         let light_dist = 10.0;
         let draw_rays_num = 750;
@@ -90,7 +88,6 @@ impl Settings {
             player_speed,
             player_radius,
             draw_max_dist,
-            draw_steps,
             draw_min_dist,
             light_dist,
             draw_rays_num,
