@@ -24,7 +24,7 @@ impl Proj {
             settings.fov_xy,
             settings.screen_aspect,
             0.01,
-            settings::MAPSIZE as f32,
+            settings.map_size_f,
         );
         let view = Mat4::look_to_rh(
             vec3(
@@ -48,7 +48,7 @@ impl Proj {
             settings.fov_xy,
             settings.screen_aspect,
             0.01,
-            settings::MAPSIZE as f32,
+            settings.map_size_f,
         );
         self.view = Mat4::look_to_rh(
             vec3(
@@ -130,19 +130,19 @@ impl Stage {
         let vertex_buffer_overlay = ctx.new_buffer(
             BufferType::VertexBuffer,
             BufferUsage::Stream,
-            BufferSource::empty::<mesh::Vertex>(settings::MAX_VERTICES_MAIN),
+            BufferSource::empty::<mesh::Vertex>(settings::MAX_VERTICES_OVERLAY),
         );
 
         let vertex_buffer_gui = ctx.new_buffer(
             BufferType::VertexBuffer,
             BufferUsage::Stream,
-            BufferSource::empty::<mesh::Vertex>(settings::MAX_VERTICES_MAIN),
+            BufferSource::empty::<mesh::Vertex>(settings::MAX_VERTICES_GUI),
         );
 
         let vertex_buffer_map = ctx.new_buffer(
             BufferType::VertexBuffer,
             BufferUsage::Stream,
-            BufferSource::empty::<mesh::Vertex>(settings::MAX_VERTICES_MAIN),
+            BufferSource::empty::<mesh::Vertex>(settings::MAX_VERTICES_MAP),
         );
 
         let index_buffer_main = ctx.new_buffer(
@@ -154,19 +154,19 @@ impl Stage {
         let index_buffer_overlay = ctx.new_buffer(
             BufferType::IndexBuffer,
             BufferUsage::Stream,
-            BufferSource::empty::<i16>(2*settings::MAX_INDICES_MAIN),
+            BufferSource::empty::<i16>(2*settings::MAX_INDICES_OVERLAY),
         );
 
         let index_buffer_gui = ctx.new_buffer(
             BufferType::IndexBuffer,
             BufferUsage::Stream,
-            BufferSource::empty::<i16>(2*settings::MAX_INDICES_MAIN),
+            BufferSource::empty::<i16>(2*settings::MAX_INDICES_GUI),
         );
 
         let index_buffer_map = ctx.new_buffer(
             BufferType::IndexBuffer,
             BufferUsage::Stream,
-            BufferSource::empty::<i16>(2*settings::MAX_INDICES_MAIN),
+            BufferSource::empty::<i16>(2*settings::MAX_INDICES_MAP),
         );
 
         let pixels: ImageBuffer<Rgba<u8>, Vec<u8>> = ass.tile_atlas;
@@ -349,7 +349,10 @@ impl Stage {
         self.overlay = text::Overlay::new_from(vec![
             &format!("FPS: {}", self.time_state.fps + 1),
             &format!("Press (Esc) for menu."),
-            &format!("Visible tiles: {}", self.depth_buffer.len),
+            &format!("Vertices main: {}", self.mesh[0].num*4),
+            &format!("Vertices overlay: {}", self.mesh[1].num*4),
+            &format!("Vertices gui: {}", self.mesh[2].num*4),
+            &format!("Vertices map: {}", self.mesh[3].num+5),
         ]);
     }
 

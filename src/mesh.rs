@@ -564,11 +564,11 @@ impl Mesh {
         let mut tex_uv = TextureUV {
             u1: player.position.x - settings.draw_max_dist,
             u2: player.position.x + settings.draw_max_dist,
-            v1: settings::MAPSIZE as f32 - player.position.y - settings.draw_max_dist,
-            v2: settings::MAPSIZE as f32 - player.position.y + settings.draw_max_dist,
+            v1: settings.map_size_f - player.position.y - settings.draw_max_dist,
+            v2: settings.map_size_f - player.position.y + settings.draw_max_dist,
         };
         
-        tex_uv.normalize(settings::MAPSIZE as f32, settings::MAPSIZE as f32);
+        tex_uv.normalize(settings.map_size_f, settings.map_size_f);
 
         let width = 2.0*settings.draw_max_dist * settings.tile_screen_size;
         let height = 2.0*settings.draw_max_dist * settings.tile_screen_size;

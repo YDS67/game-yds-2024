@@ -7,6 +7,14 @@ pub const FT_DESIRED: f32 = 0.01666666666667;
 pub const MAX_FACES_MAIN: usize = 100000;
 pub const MAX_VERTICES_MAIN: usize = MAX_FACES_MAIN*4;
 pub const MAX_INDICES_MAIN: usize = MAX_FACES_MAIN*6;
+pub const MAX_QUADS_OVERLAY: usize = 1000;
+pub const MAX_VERTICES_OVERLAY: usize = MAX_QUADS_OVERLAY*4;
+pub const MAX_INDICES_OVERLAY: usize = MAX_QUADS_OVERLAY*6;
+pub const MAX_QUADS_GUI: usize = 1000;
+pub const MAX_VERTICES_GUI: usize = MAX_QUADS_GUI*4;
+pub const MAX_INDICES_GUI: usize = MAX_QUADS_GUI*6;
+pub const MAX_VERTICES_MAP: usize = 5000;
+pub const MAX_INDICES_MAP: usize = MAX_VERTICES_MAP*3;
 
 pub struct Settings {
     pub screen_width: i32,
@@ -19,6 +27,7 @@ pub struct Settings {
     pub screen_aspect: f32,
     pub player_height: f32,
     pub tile_screen_size: f32,
+    pub map_size_f: f32,
     pub map_offset_x: f32,
     pub map_offset_y: f32,
     pub player_x0: f32,
@@ -49,6 +58,7 @@ impl Settings {
         let screen_aspect = screen_width_f/screen_height_f;
         let player_height = 0.5;
         let tile_screen_size = 1.5;
+        let map_size_f = 256.0;
         let map_offset_x = 20.0;
         let map_offset_y = screen_height_f - tile_screen_size * (MAPSIZE as f32) - 20.0;
         let player_x0 = MAPSIZE as f32 / 2.0;
@@ -76,6 +86,7 @@ impl Settings {
             screen_aspect,
             player_height,
             tile_screen_size,
+            map_size_f,
             map_offset_x,
             map_offset_y,
             player_x0,
