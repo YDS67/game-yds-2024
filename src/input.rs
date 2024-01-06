@@ -56,56 +56,25 @@ pub struct KeysState {
 
 impl KeysState {
     pub fn read_key(&mut self, keycode: KeyCode, state: bool) {
-        if keycode == KeyCode::W {
-            self.w = state
-        }
-        if keycode == KeyCode::S {
-            self.s = state
-        }
-        if keycode == KeyCode::Left {
-            self.left = state
-        }
-        if keycode == KeyCode::Right {
-            self.right = state
-        }
-        if keycode == KeyCode::A {
-            self.a = state
-        }
-        if keycode == KeyCode::D {
-            self.d = state
-        }
-        if keycode == KeyCode::Down {
-            self.down = state
-        }
-        if keycode == KeyCode::Up {
-            self.up = state
-        }
-        if keycode == KeyCode::Space {
-            self.space = state
-        }
-        if keycode == KeyCode::Escape {
-            self.esc = state
-        }
-        if keycode == KeyCode::Enter {
-            self.enter = state
-        }
-        if keycode == KeyCode::K {
-            self.k = state
-        }
-        if keycode == KeyCode::L {
-            self.l = state
-        }
-        if keycode == KeyCode::Q {
-            self.q = state
-        }
-        if keycode == KeyCode::E {
-            self.e = state
-        }
-        if keycode == KeyCode::F {
-            self.f = state
-        }
-        if keycode == KeyCode::M {
-            self.m = state
+        match keycode {
+            KeyCode::W => self.w = state,
+            KeyCode::S => self.s = state,
+            KeyCode::A => self.a = state,
+            KeyCode::D => self.d = state,
+            KeyCode::Left => self.left = state,
+            KeyCode::Right => self.right = state,
+            KeyCode::Up => self.up = state,
+            KeyCode::Down => self.down = state,
+            KeyCode::Space => self.space = state,
+            KeyCode::Escape => self.esc = state,
+            KeyCode::Enter => self.enter = state,
+            KeyCode::K => self.k = state,
+            KeyCode::L => self.l = state,
+            KeyCode::Q => self.q = state,
+            KeyCode::E => self.e = state,
+            KeyCode::F => self.f = state,
+            KeyCode::M => self.m = state,
+            _ => {},
         }
     }
 }
