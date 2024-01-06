@@ -175,7 +175,7 @@ impl Stage {
         let params = TextureParams {
             kind: TextureKind::Texture2D,
             format: TextureFormat::RGBA8,
-            wrap: TextureWrap::Repeat,
+            wrap: TextureWrap::Clamp,
             min_filter: FilterMode::Nearest,
             mag_filter: FilterMode::Nearest,
             mipmap_filter: MipmapFilterMode::Linear,
@@ -183,9 +183,9 @@ impl Stage {
             height: dims.1,
             allocate_mipmaps: true,
         };
+
         let texture_main = ctx.new_texture_from_data_and_format(pixels.as_bytes(), params);
         ctx.texture_generate_mipmaps(texture_main);
-        //unsafe{miniquad::gl::glTexParameteri(0, miniquad::gl::GL_TEXTURE_MAX_LEVEL, 100)}
 
         let pixels: ImageBuffer<Rgba<u8>, Vec<u8>> = ass.font;
         let dims = pixels.dimensions();
@@ -450,6 +450,8 @@ impl EventHandler for Stage {
         self.ctx.apply_pipeline(&self.pipeline[0]);
 
         self.ctx.apply_bindings(&self.bindings[0]);
+
+        unsafe{miniquad::gl::glTexParameteri(miniquad::gl::GL_TEXTURE_2D, miniquad::gl::GL_TEXTURE_MAX_LEVEL, 1000)}
 
         self.proj.update(&self.player, &self.settings);
 
