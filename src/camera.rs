@@ -231,7 +231,7 @@ pub fn ray_cast(game_map: &mut map::GameMap, player: &player::Player, settings: 
         while dist_hor < settings.draw_max_dist && !check {
             (i_hor, j_hor) = (x_hor.floor() as usize, y_hor.floor() as usize);
 
-            if i_hor as i32 >= 0 && i_hor < settings::MAPSIZE && j_hor as i32 >= 0 && j_hor < settings::MAPSIZE {
+            if check_ij(i_hor, j_hor) {
                 if game_map.wall_bot_array[i_hor][j_hor] < 255 {
                     check = true;
                 } else {
@@ -267,7 +267,7 @@ pub fn ray_cast(game_map: &mut map::GameMap, player: &player::Player, settings: 
         while dist_vert < settings.draw_max_dist && !check {
             (i_vert, j_vert) = (x_vert.floor() as usize, y_vert.floor() as usize);
 
-            if i_vert as i32 >= 0 && i_vert < settings::MAPSIZE && j_vert as i32 >= 0 && j_vert < settings::MAPSIZE {
+            if check_ij(i_vert, j_vert) {
                 if game_map.wall_bot_array[i_vert][j_vert] < 255 {
                     check = true;
                 } else {
@@ -290,7 +290,7 @@ pub fn ray_cast(game_map: &mut map::GameMap, player: &player::Player, settings: 
         // compare distances
         if dist_vert > dist_hor {
             ray.distance = dist_hor;
-            if game_map.wall_bot_array[i_hor][j_hor] < 255 {
+            if check_ij(i_hor, j_hor) && game_map.wall_bot_array[i_hor][j_hor] < 255 {
                 game_map.wall_visible[i_hor][j_hor] = true;
             }
             ray.i = i_hor;
@@ -300,7 +300,7 @@ pub fn ray_cast(game_map: &mut map::GameMap, player: &player::Player, settings: 
         } 
         else {
             ray.distance = dist_vert;
-            if game_map.wall_bot_array[i_vert][j_vert] < 255 {
+            if check_ij(i_vert, j_vert) && game_map.wall_bot_array[i_vert][j_vert] < 255 {
                 game_map.wall_visible[i_vert][j_vert] = true;
             }
             ray.i = i_vert;
@@ -336,4 +336,8 @@ fn cmp_dist(a: &FaceData, b: &FaceData) -> Ordering {
         return Ordering::Less;
     }
     return Ordering::Equal;
+}
+
+fn check_ij(i: usize, j: usize) -> bool {
+    i as i32 >= 0 && i < settings::MAPSIZE && j as i32 >= 0 && j < settings::MAPSIZE
 }
