@@ -40,7 +40,11 @@ vec4 col;
 
 void main() {
     col = texture(tex, texcoord);
-    FragColor = vec4(col.xyz * cols.xyz, 1.0);
+    if (col.w < 0.1) {
+        discard;
+    } else {
+        FragColor = vec4(col.xyz * cols.xyz, 1.0);
+    }
 }"#;
 
 pub const VERTEX_OVERLAY: &str = r#"#version 330 core

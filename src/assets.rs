@@ -10,6 +10,7 @@ pub struct Ass {
     pub sprite_atlas: ImageBuffer<Rgba<u8>, Vec<u8>>,
     pub floor_image: ImageBuffer<Rgba<u8>, Vec<u8>>,
     pub ceil_image: ImageBuffer<Rgba<u8>, Vec<u8>>,
+    pub sprite_image: ImageBuffer<Rgba<u8>, Vec<u8>>,
     pub wall_image_bot: ImageBuffer<Rgba<u8>, Vec<u8>>,
     pub wall_image_top: ImageBuffer<Rgba<u8>, Vec<u8>>,
     pub font: ImageBuffer<Rgba<u8>, Vec<u8>>,
@@ -30,6 +31,7 @@ impl Ass {
             "resources/sprite_atlas.png",
             "resources/floor_map.png",
             "resources/ceil_map.png",
+            "resources/sprite_map.png",
             "resources/wall_map_bot.png",
             "resources/wall_map_top.png",
             "resources/monospace.png",
@@ -49,9 +51,10 @@ impl Ass {
             sprite_atlas: images[1].clone(),
             floor_image: images[2].clone(),
             ceil_image: images[3].clone(),
-            wall_image_bot: images[4].clone(),
-            wall_image_top: images[5].clone(),
-            font: images[6].clone(),
+            sprite_image: images[4].clone(),
+            wall_image_bot: images[5].clone(),
+            wall_image_top: images[6].clone(),
+            font: images[7].clone(),
         }
     }
 }

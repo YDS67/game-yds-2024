@@ -9,6 +9,7 @@ use crate::mesh;
 use crate::player;
 use crate::settings;
 use crate::shaders;
+use crate::sprites;
 use crate::text;
 use crate::input::{TimeState, InputState};
 
@@ -73,6 +74,7 @@ pub struct Stage {
     settings: settings::Settings,
     player: player::Player,
     depth_buffer: camera::DepthBuffer,
+    sprite_buffer: sprites::SpriteBuffer,
     game_map: map::GameMap,
     overlay: text::Overlay,
     gui: text::GUI,
@@ -98,10 +100,12 @@ impl Stage {
         let rays = camera::ray_cast(&mut game_map, &player, &settings);
         let depth_buffer = camera::DepthBuffer::generate(&game_map, &player, &settings);
 
+        let sprite_buffer = sprites::SpriteBuffer::generate(&game_map, &player, &settings);
+
         let overlay = text::Overlay::new_from(vec!["Text default"]);
         let gui = text::GUI::new_from(vec!["Text default"], settings.screen_width_f, settings.screen_height_f);
 
-        let mesh_main = mesh::Mesh::new_main(&depth_buffer);
+        let mesh_main = mesh::Mesh::new_main(&depth_buffer, &sprite_buffer);
         let mesh_overlay = mesh::Mesh::new_overlay(
             &overlay,
             1.0 / settings.screen_width_f,
@@ -334,6 +338,7 @@ impl Stage {
             player,
             game_map,
             depth_buffer,
+            sprite_buffer,
             overlay: text::Overlay::new_from(vec!["Text default"]),
             gui,
             pipeline: vec![pipeline_main, pipeline_overlay, pipeline_gui, pipeline_map],
@@ -407,7 +412,9 @@ impl EventHandler for Stage {
         self.depth_buffer =
             camera::DepthBuffer::generate(&self.game_map, &self.player, &self.settings);
 
-        self.mesh[0] = mesh::Mesh::new_main(&self.depth_buffer);
+        self.sprite_buffer = sprites::SpriteBuffer::generate(&self.game_map, &self.player, &self.settings);
+
+        self.mesh[0] = mesh::Mesh::new_main(&self.depth_buffer, &self.sprite_buffer);
         self.mesh[1] = mesh::Mesh::new_overlay(
             &self.overlay,
             1.0 / self.settings.screen_width_f,

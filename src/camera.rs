@@ -57,7 +57,6 @@ pub struct FaceData {
 pub struct DepthBuffer {
     pub faces_dist: Vec<FaceData>,
     pub len: usize,
-    pub dmax: f32,
 }
 
 impl DepthBuffer {
@@ -174,7 +173,6 @@ impl DepthBuffer {
         DepthBuffer {
             faces_dist,
             len,
-            dmax: settings.light_dist,
         }
     }
 }
