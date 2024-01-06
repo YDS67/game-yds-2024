@@ -60,19 +60,19 @@ impl Mesh {
 
         let mut idx = 0;
 
-        let du = 3.0*64.0/1024.0;
+        let du = 2.0*64.0/1024.0;
         let uw = 64.0/1024.0;
 
         for l in 0..depth_buffer.len {
             if depth_buffer.faces_dist[l].is_wall {
-                let texture_u = 1.0 + depth_buffer.faces_dist[l].texture_top.overflowing_rem(50).0 as f32 / 10.0;
-                let texture_v = 1.0 + depth_buffer.faces_dist[l].texture_top.overflowing_div(50).0 as f32;
+                let texture_u = 1.0 + depth_buffer.faces_dist[l].texture_top.overflowing_rem(32).0 as f32 / 4.0;
+                let texture_v = 1.0 + depth_buffer.faces_dist[l].texture_top.overflowing_div(32).0 as f32;
 
                 let tex_uv = TextureUV {
-                    u1: texture_u * du - 2.0*uw,
-                    u2: texture_u * du - uw,
-                    v1: texture_v * du - 2.0*uw,
-                    v2: texture_v * du - uw,
+                    u1: texture_u * du - 1.5*uw,
+                    u2: texture_u * du - 0.5*uw,
+                    v1: texture_v * du - 1.5*uw,
+                    v2: texture_v * du - 0.5*uw,
                 };
 
                 let x = depth_buffer.faces_dist[l].top_right_x as f32;
@@ -121,14 +121,14 @@ impl Mesh {
 
                 idx = idx + 1;
 
-                let texture_u = 1.0 + depth_buffer.faces_dist[l].texture_bot.overflowing_rem(50).0 as f32 / 10.0;
-                let texture_v = 1.0 + depth_buffer.faces_dist[l].texture_bot.overflowing_div(50).0 as f32;
+                let texture_u = 1.0 + depth_buffer.faces_dist[l].texture_bot.overflowing_rem(32).0 as f32 / 4.0;
+                let texture_v = 1.0 + depth_buffer.faces_dist[l].texture_bot.overflowing_div(32).0 as f32;
 
                 let tex_uv = TextureUV {
-                    u1: texture_u * du - 2.0*uw,
-                    u2: texture_u * du - uw,
-                    v1: texture_v * du - 2.0*uw,
-                    v2: texture_v * du - uw,
+                    u1: texture_u * du - 1.5*uw,
+                    u2: texture_u * du - 0.5*uw,
+                    v1: texture_v * du - 1.5*uw,
+                    v2: texture_v * du - 0.5*uw,
                 };
 
                 let x = depth_buffer.faces_dist[l].top_right_x as f32;
@@ -181,24 +181,24 @@ impl Mesh {
                 let z1: f32 = 2.0;
                 let z2: f32 = 0.0;
 
-                let texture1_u = 1.0 + depth_buffer.faces_dist[l].texture_top.overflowing_rem(50).0 as f32 / 10.0;
-                let texture1_v = 1.0 + depth_buffer.faces_dist[l].texture_top.overflowing_div(50).0 as f32;
+                let texture1_u = 1.0 + depth_buffer.faces_dist[l].texture_top.overflowing_rem(32).0 as f32 / 4.0;
+                let texture1_v = 1.0 + depth_buffer.faces_dist[l].texture_top.overflowing_div(32).0 as f32;
 
                 let tex_uv_1 = TextureUV {
-                    u1: texture1_u * du - 2.0*uw,
-                    u2: texture1_u * du - uw,
-                    v1: texture1_v * du - 2.0*uw,
-                    v2: texture1_v * du - uw,
+                    u1: texture1_u * du - 1.5*uw,
+                    u2: texture1_u * du - 0.5*uw,
+                    v1: texture1_v * du - 1.5*uw,
+                    v2: texture1_v * du - 0.5*uw,
                 };
 
-                let texture2_u = 1.0 + depth_buffer.faces_dist[l].texture_bot.overflowing_rem(50).0 as f32 / 10.0;
-                let texture2_v = 1.0 + depth_buffer.faces_dist[l].texture_bot.overflowing_div(50).0 as f32;
+                let texture2_u = 1.0 + depth_buffer.faces_dist[l].texture_bot.overflowing_rem(32).0 as f32 / 4.0;
+                let texture2_v = 1.0 + depth_buffer.faces_dist[l].texture_bot.overflowing_div(32).0 as f32;
 
                 let tex_uv_2 = TextureUV {
-                    u1: texture2_u * du - 2.0*uw,
-                    u2: texture2_u * du - uw,
-                    v1: texture2_v * du - 2.0*uw,
-                    v2: texture2_v * du - uw,
+                    u1: texture2_u * du - 1.5*uw,
+                    u2: texture2_u * du - 0.5*uw,
+                    v1: texture2_v * du - 1.5*uw,
+                    v2: texture2_v * du - 0.5*uw,
                 };
 
                 let x = depth_buffer.faces_dist[l].top_right_x as f32;
