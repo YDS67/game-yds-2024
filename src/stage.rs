@@ -185,6 +185,7 @@ impl Stage {
         };
         let texture_main = ctx.new_texture_from_data_and_format(pixels.as_bytes(), params);
         ctx.texture_generate_mipmaps(texture_main);
+        unsafe{miniquad::gl::glTexParameteri(0, miniquad::gl::GL_TEXTURE_MAX_LEVEL, 5)}
 
         let pixels: ImageBuffer<Rgba<u8>, Vec<u8>> = ass.font;
         let dims = pixels.dimensions();
