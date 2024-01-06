@@ -355,10 +355,10 @@ impl Stage {
         self.overlay = text::Overlay::new_from(vec![
             &format!("FPS: {}", self.time_state.fps + 1),
             &format!("Press (Esc) for menu."),
-            &format!("Vertices main: {}", self.mesh[0].num*4),
-            &format!("Vertices overlay: {}", self.mesh[1].num*4),
-            &format!("Vertices gui: {}", self.mesh[2].num*4),
-            &format!("Vertices map: {}", self.mesh[3].num+5),
+            // &format!("Vertices main: {}", self.mesh[0].num*4),
+            // &format!("Vertices overlay: {}", self.mesh[1].num*4),
+            // &format!("Vertices gui: {}", self.mesh[2].num*4),
+            // &format!("Vertices map: {}", self.mesh[3].num+5),
         ]);
     }
 
