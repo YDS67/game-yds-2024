@@ -462,6 +462,20 @@ impl EventHandler for Stage {
 
         self.proj.update(&self.player, &self.settings);
 
+        let lightpos = if self.sprite_buffer.len > 0 {
+            (
+                self.sprite_buffer.sprites_dist[self.sprite_buffer.len-1].x,
+                self.sprite_buffer.sprites_dist[self.sprite_buffer.len-1].y,
+                self.sprite_buffer.sprites_dist[self.sprite_buffer.len-1].z,
+            )
+        } else {
+            (
+                self.player.position.x,
+                self.player.position.y,
+                self.player.position.z,
+            )
+        };
+
         self.ctx
             .apply_uniforms(miniquad::UniformsSource::table(&shaders::UniformsMain {
                 mvp: self.proj.mvp,
@@ -470,6 +484,7 @@ impl EventHandler for Stage {
                     self.player.position.y,
                     self.player.position.z,
                 ),
+                lightpos,
                 lightdist: self.settings.light_dist,
             }));
         self.ctx.draw(0, self.mesh[0].num * 6, 1);

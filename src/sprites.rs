@@ -6,6 +6,9 @@ use crate::player;
 
 #[derive(Debug, Clone)]
 pub struct Sprite {
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
     pub top_right_x: f32,
     pub top_right_y: f32,
     pub top_right_z: f32,
@@ -34,6 +37,9 @@ impl Sprite {
             let dist = (xi+2.0/4.0-xp).powi(2)+(yj+2.0/4.0-yp).powi(2);
             let offset_z = -0.1;
             let sprite = Sprite {
+                x: xi + 0.5,
+                y: yj + 0.5,
+                z: 2.0 + offset_z,
                 top_right_x: xi + 1.0, 
                 top_right_y: yj + 1.0, 
                 top_right_z: 2.0 + offset_z, 

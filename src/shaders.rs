@@ -8,21 +8,24 @@ in float act;
 
 uniform mat4 mvp;
 uniform vec3 playerpos;
+uniform vec3 lightpos;
 uniform float lightdist;
 
 out vec2 texcoord;
 out vec4 cols;
 
-float col1, d;
-vec3 dir;
+float col1, d1, d2;
+vec3 dir1, dir2;
 
 void main() {
-    dir = pos - playerpos;
-    d = length(dir);
+    dir1 = pos - playerpos;
+    d1 = length(dir1);
+    dir2 = pos - lightpos;
+    d2 = length(dir2);
 
     gl_Position = mvp * vec4(pos, 1.0);
 
-    col1 = 1.0/(1.0+(d/lightdist)*(d/lightdist));
+    col1 = 0.1/(1.0+(d1/lightdist)*(d1/lightdist))+0.9/(1.0+(d2/lightdist)*(d2/lightdist));
     cols = vec4(col1,col1,col1,1.0);
     
     texcoord = uv;
@@ -184,6 +187,7 @@ pub fn meta_main() -> ShaderMeta {
             uniforms: vec![
                 UniformDesc::new("mvp", UniformType::Mat4),
                 UniformDesc::new("playerpos", UniformType::Float3),
+                UniformDesc::new("lightpos", UniformType::Float3),
                 UniformDesc::new("lightdist", UniformType::Float1),
             ],
         },
@@ -230,6 +234,7 @@ pub fn meta_map() -> ShaderMeta {
 pub struct UniformsMain {
     pub mvp: glam::Mat4,
     pub playerpos: (f32, f32, f32),
+    pub lightpos: (f32, f32, f32),
     pub lightdist: f32,
 }
 
