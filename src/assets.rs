@@ -7,6 +7,7 @@ const DEF_IMAGE_SIZE: u32 = settings::MAPSIZE as u32;
 
 pub struct Ass {
     pub tile_atlas: ImageBuffer<Rgba<u8>, Vec<u8>>,
+    pub sprite_atlas: ImageBuffer<Rgba<u8>, Vec<u8>>,
     pub floor_image: ImageBuffer<Rgba<u8>, Vec<u8>>,
     pub ceil_image: ImageBuffer<Rgba<u8>, Vec<u8>>,
     pub wall_image_bot: ImageBuffer<Rgba<u8>, Vec<u8>>,
@@ -26,6 +27,7 @@ impl Ass {
 
         let paths: Vec<&str> = vec![
             "resources/texture_atlas.png",
+            "resources/sprite_atlas.png",
             "resources/floor_map.png",
             "resources/ceil_map.png",
             "resources/wall_map_bot.png",
@@ -44,11 +46,12 @@ impl Ass {
 
         Ass {
             tile_atlas: images[0].clone(),
-            floor_image: images[1].clone(),
-            ceil_image: images[2].clone(),
-            wall_image_bot: images[3].clone(),
-            wall_image_top: images[4].clone(),
-            font: images[5].clone(),
+            sprite_atlas: images[1].clone(),
+            floor_image: images[2].clone(),
+            ceil_image: images[3].clone(),
+            wall_image_bot: images[4].clone(),
+            wall_image_top: images[5].clone(),
+            font: images[6].clone(),
         }
     }
 }

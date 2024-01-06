@@ -12,6 +12,7 @@ mod shaders;
 mod stage;
 mod text;
 mod input;
+mod sprites;
 
 fn window_conf() -> Conf {
     let mut conf = Conf {
