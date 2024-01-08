@@ -441,13 +441,11 @@ impl EventHandler for Stage {
 
     fn draw(&mut self) {
         window::show_mouse(self.gui.show);
-
-        //unsafe {miniquad::gl::glFlush()}
         
         self.ctx
             .begin_default_pass(miniquad::PassAction::default());
 
-        self.ctx.clear(Some((0.0, 0.0, 0.0, 1.0)), None, None);
+        self.ctx.clear(Some((0.0, 0.0, 0.0, 1.0)), Some(1.0), None);
 
         for j in 0..self.bindings.len() {
             self.ctx.buffer_update(self.bindings[j].vertex_buffers[0], BufferSource::slice(&self.mesh[j].vertices));
@@ -457,6 +455,8 @@ impl EventHandler for Stage {
         self.ctx.apply_pipeline(&self.pipeline[0]);
 
         self.ctx.apply_bindings(&self.bindings[0]);
+
+        unsafe{ miniquad::gl::glEnable(miniquad::gl::GL_DEPTH_TEST);   }
 
         unsafe{miniquad::gl::glTexParameteri(miniquad::gl::GL_TEXTURE_2D, miniquad::gl::GL_TEXTURE_MAX_LEVEL, 1000)}
 

@@ -122,12 +122,12 @@ impl Mesh {
                     act: 0.0,
                 }); // top left
 
-                indices.push(4 * idx);
-                indices.push(4 * idx + 1);
-                indices.push(4 * idx + 3);
+                indices.push(4 * idx + 0);
                 indices.push(4 * idx + 1);
                 indices.push(4 * idx + 2);
+                indices.push(4 * idx + 2);
                 indices.push(4 * idx + 3);
+                indices.push(4 * idx + 0);
 
                 idx = idx + 1;
 
@@ -184,12 +184,12 @@ impl Mesh {
                     act: 0.0,
                 }); // top left
 
-                indices.push(4 * idx);
-                indices.push(4 * idx + 1);
-                indices.push(4 * idx + 3);
+                indices.push(4 * idx + 0);
                 indices.push(4 * idx + 1);
                 indices.push(4 * idx + 2);
+                indices.push(4 * idx + 2);
                 indices.push(4 * idx + 3);
+                indices.push(4 * idx + 0);
 
                 idx = idx + 1;
             } else {
@@ -262,12 +262,12 @@ impl Mesh {
                     act: 0.0,
                 }); // top left
 
-                indices.push(4 * idx);
-                indices.push(4 * idx + 1);
-                indices.push(4 * idx + 3);
+                indices.push(4 * idx + 0);
                 indices.push(4 * idx + 1);
                 indices.push(4 * idx + 2);
+                indices.push(4 * idx + 2);
                 indices.push(4 * idx + 3);
+                indices.push(4 * idx + 0);
 
                 idx = idx + 1;
 
@@ -312,12 +312,12 @@ impl Mesh {
                     act: 0.0,
                 }); // top left
 
-                indices.push(4 * idx);
-                indices.push(4 * idx + 1);
-                indices.push(4 * idx + 3);
+                indices.push(4 * idx + 0);
                 indices.push(4 * idx + 1);
                 indices.push(4 * idx + 2);
+                indices.push(4 * idx + 2);
                 indices.push(4 * idx + 3);
+                indices.push(4 * idx + 0);
 
                 idx = idx + 1;
             }
@@ -385,12 +385,12 @@ impl Mesh {
                     act: 0.0,
                 }); // top left
 
-                indices.push(4 * idx);
-                indices.push(4 * idx + 1);
-                indices.push(4 * idx + 3);
+                indices.push(4 * idx + 0);
                 indices.push(4 * idx + 1);
                 indices.push(4 * idx + 2);
+                indices.push(4 * idx + 2);
                 indices.push(4 * idx + 3);
+                indices.push(4 * idx + 0);
 
                 idx = idx + 1;
             }
