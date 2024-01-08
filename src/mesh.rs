@@ -457,12 +457,12 @@ impl Mesh {
             act: 0.0,
         }); // top left
 
-        indices.push(4 * idx);
-        indices.push(4 * idx + 1);
-        indices.push(4 * idx + 3);
+        indices.push(4 * idx + 0);
         indices.push(4 * idx + 1);
         indices.push(4 * idx + 2);
+        indices.push(4 * idx + 2);
         indices.push(4 * idx + 3);
+        indices.push(4 * idx + 0);
 
         idx = idx + 1;
 
@@ -515,12 +515,12 @@ impl Mesh {
                     act: 0.0,
                 }); // top left
 
-                indices.push(4 * idx);
-                indices.push(4 * idx + 1);
-                indices.push(4 * idx + 3);
+                indices.push(4 * idx + 0);
                 indices.push(4 * idx + 1);
                 indices.push(4 * idx + 2);
+                indices.push(4 * idx + 2);
                 indices.push(4 * idx + 3);
+                indices.push(4 * idx + 0);
 
                 idx = idx + 1;
             }
@@ -581,12 +581,12 @@ impl Mesh {
             act: 0.0,
         }); // top left
 
-        indices.push(4 * idx);
-        indices.push(4 * idx + 1);
-        indices.push(4 * idx + 3);
+        indices.push(4 * idx + 0);
         indices.push(4 * idx + 1);
         indices.push(4 * idx + 2);
+        indices.push(4 * idx + 2);
         indices.push(4 * idx + 3);
+        indices.push(4 * idx + 0);
 
         idx = idx + 1;
 
@@ -639,12 +639,12 @@ impl Mesh {
                     act: gui.line_active[s] as f32,
                 }); // top left
 
-                indices.push(4 * idx);
-                indices.push(4 * idx + 1);
-                indices.push(4 * idx + 3);
+                indices.push(4 * idx + 0);
                 indices.push(4 * idx + 1);
                 indices.push(4 * idx + 2);
+                indices.push(4 * idx + 2);
                 indices.push(4 * idx + 3);
+                indices.push(4 * idx + 0);
 
                 idx = idx + 1;
             }
@@ -724,10 +724,10 @@ impl Mesh {
 
         indices.push(0);
         indices.push(1);
-        indices.push(3);
-        indices.push(1);
+        indices.push(2);
         indices.push(2);
         indices.push(3);
+        indices.push(0);
 
         tex_uv = TextureUV {
             u1: 0.0,
