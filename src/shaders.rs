@@ -71,12 +71,7 @@ vec4 col;
 void main() {
     col = texture(tex, texcoord);
 
-    if (col.w < 0.9) {
-        discard;
-    } else {
-        FragColor = fontcolor;
-        
-    }
+    FragColor = vec4(fontcolor.xyz,col.w);
 }"#;
 
 pub const VERTEX_GUI: &str = r#"#version 330 core
@@ -112,16 +107,7 @@ vec4 col;
 
 void main() {
     col = texture(tex, texcoord);
-
-    if (col.w < 0.9) {
-        discard;
-    } else {
-        if (col.x+col.y+col.z < 0.01) {
-            FragColor = cols;
-        } else {
-            FragColor = col;
-        }
-    }
+    FragColor = vec4(col.xyz+(1-col.xyz)*cols.xyz,col.w);
 }"#;
 
 pub const VERTEX_MAP: &str = r#"#version 330 core
@@ -153,25 +139,16 @@ uniform vec4 fontcolor;
 uniform vec4 actcolor;
 
 vec4 col;
+float l = length((spos.xy-cent.xy)/cent.zw);
 
 void main() {
-    if (length((spos.xy-cent.xy)/cent.zw) < 0.04) {
+    if (l > 1.0) {
+        discard;
+    }
+    col = texture(tex, texcoord);
+    FragColor = actcolor*acts+vec4((col.xyz+fontcolor.xyz*(1.0-col.xyz))*(1.0-acts),1.0);
+    if (l < 0.04) {
         FragColor = vec4(0.8, 0.0, 0.2, 1.0);
-    } else {
-        if (length((spos.xy-cent.xy)/cent.zw) > 1.0) {
-            discard;
-        } else {
-            if (acts > 0.1) {
-                FragColor = actcolor;
-            } else {
-                col = texture(tex, texcoord);
-                if (col.x+col.y+col.z > 2.99) {
-                    FragColor = col;
-                } else {
-                    FragColor = fontcolor;
-                }
-            }
-        }
     }
 }"#;
 

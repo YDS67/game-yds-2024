@@ -239,8 +239,8 @@ impl Stage {
             kind: TextureKind::Texture2D,
             format: TextureFormat::Depth,
             wrap: TextureWrap::Clamp,
-            min_filter: FilterMode::Linear,
-            mag_filter: FilterMode::Linear,
+            min_filter: FilterMode::Nearest,
+            mag_filter: FilterMode::Nearest,
             mipmap_filter: MipmapFilterMode::None,
             width: settings::WIDTH,
             height: settings::HEIGHT,
@@ -329,7 +329,7 @@ impl Stage {
             )
             .unwrap();
 
-        let p_params = PipelineParams {
+        let mut p_params = PipelineParams {
             cull_face: CullFace::Nothing,
             front_face_order: FrontFaceOrder::CounterClockwise,
             depth_test: Comparison::LessOrEqual,
@@ -359,7 +359,26 @@ impl Stage {
             p_params,
         );
 
-        let pipeline_overlay = ctx.new_pipeline(
+        p_params = PipelineParams {
+            cull_face: CullFace::Nothing,
+            front_face_order: FrontFaceOrder::CounterClockwise,
+            depth_test: Comparison::Always,
+            depth_write: false,      
+            depth_write_offset: None,
+            color_blend: Some(BlendState::new(
+                Equation::Add,
+                BlendFactor::Value(BlendValue::SourceAlpha),
+                BlendFactor::OneMinusValue(BlendValue::SourceAlpha))
+            ),
+            alpha_blend: Some(BlendState::new(Equation::Add, 
+                BlendFactor::Value(BlendValue::SourceAlpha), 
+                BlendFactor::OneMinusValue(BlendValue::SourceAlpha))),
+            stencil_test: None,
+            color_write: (true, true, true, true),
+            primitive_type: PrimitiveType::Triangles,
+        };
+
+        let pipeline_overlay = ctx.new_pipeline_with_params(
             &[BufferLayout::default()],
             &[
                 VertexAttribute::new("pos", VertexFormat::Float3),
@@ -367,9 +386,10 @@ impl Stage {
                 VertexAttribute::new("act", VertexFormat::Float1),
             ],
             shader_overlay,
+            p_params,
         );
 
-        let pipeline_gui = ctx.new_pipeline(
+        let pipeline_gui = ctx.new_pipeline_with_params(
             &[BufferLayout::default()],
             &[
                 VertexAttribute::new("pos", VertexFormat::Float3),
@@ -377,9 +397,10 @@ impl Stage {
                 VertexAttribute::new("act", VertexFormat::Float1),
             ],
             shader_gui,
+            p_params,
         );
 
-        let pipeline_map = ctx.new_pipeline(
+        let pipeline_map = ctx.new_pipeline_with_params(
             &[BufferLayout::default()],
             &[
                 VertexAttribute::new("pos", VertexFormat::Float3),
@@ -387,6 +408,7 @@ impl Stage {
                 VertexAttribute::new("act", VertexFormat::Float1),
             ],
             shader_map,
+            p_params,
         );
 
         let p_params = PipelineParams {

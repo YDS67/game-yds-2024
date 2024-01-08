@@ -83,9 +83,10 @@ impl SpriteBuffer {
 
         for i in i1..i2 {
             for j in j1..j2 {
-                if game_map.floor_visible[i][j] {
-                    len += Sprite::add_static_sprite(i, j, &mut sprites, game_map, player);
-                }
+                // if game_map.floor_visible[i][j] {
+                //     len += Sprite::add_static_sprite(i, j, &mut sprites, game_map, player);
+                // }
+                len += Sprite::add_static_sprite(i, j, &mut sprites, game_map, player);
             }
         }
 
