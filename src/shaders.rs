@@ -71,7 +71,7 @@ vec4 col;
 void main() {
     col = texture(tex, texcoord);
 
-    if (col.x+col.y+col.z > 2.99) {
+    if (col.w < 0.9) {
         discard;
     } else {
         FragColor = fontcolor;
@@ -113,7 +113,7 @@ vec4 col;
 void main() {
     col = texture(tex, texcoord);
 
-    if (col.x+col.y+col.z > 2.99) {
+    if (col.w < 0.9) {
         discard;
     } else {
         if (col.x+col.y+col.z < 0.01) {
