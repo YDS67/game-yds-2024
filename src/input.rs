@@ -5,29 +5,29 @@ use std::time::Duration;
 use crate::settings;
 
 pub struct TimeState {
-    pub last_frame: std::time::Instant,
-    pub frame_time: f32,
+    pub last_frame: f64,
+    pub frame_time: f64,
     pub fps: i32,
 }
 
 impl TimeState {
     pub fn init() -> TimeState {
         TimeState {
-            last_frame: Some(std::time::Instant::now()).unwrap(),
+            last_frame: date::now(),
             frame_time: 1.0 / 60.0,
             fps: 60,
         }
     }
 
     pub fn frame_time(&mut self, settings: &mut settings::Settings) {
-        self.frame_time = self.last_frame.elapsed().as_secs_f32();
+        self.frame_time = date::now() - self.last_frame;
         if self.frame_time < settings::FT_DESIRED {
-            sleep(Duration::from_secs_f32(
+            sleep(Duration::from_secs_f64(
                 settings::FT_DESIRED - self.frame_time,
             ));
         }
-        self.frame_time = self.last_frame.elapsed().as_secs_f32();
-        settings.delta_time = self.frame_time;
+        self.frame_time = date::now() - self.last_frame;
+        settings.delta_time = self.frame_time as f32;
         self.fps = (1. / self.frame_time).floor() as i32;
 
         settings.player_speed = 12.0 * settings.delta_time;

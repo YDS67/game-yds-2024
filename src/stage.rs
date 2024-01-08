@@ -542,7 +542,7 @@ impl EventHandler for Stage {
 
         self.ctx.commit_frame();
 
-        self.time_state.last_frame = Some(std::time::Instant::now()).unwrap();
+        self.time_state.last_frame = date::now();
     }
 
     // ============================
