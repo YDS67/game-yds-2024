@@ -799,4 +799,71 @@ impl Mesh {
             num: idx as i32,
         }
     }
+
+    pub fn new_screen(
+    ) -> Mesh {
+        let mut vertices: Vec<Vertex> = Vec::new();
+        let mut indices: Vec<i16> = Vec::new();
+
+        let tex_uv = TextureUV {
+            u1: 0.0,
+            u2: 1.0,
+            v1: 1.0,
+            v2: 0.0,
+        };
+
+        let x = 1.0;
+        let y = 1.0;
+        vertices.push(Vertex {
+            pos: Vec3 { x, y, z: 0.0 },
+            uv: Vec2 {
+                x: tex_uv.u2,
+                y: tex_uv.v1,
+            },
+            act: 0.0,
+        }); // top right
+        let x = 1.0;
+        let y = -1.0;
+        vertices.push(Vertex {
+            pos: Vec3 { x, y, z: 0.0 },
+            uv: Vec2 {
+                x: tex_uv.u2,
+                y: tex_uv.v2,
+            },
+            act: 0.0,
+        }); // bottom right
+        let x = -1.0;
+        let y = -1.0;
+        vertices.push(Vertex {
+            pos: Vec3 { x, y, z: 0.0 },
+            uv: Vec2 {
+                x: tex_uv.u1,
+                y: tex_uv.v2,
+            },
+            act: 0.0,
+        }); // bottom left
+        let x = -1.0;
+        let y = 1.0;
+        vertices.push(Vertex {
+            pos: Vec3 { x, y, z: 0.0 },
+            uv: Vec2 {
+                x: tex_uv.u1,
+                y: tex_uv.v1,
+            },
+            act: 0.0,
+        }); // top left
+
+        indices.push(0);
+        indices.push(1);
+        indices.push(2);
+        indices.push(2);
+        indices.push(3);
+        indices.push(0);
+
+        Mesh {
+            vertices,
+            indices,
+            num: 1,
+        }
+    }
 }

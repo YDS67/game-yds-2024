@@ -176,6 +176,30 @@ void main() {
 }"#;
 
 
+pub const VERTEX_SCREEN: &str = r#"#version 330 core
+in vec3 pos;
+in vec2 uv;
+in float act;
+
+out vec2 texcoord;
+
+void main() {
+    gl_Position = vec4(pos, 1.0);
+    texcoord = uv;
+}"#;
+
+pub const FRAGMENT_SCREEN: &str = r#"#version 330 core
+in vec2 texcoord;
+
+out vec4 FragColor;
+
+uniform sampler2D tex;
+
+void main() {
+    FragColor = texture(tex, texcoord);
+}"#;
+
+
 pub fn meta_main() -> ShaderMeta {
     ShaderMeta {
         images: vec!["tex".to_string()],
@@ -226,6 +250,16 @@ pub fn meta_map() -> ShaderMeta {
     }
 }
 
+pub fn meta_screen() -> ShaderMeta {
+    ShaderMeta {
+        images: vec!["tex".to_string()],
+        uniforms: UniformBlockLayout {
+            uniforms: vec![
+            ],
+        },
+    }
+}
+
 #[repr(C)]
 pub struct UniformsMain {
     pub mvp: glam::Mat4,
@@ -250,4 +284,8 @@ pub struct UniformsMap {
     pub fontcolor: (f32, f32, f32, f32),
     pub actcolor: (f32, f32, f32, f32),
     pub cent: (f32, f32, f32, f32)
+}
+
+#[repr(C)]
+pub struct UniformsScreen {
 }

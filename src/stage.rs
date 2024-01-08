@@ -79,6 +79,7 @@ pub struct Stage {
     overlay: text::Overlay,
     gui: text::GUI,
     mesh: Vec<mesh::Mesh>,
+    render_pass: RenderPass,
     pipeline: Vec<Pipeline>,
     bindings: Vec<Bindings>,
     proj: Proj,
@@ -124,6 +125,7 @@ impl Stage {
             1.0 / settings.screen_width_f,
             1.0 / settings.screen_height_f,
         );
+        let mesh_screen = mesh::Mesh::new_screen();
 
         let vertex_buffer_main = ctx.new_buffer(
             BufferType::VertexBuffer,
@@ -147,6 +149,12 @@ impl Stage {
             BufferType::VertexBuffer,
             BufferUsage::Stream,
             BufferSource::empty::<mesh::Vertex>(settings::MAX_VERTICES_MAP),
+        );
+
+        let vertex_buffer_screen = ctx.new_buffer(
+            BufferType::VertexBuffer,
+            BufferUsage::Immutable,
+            BufferSource::slice(&mesh_screen.vertices),
         );
 
         let index_buffer_main = ctx.new_buffer(
@@ -173,6 +181,12 @@ impl Stage {
             BufferSource::empty::<i16>(2*settings::MAX_INDICES_MAP),
         );
 
+        let index_buffer_screen = ctx.new_buffer(
+            BufferType::IndexBuffer,
+            BufferUsage::Stream,
+            BufferSource::slice(&mesh_screen.indices),
+        );
+
         let pixels: ImageBuffer<Rgba<u8>, Vec<u8>> = ass.tile_atlas;
         let dims = pixels.dimensions();
 
@@ -196,6 +210,7 @@ impl Stage {
         t_params.mipmap_filter = MipmapFilterMode::None;
         t_params.width = dims.0;
         t_params.height = dims.1;
+        t_params.allocate_mipmaps = false;
 
         let texture_overlay = ctx.new_texture_from_data_and_format(pixels.as_bytes(), t_params);
 
@@ -205,6 +220,34 @@ impl Stage {
         t_params.height = dims.1;
 
         let texture_map = ctx.new_texture_from_data_and_format(pixels.as_bytes(), t_params);
+
+        t_params = TextureParams {
+            kind: TextureKind::Texture2D,
+            format: TextureFormat::RGBA8,
+            wrap: TextureWrap::Clamp,
+            min_filter: FilterMode::Linear,
+            mag_filter: FilterMode::Linear,
+            mipmap_filter: MipmapFilterMode::None,
+            width: settings::WIDTH,
+            height: settings::HEIGHT,
+            allocate_mipmaps: false,
+        };
+
+        let texture = ctx.new_render_texture(t_params);
+
+        t_params = TextureParams {
+            kind: TextureKind::Texture2D,
+            format: TextureFormat::Depth,
+            wrap: TextureWrap::Clamp,
+            min_filter: FilterMode::Linear,
+            mag_filter: FilterMode::Linear,
+            mipmap_filter: MipmapFilterMode::None,
+            width: settings::WIDTH,
+            height: settings::HEIGHT,
+            allocate_mipmaps: false,
+        };
+
+        let depth_tex = ctx.new_render_texture(t_params);
 
         let bindings_main = Bindings {
             vertex_buffers: vec![vertex_buffer_main],
@@ -228,6 +271,12 @@ impl Stage {
             vertex_buffers: vec![vertex_buffer_map],
             index_buffer: index_buffer_map,
             images: vec![texture_map],
+        };
+
+        let bindings_screen = Bindings {
+            vertex_buffers: vec![vertex_buffer_screen],
+            index_buffer: index_buffer_screen,
+            images: vec![texture],
         };
 
         let shader_main = ctx
@@ -267,6 +316,16 @@ impl Stage {
                     fragment: shaders::FRAGMENT_MAP,
                 },
                 shaders::meta_map(),
+            )
+            .unwrap();
+
+        let shader_screen = ctx
+            .new_shader(
+                miniquad::ShaderSource::Glsl {
+                    vertex: shaders::VERTEX_SCREEN,
+                    fragment: shaders::FRAGMENT_SCREEN,
+                },
+                shaders::meta_screen(),
             )
             .unwrap();
 
@@ -330,10 +389,36 @@ impl Stage {
             shader_map,
         );
 
+        let p_params = PipelineParams {
+            cull_face: CullFace::Nothing,
+            front_face_order: FrontFaceOrder::CounterClockwise,
+            depth_test: Comparison::Always,
+            depth_write: false,      
+            depth_write_offset: None,
+            color_blend: None,
+            alpha_blend: None,
+            stencil_test: None,
+            color_write: (true, true, true, true),
+            primitive_type: PrimitiveType::Triangles,
+        };
+
+        let pipeline_screen = ctx.new_pipeline_with_params(
+            &[BufferLayout::default()],
+            &[
+                VertexAttribute::new("pos", VertexFormat::Float3),
+                VertexAttribute::new("uv", VertexFormat::Float2),
+                VertexAttribute::new("act", VertexFormat::Float1),
+            ],
+            shader_screen,
+            p_params,
+        );
+
         let gui = text::GUI::new_from(vec!["Text default"], settings.screen_width_f, settings.screen_height_f);
         //gui.show = false;
 
         let proj = Proj::new(&player, &settings);
+
+        let render_pass = ctx.new_render_pass(texture, Some(depth_tex));
 
         Stage {
             ctx,
@@ -345,9 +430,10 @@ impl Stage {
             sprite_buffer,
             overlay: text::Overlay::new_from(vec!["Text default"]),
             gui,
-            pipeline: vec![pipeline_main, pipeline_overlay, pipeline_gui, pipeline_map],
-            bindings: vec![bindings_main, bindings_overlay, bindings_gui, bindings_map],
-            mesh: vec![mesh_main, mesh_overlay, mesh_gui, mesh_map],
+            pipeline: vec![pipeline_main, pipeline_overlay, pipeline_gui, pipeline_map, pipeline_screen],
+            bindings: vec![bindings_main, bindings_overlay, bindings_gui, bindings_map, bindings_screen],
+            mesh: vec![mesh_main, mesh_overlay, mesh_gui, mesh_map, mesh_screen],
+            render_pass,
             proj,
 
             time_state: TimeState::init(),
@@ -359,10 +445,6 @@ impl Stage {
         self.overlay = text::Overlay::new_from(vec![
             &format!("FPS: {}", self.time_state.fps + 1),
             &format!("Press (Esc) for menu."),
-            // &format!("Vertices main: {}", self.mesh[0].num*4),
-            // &format!("Vertices overlay: {}", self.mesh[1].num*4),
-            // &format!("Vertices gui: {}", self.mesh[2].num*4),
-            // &format!("Vertices map: {}", self.mesh[3].num+5),
         ]);
     }
 
@@ -445,11 +527,23 @@ impl EventHandler for Stage {
 
     fn draw(&mut self) {
         window::show_mouse(self.gui.show);
-        
-        self.ctx
-            .begin_default_pass(miniquad::PassAction::default());
 
-        self.ctx.clear(Some((0.0, 0.0, 0.0, 1.0)), Some(1.0), None);
+        self.ctx.begin_default_pass(PassAction::default());
+
+        self.ctx.apply_pipeline(&self.pipeline[4]);
+
+        self.ctx.apply_bindings(&self.bindings[4]);
+
+        self.ctx
+            .apply_uniforms(miniquad::UniformsSource::table(&shaders::UniformsScreen {
+            }));
+
+        self.ctx.draw(0, self.mesh[4].num * 6, 1);
+
+        self.ctx.end_render_pass();
+
+        self.ctx
+            .begin_pass(Some(self.render_pass), PassAction::default());
 
         for j in 0..self.bindings.len() {
             self.ctx.buffer_update(self.bindings[j].vertex_buffers[0], BufferSource::slice(&self.mesh[j].vertices));
@@ -459,8 +553,6 @@ impl EventHandler for Stage {
         self.ctx.apply_pipeline(&self.pipeline[0]);
 
         self.ctx.apply_bindings(&self.bindings[0]);
-
-        //unsafe{miniquad::gl::glTexParameteri(miniquad::gl::GL_TEXTURE_2D, miniquad::gl::GL_TEXTURE_MAX_LEVEL, 1000)}
 
         self.proj.update(&self.player, &self.settings);
 
