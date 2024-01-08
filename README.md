@@ -20,4 +20,5 @@ Font is a heavily edited version of https://datagoblin.itch.io/monogram
 - Put a single quad mesh generation in a separate function to optimize mesh module.
 - Add sprites. First static, then animated.
 - Add light sources and light map.
-- Add map overlay.
+- Add save system.
+- Add physics.
