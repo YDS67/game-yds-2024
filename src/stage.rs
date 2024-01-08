@@ -73,7 +73,7 @@ pub struct Stage {
 
     settings: settings::Settings,
     player: player::Player,
-    depth_buffer: camera::DepthBuffer,
+    face_buffer: camera::FaceBuffer,
     sprite_buffer: sprites::SpriteBuffer,
     game_map: map::GameMap,
     overlay: text::Overlay,
@@ -98,14 +98,14 @@ impl Stage {
         let mut game_map = map::GameMap::new(&ass);
 
         let rays = camera::ray_cast(&mut game_map, &player, &settings);
-        let depth_buffer = camera::DepthBuffer::generate(&game_map, &player, &settings);
+        let face_buffer = camera::FaceBuffer::generate(&game_map, &player, &settings);
 
         let sprite_buffer = sprites::SpriteBuffer::generate(&game_map, &player, &settings);
 
         let overlay = text::Overlay::new_from(vec!["Text default"]);
         let gui = text::GUI::new_from(vec!["Text default"], settings.screen_width_f, settings.screen_height_f);
 
-        let mesh_main = mesh::Mesh::new_main(&depth_buffer, &sprite_buffer);
+        let mesh_main = mesh::Mesh::new_main(&face_buffer, &sprite_buffer);
         let mesh_overlay = mesh::Mesh::new_overlay(
             &overlay,
             1.0 / settings.screen_width_f,
@@ -176,7 +176,7 @@ impl Stage {
         let pixels: ImageBuffer<Rgba<u8>, Vec<u8>> = ass.tile_atlas;
         let dims = pixels.dimensions();
 
-        let params = TextureParams {
+        let mut t_params = TextureParams {
             kind: TextureKind::Texture2D,
             format: TextureFormat::RGBA8,
             wrap: TextureWrap::Clamp,
@@ -188,39 +188,23 @@ impl Stage {
             allocate_mipmaps: true,
         };
 
-        let texture_main = ctx.new_texture_from_data_and_format(pixels.as_bytes(), params);
+        let texture_main = ctx.new_texture_from_data_and_format(pixels.as_bytes(), t_params);
         ctx.texture_generate_mipmaps(texture_main);
 
         let pixels: ImageBuffer<Rgba<u8>, Vec<u8>> = ass.font;
         let dims = pixels.dimensions();
+        t_params.mipmap_filter = MipmapFilterMode::None;
+        t_params.width = dims.0;
+        t_params.height = dims.1;
 
-        let params = TextureParams {
-            kind: TextureKind::Texture2D,
-            format: TextureFormat::RGBA8,
-            wrap: TextureWrap::Clamp,
-            min_filter: FilterMode::Nearest,
-            mag_filter: FilterMode::Nearest,
-            mipmap_filter: MipmapFilterMode::None,
-            width: dims.0,
-            height: dims.1,
-            allocate_mipmaps: false,
-        };
-        let texture_overlay = ctx.new_texture_from_data_and_format(pixels.as_bytes(), params);
+        let texture_overlay = ctx.new_texture_from_data_and_format(pixels.as_bytes(), t_params);
 
         let pixels: ImageBuffer<Rgba<u8>, Vec<u8>> = ass.wall_image_bot;
         let dims = pixels.dimensions();
-        let params = TextureParams {
-            kind: TextureKind::Texture2D,
-            format: TextureFormat::RGBA8,
-            wrap: TextureWrap::Clamp,
-            min_filter: FilterMode::Nearest,
-            mag_filter: FilterMode::Nearest,
-            mipmap_filter: MipmapFilterMode::None,
-            width: dims.0,
-            height: dims.1,
-            allocate_mipmaps: false,
-        };
-        let texture_map = ctx.new_texture_from_data_and_format(pixels.as_bytes(), params);
+        t_params.width = dims.0;
+        t_params.height = dims.1;
+
+        let texture_map = ctx.new_texture_from_data_and_format(pixels.as_bytes(), t_params);
 
         let bindings_main = Bindings {
             vertex_buffers: vec![vertex_buffer_main],
@@ -286,7 +270,26 @@ impl Stage {
             )
             .unwrap();
 
-        let pipeline_main = ctx.new_pipeline(
+        let p_params = PipelineParams {
+            cull_face: CullFace::Nothing,
+            front_face_order: FrontFaceOrder::CounterClockwise,
+            depth_test: Comparison::LessOrEqual,
+            depth_write: true,      
+            depth_write_offset: None,
+            color_blend: Some(BlendState::new(
+                Equation::Add,
+                BlendFactor::Value(BlendValue::SourceAlpha),
+                BlendFactor::OneMinusValue(BlendValue::SourceAlpha))
+            ),
+            alpha_blend: Some(BlendState::new(Equation::Add, 
+                BlendFactor::Value(BlendValue::SourceAlpha), 
+                BlendFactor::OneMinusValue(BlendValue::SourceAlpha))),
+            stencil_test: None,
+            color_write: (true, true, true, true),
+            primitive_type: PrimitiveType::Triangles,
+        };
+
+        let pipeline_main: Pipeline = ctx.new_pipeline_with_params(
             &[BufferLayout::default()],
             &[
                 VertexAttribute::new("pos", VertexFormat::Float3),
@@ -294,6 +297,7 @@ impl Stage {
                 VertexAttribute::new("act", VertexFormat::Float1),
             ],
             shader_main,
+            p_params,
         );
 
         let pipeline_overlay = ctx.new_pipeline(
@@ -337,7 +341,7 @@ impl Stage {
             settings,
             player,
             game_map,
-            depth_buffer,
+            face_buffer,
             sprite_buffer,
             overlay: text::Overlay::new_from(vec!["Text default"]),
             gui,
@@ -409,12 +413,12 @@ impl EventHandler for Stage {
         );
         
         let rays = camera::ray_cast(&mut self.game_map, &self.player, &self.settings);
-        self.depth_buffer =
-            camera::DepthBuffer::generate(&self.game_map, &self.player, &self.settings);
+        self.face_buffer =
+            camera::FaceBuffer::generate(&self.game_map, &self.player, &self.settings);
 
         self.sprite_buffer = sprites::SpriteBuffer::generate(&self.game_map, &self.player, &self.settings);
 
-        self.mesh[0] = mesh::Mesh::new_main(&self.depth_buffer, &self.sprite_buffer);
+        self.mesh[0] = mesh::Mesh::new_main(&self.face_buffer, &self.sprite_buffer);
         self.mesh[1] = mesh::Mesh::new_overlay(
             &self.overlay,
             1.0 / self.settings.screen_width_f,
@@ -456,9 +460,7 @@ impl EventHandler for Stage {
 
         self.ctx.apply_bindings(&self.bindings[0]);
 
-        unsafe{ miniquad::gl::glEnable(miniquad::gl::GL_DEPTH_TEST);   }
-
-        unsafe{miniquad::gl::glTexParameteri(miniquad::gl::GL_TEXTURE_2D, miniquad::gl::GL_TEXTURE_MAX_LEVEL, 1000)}
+        //unsafe{miniquad::gl::glTexParameteri(miniquad::gl::GL_TEXTURE_2D, miniquad::gl::GL_TEXTURE_MAX_LEVEL, 1000)}
 
         self.proj.update(&self.player, &self.settings);
 

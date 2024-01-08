@@ -56,7 +56,7 @@ pub struct Mesh {
 
 impl Mesh {
     pub fn new_main(
-        depth_buffer: &camera::DepthBuffer,
+        face_buffer: &camera::FaceBuffer,
         sprite_buffer: &sprites::SpriteBuffer,
     ) -> Mesh {
         let mut vertices: Vec<Vertex> = Vec::new();
@@ -67,12 +67,12 @@ impl Mesh {
         let du = 2.0 * 64.0 / 1024.0;
         let uw = 64.0 / 1024.0;
 
-        for l in 0..depth_buffer.len {
-            if depth_buffer.faces_dist[l].is_wall {
+        for l in 0..face_buffer.len {
+            if face_buffer.faces_dist[l].is_wall {
                 let texture_u =
-                    1.0 + depth_buffer.faces_dist[l].texture_top.overflowing_rem(32).0 as f32 / 4.0;
+                    1.0 + face_buffer.faces_dist[l].texture_top.overflowing_rem(32).0 as f32 / 4.0;
                 let texture_v =
-                    1.0 + depth_buffer.faces_dist[l].texture_top.overflowing_div(32).0 as f32;
+                    1.0 + face_buffer.faces_dist[l].texture_top.overflowing_div(32).0 as f32;
 
                 let tex_uv = TextureUV {
                     u1: texture_u * du - 1.5 * uw,
@@ -81,8 +81,8 @@ impl Mesh {
                     v2: texture_v * du - 0.5 * uw,
                 };
 
-                let x = depth_buffer.faces_dist[l].top_right_x as f32;
-                let y = depth_buffer.faces_dist[l].top_right_y as f32;
+                let x = face_buffer.faces_dist[l].top_right_x as f32;
+                let y = face_buffer.faces_dist[l].top_right_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: 2.0 },
                     uv: Vec2 {
@@ -91,8 +91,8 @@ impl Mesh {
                     },
                     act: 0.0,
                 }); // top right
-                let x = depth_buffer.faces_dist[l].bottom_right_x as f32;
-                let y = depth_buffer.faces_dist[l].bottom_right_y as f32;
+                let x = face_buffer.faces_dist[l].bottom_right_x as f32;
+                let y = face_buffer.faces_dist[l].bottom_right_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: 1.0 },
                     uv: Vec2 {
@@ -101,8 +101,8 @@ impl Mesh {
                     },
                     act: 0.0,
                 }); // bottom right
-                let x = depth_buffer.faces_dist[l].bottom_left_x as f32;
-                let y = depth_buffer.faces_dist[l].bottom_left_y as f32;
+                let x = face_buffer.faces_dist[l].bottom_left_x as f32;
+                let y = face_buffer.faces_dist[l].bottom_left_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: 1.0 },
                     uv: Vec2 {
@@ -111,8 +111,8 @@ impl Mesh {
                     },
                     act: 0.0,
                 }); // bottom left
-                let x = depth_buffer.faces_dist[l].top_left_x as f32;
-                let y = depth_buffer.faces_dist[l].top_left_y as f32;
+                let x = face_buffer.faces_dist[l].top_left_x as f32;
+                let y = face_buffer.faces_dist[l].top_left_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: 2.0 },
                     uv: Vec2 {
@@ -132,9 +132,9 @@ impl Mesh {
                 idx = idx + 1;
 
                 let texture_u =
-                    1.0 + depth_buffer.faces_dist[l].texture_bot.overflowing_rem(32).0 as f32 / 4.0;
+                    1.0 + face_buffer.faces_dist[l].texture_bot.overflowing_rem(32).0 as f32 / 4.0;
                 let texture_v =
-                    1.0 + depth_buffer.faces_dist[l].texture_bot.overflowing_div(32).0 as f32;
+                    1.0 + face_buffer.faces_dist[l].texture_bot.overflowing_div(32).0 as f32;
 
                 let tex_uv = TextureUV {
                     u1: texture_u * du - 1.5 * uw,
@@ -143,8 +143,8 @@ impl Mesh {
                     v2: texture_v * du - 0.5 * uw,
                 };
 
-                let x = depth_buffer.faces_dist[l].top_right_x as f32;
-                let y = depth_buffer.faces_dist[l].top_right_y as f32;
+                let x = face_buffer.faces_dist[l].top_right_x as f32;
+                let y = face_buffer.faces_dist[l].top_right_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: 1.0 },
                     uv: Vec2 {
@@ -153,8 +153,8 @@ impl Mesh {
                     },
                     act: 0.0,
                 }); // top right
-                let x = depth_buffer.faces_dist[l].bottom_right_x as f32;
-                let y = depth_buffer.faces_dist[l].bottom_right_y as f32;
+                let x = face_buffer.faces_dist[l].bottom_right_x as f32;
+                let y = face_buffer.faces_dist[l].bottom_right_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: 0.0 },
                     uv: Vec2 {
@@ -163,8 +163,8 @@ impl Mesh {
                     },
                     act: 0.0,
                 }); // bottom right
-                let x = depth_buffer.faces_dist[l].bottom_left_x as f32;
-                let y = depth_buffer.faces_dist[l].bottom_left_y as f32;
+                let x = face_buffer.faces_dist[l].bottom_left_x as f32;
+                let y = face_buffer.faces_dist[l].bottom_left_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: 0.0 },
                     uv: Vec2 {
@@ -173,8 +173,8 @@ impl Mesh {
                     },
                     act: 0.0,
                 }); // bottom left
-                let x = depth_buffer.faces_dist[l].top_left_x as f32;
-                let y = depth_buffer.faces_dist[l].top_left_y as f32;
+                let x = face_buffer.faces_dist[l].top_left_x as f32;
+                let y = face_buffer.faces_dist[l].top_left_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: 1.0 },
                     uv: Vec2 {
@@ -198,9 +198,9 @@ impl Mesh {
                 let z2: f32 = 0.0;
 
                 let texture1_u =
-                    1.0 + depth_buffer.faces_dist[l].texture_top.overflowing_rem(32).0 as f32 / 4.0;
+                    1.0 + face_buffer.faces_dist[l].texture_top.overflowing_rem(32).0 as f32 / 4.0;
                 let texture1_v =
-                    1.0 + depth_buffer.faces_dist[l].texture_top.overflowing_div(32).0 as f32;
+                    1.0 + face_buffer.faces_dist[l].texture_top.overflowing_div(32).0 as f32;
 
                 let tex_uv_1 = TextureUV {
                     u1: texture1_u * du - 1.5 * uw,
@@ -210,9 +210,9 @@ impl Mesh {
                 };
 
                 let texture2_u =
-                    1.0 + depth_buffer.faces_dist[l].texture_bot.overflowing_rem(32).0 as f32 / 4.0;
+                    1.0 + face_buffer.faces_dist[l].texture_bot.overflowing_rem(32).0 as f32 / 4.0;
                 let texture2_v =
-                    1.0 + depth_buffer.faces_dist[l].texture_bot.overflowing_div(32).0 as f32;
+                    1.0 + face_buffer.faces_dist[l].texture_bot.overflowing_div(32).0 as f32;
 
                 let tex_uv_2 = TextureUV {
                     u1: texture2_u * du - 1.5 * uw,
@@ -221,8 +221,8 @@ impl Mesh {
                     v2: texture2_v * du - 0.5 * uw,
                 };
 
-                let x = depth_buffer.faces_dist[l].top_right_x as f32;
-                let y = depth_buffer.faces_dist[l].top_right_y as f32;
+                let x = face_buffer.faces_dist[l].top_right_x as f32;
+                let y = face_buffer.faces_dist[l].top_right_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: z1 },
                     uv: Vec2 {
@@ -231,8 +231,8 @@ impl Mesh {
                     },
                     act: 0.0,
                 }); // top right
-                let x = depth_buffer.faces_dist[l].bottom_right_x as f32;
-                let y = depth_buffer.faces_dist[l].bottom_right_y as f32;
+                let x = face_buffer.faces_dist[l].bottom_right_x as f32;
+                let y = face_buffer.faces_dist[l].bottom_right_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: z1 },
                     uv: Vec2 {
@@ -241,8 +241,8 @@ impl Mesh {
                     },
                     act: 0.0,
                 }); // bottom right
-                let x = depth_buffer.faces_dist[l].bottom_left_x as f32;
-                let y = depth_buffer.faces_dist[l].bottom_left_y as f32;
+                let x = face_buffer.faces_dist[l].bottom_left_x as f32;
+                let y = face_buffer.faces_dist[l].bottom_left_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: z1 },
                     uv: Vec2 {
@@ -251,8 +251,8 @@ impl Mesh {
                     },
                     act: 0.0,
                 }); // bottom left
-                let x = depth_buffer.faces_dist[l].top_left_x as f32;
-                let y = depth_buffer.faces_dist[l].top_left_y as f32;
+                let x = face_buffer.faces_dist[l].top_left_x as f32;
+                let y = face_buffer.faces_dist[l].top_left_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: z1 },
                     uv: Vec2 {
@@ -271,8 +271,8 @@ impl Mesh {
 
                 idx = idx + 1;
 
-                let x = depth_buffer.faces_dist[l].top_right_x as f32;
-                let y = depth_buffer.faces_dist[l].top_right_y as f32;
+                let x = face_buffer.faces_dist[l].top_right_x as f32;
+                let y = face_buffer.faces_dist[l].top_right_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: z2 },
                     uv: Vec2 {
@@ -281,8 +281,8 @@ impl Mesh {
                     },
                     act: 0.0,
                 }); // top right
-                let x = depth_buffer.faces_dist[l].bottom_right_x as f32;
-                let y = depth_buffer.faces_dist[l].bottom_right_y as f32;
+                let x = face_buffer.faces_dist[l].bottom_right_x as f32;
+                let y = face_buffer.faces_dist[l].bottom_right_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: z2 },
                     uv: Vec2 {
@@ -291,8 +291,8 @@ impl Mesh {
                     },
                     act: 0.0,
                 }); // bottom right
-                let x = depth_buffer.faces_dist[l].bottom_left_x as f32;
-                let y = depth_buffer.faces_dist[l].bottom_left_y as f32;
+                let x = face_buffer.faces_dist[l].bottom_left_x as f32;
+                let y = face_buffer.faces_dist[l].bottom_left_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: z2 },
                     uv: Vec2 {
@@ -301,8 +301,8 @@ impl Mesh {
                     },
                     act: 0.0,
                 }); // bottom left
-                let x = depth_buffer.faces_dist[l].top_left_x as f32;
-                let y = depth_buffer.faces_dist[l].top_left_y as f32;
+                let x = face_buffer.faces_dist[l].top_left_x as f32;
+                let y = face_buffer.faces_dist[l].top_left_y as f32;
                 vertices.push(Vertex {
                     pos: Vec3 { x, y, z: z2 },
                     uv: Vec2 {

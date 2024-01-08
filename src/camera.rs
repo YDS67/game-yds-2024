@@ -54,13 +54,13 @@ pub struct FaceData {
     pub dist: f32,
 }
 
-pub struct DepthBuffer {
+pub struct FaceBuffer {
     pub faces_dist: Vec<FaceData>,
     pub len: usize,
 }
 
-impl DepthBuffer {
-    pub fn generate(game_map: &map::GameMap, player: &player::Player, settings: &settings::Settings) -> DepthBuffer {
+impl FaceBuffer {
+    pub fn generate(game_map: &map::GameMap, player: &player::Player, settings: &settings::Settings) -> FaceBuffer {
         let mut faces_dist: Vec<FaceData> = Vec::new();
         let mut len = 0;
         let xp = player.position.x;
@@ -168,9 +168,9 @@ impl DepthBuffer {
             }
         }
 
-        faces_dist.sort_by(cmp_dist);
+        //faces_dist.sort_by(cmp_dist);
 
-        DepthBuffer {
+        FaceBuffer {
             faces_dist,
             len,
         }
@@ -327,7 +327,7 @@ pub fn ray_cast(game_map: &mut map::GameMap, player: &player::Player, settings: 
     
 }
 
-fn cmp_dist(a: &FaceData, b: &FaceData) -> Ordering {
+fn _cmp_dist(a: &FaceData, b: &FaceData) -> Ordering {
     if a.dist < b.dist {
         return Ordering::Greater;
     } else if a.dist > b.dist {
