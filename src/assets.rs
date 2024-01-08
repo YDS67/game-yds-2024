@@ -27,14 +27,14 @@ impl Ass {
         let mut images: Vec<ImageBuffer<Rgba<u8>, Vec<u8>>> = Vec::new();
 
         let paths: Vec<&str> = vec![
-            "resources/texture_atlas.png",
-            "resources/sprite_atlas.png",
-            "resources/floor_map.png",
-            "resources/ceil_map.png",
-            "resources/sprite_map.png",
-            "resources/wall_map_bot.png",
-            "resources/wall_map_top.png",
-            "resources/monospace.png",
+            "assets/texture_atlas.png",
+            "assets/sprite_atlas.png",
+            "assets/floor_map.png",
+            "assets/ceil_map.png",
+            "assets/sprite_map.png",
+            "assets/wall_map_bot.png",
+            "assets/wall_map_top.png",
+            "assets/monospace.png",
         ];
 
         for path in paths {

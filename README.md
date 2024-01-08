@@ -8,6 +8,8 @@ Map generated using: https://www.mazegenerator.net/
 
 Font is a heavily edited version of https://datagoblin.itch.io/monogram
 
+Background music from: https://leohpaz.itch.io/minifantasy-dungeon-sfx-pack
+
 # Screenshots
 ## January, 3rd, 2024
 ![width:500px](./screenshots/2.png)
@@ -22,3 +24,4 @@ Font is a heavily edited version of https://datagoblin.itch.io/monogram
 - Add light sources and light map.
 - Add save system.
 - Add physics.
+- How to interact with sound playback, which is in a different thread?

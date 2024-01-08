@@ -2,6 +2,8 @@
 
 use miniquad::{self, conf::Platform, conf::Conf};
 
+use std::thread;
+
 mod assets;
 mod camera;
 mod map;
@@ -13,6 +15,7 @@ mod stage;
 mod text;
 mod input;
 mod sprites;
+mod audio;
 
 fn window_conf() -> Conf {
     let mut conf = Conf {
@@ -27,6 +30,7 @@ fn window_conf() -> Conf {
 }
 
 fn main() {
+    thread::spawn(|| {audio::playback()});
     miniquad::start(window_conf(), move || Box::new(stage::Stage::new()));
     
 }

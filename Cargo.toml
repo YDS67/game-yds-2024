@@ -9,3 +9,4 @@ edition = "2021"
 glam = "0.25.0"
 image = "0.24.7"
 miniquad = { version = "=0.4.0-alpha.10", features = ["log-impl"] }
+rodio = "0.17.3"
