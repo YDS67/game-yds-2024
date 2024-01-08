@@ -467,6 +467,7 @@ impl Stage {
         self.overlay = text::Overlay::new_from(vec![
             &format!("FPS: {}", self.time_state.fps + 1),
             &format!("Press (Esc) for menu."),
+            &format!("Position: ({:.1},{:.1})", self.player.position.x, self.player.position.y),
         ]);
     }
 
