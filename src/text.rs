@@ -122,31 +122,42 @@ impl GUI {
         }
     }
 
-    pub fn gui_control(&mut self, input_state: &input::InputState, settings: &mut settings::Settings) {
-        if self.act_no == self.lines.len() && input_state.mouse.left {
-            miniquad::window::quit()
+    pub fn gui_control(&mut self, input_state: &input::InputState, settings: &mut settings::Settings) -> bool {
+        let mut request = false;
+        if input_state.mouse.left {
+            if self.act_no == self.lines.len() {
+                request = true;
+                miniquad::window::quit()
+            }
+            if self.act_no == 1 {
+                request = true;
+                self.show = false
+            }
+            if self.act_no == 3 && !settings.full_screen {
+                request = true;
+                miniquad::window::set_fullscreen(true);
+                let screen = miniquad::window::screen_size();
+                settings.full_screen = true;
+                settings.screen_change(screen.0, screen.1);
+            }
+            if self.act_no == 4 {
+                request = true;
+                settings.light_dist += 1.0*settings.player_speed;
+            }
+            if self.act_no == 5 {
+                request = true;
+                settings.light_dist -= 1.0*settings.player_speed;
+            }
+            if self.act_no == 6 {
+                request = true;
+                settings.music_playing = true
+            }
+            if self.act_no == 7 {
+                request = true;
+                settings.music_playing = false
+            }
         }
-        if self.act_no == 1 && input_state.mouse.left {
-            self.show = false
-        }
-        if self.act_no == 3 && input_state.mouse.left && !settings.full_screen {
-            miniquad::window::set_fullscreen(true);
-            let screen = miniquad::window::screen_size();
-            settings.full_screen = true;
-            settings.screen_change(screen.0, screen.1);
-        }
-        if self.act_no == 4 && input_state.mouse.left {
-            settings.light_dist += 1.0*settings.player_speed;
-        }
-        if self.act_no == 5 && input_state.mouse.left {
-            settings.light_dist -= 1.0*settings.player_speed;
-        }
-        if self.act_no == 6 && input_state.mouse.left {
-            settings.music_playing = true
-        }
-        if self.act_no == 7 && input_state.mouse.left {
-            settings.music_playing = false
-        }
+        request
     }
 
     pub fn gui_highlight(&mut self, x: f32, y: f32) {

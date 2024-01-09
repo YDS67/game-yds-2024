@@ -88,6 +88,7 @@ pub struct Stage {
 
     time_state: TimeState,
     input_state: InputState,
+    request: bool,
 }
 
 impl Stage {
@@ -463,6 +464,7 @@ impl Stage {
 
             time_state: TimeState::init(),
             input_state: InputState::init(),
+            request: false,
         }
     }
 
@@ -503,8 +505,11 @@ impl EventHandler for Stage {
 
         if self.gui.show {
             self.show_gui();
-            self.gui.gui_control(&self.input_state, &mut self.settings);
-            self.tx.send(self.settings.music_playing).unwrap();
+            self.request = self.gui.gui_control(&self.input_state, &mut self.settings);
+            if self.request {
+                self.tx.send(self.settings.music_playing).unwrap();
+            }
+            self.request = false
         }
 
         if self.input_state.keys.esc {

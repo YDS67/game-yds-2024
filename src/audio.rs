@@ -16,13 +16,17 @@ pub fn playback(rx: &Receiver<bool>) {
     let mut play = true;
     let mut time_start = date::now();
     let mut time_curr;
+    let mut iter: i32 = 0;
 
     sink.append(buffer.clone());
 
     loop {
-        match rx.recv() {
+        iter += 1;
+        let play_request = rx.recv();
+        match play_request {
             Ok(play_result) => {
-                play = play_result
+                play = play_result;
+                println!("Request sent at loop {}", iter)
             },
             Err(_) => {
             },
