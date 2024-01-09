@@ -77,7 +77,7 @@ pub struct GUI {
 
 impl GUI {
     pub fn new_from(lines: Vec<&str>, width: f32, height: f32) -> GUI {
-        let scale = 2.0;
+        let scale = 1.0;
         let line_height = HEIGHT*scale;
         let x0 = width*0.5;
         let y0 = (height - (lines.len() as f32 - 1.0)*line_height)*0.5/scale;
@@ -102,7 +102,7 @@ impl GUI {
             line_y,
             line_active,
             font_col: (0.14117647, 0.07843137, 0.13333333, 1.0),
-            act_col: (0.8, 0.0, 0.2, 1.0),
+            act_col: (0.9960784, 0.7607843, 0.5568627, 1.0),
             act_no: 0,
             x0,
             y0,

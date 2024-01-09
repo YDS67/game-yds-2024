@@ -85,14 +85,13 @@ uniform vec4 actcolor;
 out vec2 texcoord;
 out vec4 cols;
 
+vec2 posxy;
+
 void main() {
-    gl_Position = vec4((pos.x-0.5)*2.0, (0.5-pos.y)*2.0, 0.0, 1.0);
+    posxy = vec2((pos.x-0.5)*2.0, (0.5-pos.y)*2.0);
+    gl_Position = vec4(posxy + act*vec2(0.005,-0.005), 0.0, 1.0);
     texcoord = uv;
-    if (act > 0.0) {
-        cols = actcolor;
-    } else {
-        cols = fontcolor;
-    }
+    cols = actcolor*act + fontcolor*(1.0-act);
 }"#;
 
 pub const FRAGMENT_GUI: &str = r#"#version 330 core
