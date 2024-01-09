@@ -46,6 +46,7 @@ pub struct Settings {
     pub light_dist: f32,
     pub draw_rays_num: usize,
     pub mouse_sensitivity: f32,
+    pub music_playing: bool,
 }
 
 impl Settings {
@@ -105,6 +106,7 @@ impl Settings {
             light_dist,
             draw_rays_num,
             mouse_sensitivity,
+            music_playing: true,
         }
     }
 

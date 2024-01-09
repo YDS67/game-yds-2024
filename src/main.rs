@@ -3,6 +3,7 @@
 use miniquad::{self, conf::Platform, conf::Conf};
 
 use std::thread;
+use std::sync::mpsc::{self, Sender, Receiver};
 
 mod assets;
 mod camera;
@@ -30,7 +31,8 @@ fn window_conf() -> Conf {
 }
 
 fn main() {
-    thread::spawn(|| {audio::playback()});
-    miniquad::start(window_conf(), move || Box::new(stage::Stage::new()));
+    let (tx, rx): (Sender<bool>, Receiver<bool>) = mpsc::channel();
+    thread::spawn(move || {audio::playback(rx)});
+    miniquad::start(window_conf(), move || {Box::new(stage::Stage::new(&tx))});
     
 }

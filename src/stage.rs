@@ -1,5 +1,6 @@
 use glam::{vec3, Mat4};
 use image::{self, EncodableLayout, ImageBuffer, Rgba};
+use std::sync::mpsc::Sender;
 use miniquad::*;
 
 use crate::assets;
@@ -72,7 +73,7 @@ pub struct Stage {
     ctx: Box<dyn RenderingBackend>,
 
     settings: settings::Settings,
-    player: player::Player,
+    pub player: player::Player,
     face_buffer: camera::FaceBuffer,
     sprite_buffer: sprites::SpriteBuffer,
     game_map: map::GameMap,
@@ -83,13 +84,14 @@ pub struct Stage {
     pipeline: Vec<Pipeline>,
     bindings: Vec<Bindings>,
     proj: Proj,
+    tx: Sender<bool>,
 
     time_state: TimeState,
     input_state: InputState,
 }
 
 impl Stage {
-    pub fn new() -> Stage {
+    pub fn new(tx: &Sender<bool>) -> Stage {
         let mut ctx: Box<dyn RenderingBackend> = window::new_rendering_backend();
 
         let settings = settings::Settings::init();
@@ -457,6 +459,7 @@ impl Stage {
             mesh: vec![mesh_main, mesh_overlay, mesh_gui, mesh_map, mesh_screen],
             render_pass,
             proj,
+            tx: tx.clone(),
 
             time_state: TimeState::init(),
             input_state: InputState::init(),
@@ -478,6 +481,8 @@ impl Stage {
             &format!("Fullscreen"),
             &format!("Light >"),
             &format!("Light <"),
+            &format!("Music playing: {}", self.settings.music_playing),
+            &format!("Music paused: {}", !self.settings.music_playing),
             &format!("-"),
             &format!("Quit game"),
         ], self.settings.screen_width_f, self.settings.screen_height_f);
@@ -499,6 +504,7 @@ impl EventHandler for Stage {
         if self.gui.show {
             self.show_gui();
             self.gui.gui_control(&self.input_state, &mut self.settings);
+            self.tx.send(self.settings.music_playing).unwrap();
         }
 
         if self.input_state.keys.esc {

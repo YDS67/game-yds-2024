@@ -141,6 +141,12 @@ impl GUI {
         if self.act_no == 5 && input_state.mouse.left {
             settings.light_dist -= 1.0*settings.player_speed;
         }
+        if self.act_no == 6 && input_state.mouse.left {
+            settings.music_playing = true
+        }
+        if self.act_no == 7 && input_state.mouse.left {
+            settings.music_playing = false
+        }
     }
 
     pub fn gui_highlight(&mut self, x: f32, y: f32) {
