@@ -32,7 +32,7 @@ fn window_conf() -> Conf {
 
 fn main() {
     let (tx, rx): (Sender<bool>, Receiver<bool>) = mpsc::channel();
-    thread::spawn(move || {audio::playback(rx)});
+    thread::spawn(move || {audio::playback(&rx)});
     miniquad::start(window_conf(), move || {Box::new(stage::Stage::new(&tx))});
     
 }
