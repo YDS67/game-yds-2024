@@ -8,6 +8,8 @@ pub struct TimeState {
     pub last_frame: f64,
     pub frame_time: f64,
     pub fps: i32,
+    pub frame_count: i32,
+    pub tick_count: i32,
 }
 
 impl TimeState {
@@ -16,6 +18,8 @@ impl TimeState {
             last_frame: date::now(),
             frame_time: 1.0 / 60.0,
             fps: 60,
+            frame_count: 0,
+            tick_count: 0,
         }
     }
 
@@ -92,6 +96,7 @@ pub struct MouseState {
 pub struct InputState {
     pub keys: KeysState,
     pub mouse: MouseState,
+    pub apply_change: bool,
 }
 
 impl InputState {
@@ -125,6 +130,7 @@ impl InputState {
                 dx: 0.5 * settings::TOLERANCE,
                 dy: 0.5 * settings::TOLERANCE,
             },
+            apply_change: false,
         }
     }
 

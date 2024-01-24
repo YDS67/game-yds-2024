@@ -473,6 +473,7 @@ impl Stage {
             &format!("FPS: {}", self.time_state.fps + 1),
             &format!("Press (Esc) for menu."),
             &format!("Position: ({:.1},{:.1})", self.player.position.x, self.player.position.y),
+            &format!("Press (K) to take a screenshot."),
         ]);
     }
 
@@ -483,8 +484,7 @@ impl Stage {
             &format!("Fullscreen"),
             &format!("Light >"),
             &format!("Light <"),
-            &format!("Music playing: {}", self.settings.music_playing),
-            &format!("Music paused: {}", !self.settings.music_playing),
+            &format!("{}", if self.settings.music_playing {"Pause music"} else {"Resume music"}),
             &format!("-"),
             &format!("Quit game"),
         ], self.settings.screen_width_f, self.settings.screen_height_f);
@@ -509,6 +509,7 @@ impl EventHandler for Stage {
             if self.request {
                 self.tx.send(self.settings.music_playing).unwrap();
             }
+            self.input_state.apply_change = false;
             self.request = false
         }
 
@@ -553,6 +554,18 @@ impl EventHandler for Stage {
             1.0 / self.settings.screen_width_f,
             1.0 / self.settings.screen_height_f,
         );
+
+        if self.input_state.keys.k && self.input_state.apply_change {
+            let cap = (settings::WIDTH*settings::HEIGHT*4) as usize;
+            let mut image: Vec<u8> = vec![0; cap];
+            self.ctx.texture_read_pixels(self.ctx.render_pass_texture(self.render_pass), &mut image);
+            image::save_buffer_with_format(format!("screenshot-{}.png", self.time_state.frame_count), &image, 
+            settings::WIDTH as u32, settings::HEIGHT as u32, image::ColorType::Rgba8, 
+                image::ImageFormat::Png).expect("Can't save screenshot");
+            self.input_state.apply_change = false;
+        }
+
+        self.time_state.tick_count += 1;
     }
 
     // ============================
@@ -562,7 +575,7 @@ impl EventHandler for Stage {
     fn draw(&mut self) {
         window::show_mouse(self.gui.show);
 
-        self.ctx.begin_default_pass(PassAction::default());
+        self.ctx.begin_default_pass(PassAction::Clear { color: Some((0.0, 0.0, 0.0, 1.0)), depth: None, stencil: None });
 
         self.ctx.apply_pipeline(&self.pipeline[4]);
 
@@ -671,6 +684,8 @@ impl EventHandler for Stage {
         self.ctx.commit_frame();
 
         self.time_state.last_frame = date::now();
+
+        self.time_state.frame_count += 1;
     }
 
     // ============================
@@ -678,11 +693,15 @@ impl EventHandler for Stage {
     // ============================
 
     fn key_down_event(&mut self, keycode: KeyCode, _keymods: KeyMods, _repeat: bool) {
-        self.input_state.keys.read_key(keycode, true)
+        self.input_state.keys.read_key(keycode, true);
+        if !self.input_state.apply_change {
+            self.input_state.apply_change = true
+        }
     }
 
     fn key_up_event(&mut self, keycode: KeyCode, _keymods: KeyMods) {
-        self.input_state.keys.read_key(keycode, false)
+        self.input_state.keys.read_key(keycode, false);
+        self.input_state.apply_change = false
     }
 
     fn resize_event(&mut self, width: f32, height: f32) {
@@ -709,6 +728,9 @@ impl EventHandler for Stage {
         if button == MouseButton::Right {
             self.input_state.mouse.right = true;
         }
+        if !self.input_state.apply_change {
+            self.input_state.apply_change = true
+        }
     }
 
     fn mouse_button_up_event(&mut self, button: MouseButton, _x: f32, _y: f32) {
@@ -718,5 +740,6 @@ impl EventHandler for Stage {
         if button == MouseButton::Right {
             self.input_state.mouse.right = false;
         }
+        self.input_state.apply_change = false
     }
 }

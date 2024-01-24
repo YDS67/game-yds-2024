@@ -124,7 +124,7 @@ impl GUI {
 
     pub fn gui_control(&mut self, input_state: &input::InputState, settings: &mut settings::Settings) -> bool {
         let mut request = false;
-        if input_state.mouse.left {
+        if input_state.mouse.left && input_state.apply_change {
             if self.act_no == self.lines.len() {
                 request = true;
                 miniquad::window::quit()
@@ -150,11 +150,7 @@ impl GUI {
             }
             if self.act_no == 6 {
                 request = true;
-                settings.music_playing = true
-            }
-            if self.act_no == 7 {
-                request = true;
-                settings.music_playing = false
+                settings.music_playing = !settings.music_playing
             }
         }
         request
